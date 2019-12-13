@@ -1,5 +1,9 @@
 class Node {
-    private int adress;
+    private String address;
 
+    public void createNode() {
+
+
+    }
 
 }
