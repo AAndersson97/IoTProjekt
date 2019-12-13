@@ -1,6 +1,8 @@
+package network;
+
 import java.util.Comparator;
 
-class Node implements Comparator<Node> {
+public class Node implements Comparator<Node> {
     private String address;
     private LocationCreator.Location location;
     public void createNode() {

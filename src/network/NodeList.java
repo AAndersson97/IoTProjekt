@@ -1,3 +1,5 @@
+package network;
+
 import java.util.ArrayList;
 
 class NodeList {

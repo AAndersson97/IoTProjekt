@@ -1,4 +1,6 @@
-public class Package {
+package network;
+
+public class TCPPackage {
 
     private class TCPHeader {
         private int senderPort;

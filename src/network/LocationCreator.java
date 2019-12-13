@@ -1,3 +1,5 @@
+package network;
+
 import java.util.Random;
 
 public class LocationCreator implements Constants {
