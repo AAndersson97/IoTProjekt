@@ -21,7 +21,6 @@ class NodeList {
     }
 
     public void removeNode(int index) {
-        assert nodeList.isEmpty(): "List is empty, node was not removed";
         if (index < 0 || index >= nodeList.size())
             throw new IllegalArgumentException("Index out of bounds. Min index: 0, max index: " + (nodeList.size()-1));
     }
