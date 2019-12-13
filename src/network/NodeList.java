@@ -20,6 +20,10 @@ class NodeList {
         nodeList.add(node);
     }
 
+    public ArrayList<Node> getNodeList() {
+        return new ArrayList<>(nodeList);
+    }
+
     public void removeNode(int index) {
         if (index < 0 || index >= nodeList.size())
             throw new IllegalArgumentException("Index out of bounds. Min index: 0, max index: " + (nodeList.size()-1));
