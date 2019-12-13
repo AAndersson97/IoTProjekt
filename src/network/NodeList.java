@@ -1,17 +1,19 @@
+import java.util.ArrayList;
+
 class NodeList {
     private static NodeList instace;
-    private ArrayList<Node> nodeList;
+    private static ArrayList<Node> nodeList;
 
     static {
-        instance = new NodeList();
+        instace = new NodeList();
         nodeList = new ArrayList();
     }
-    NodeList() {
 
+    NodeList() {
     }
 
-    public static getInstance() {
-        return instance;
+    public static NodeList getInstance() {
+        return instace;
     }
 
     public void addNode(Node node) {
