@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 
 class NodeList {
-    private static NodeList instace;
+    private static NodeList instance;
     private static ArrayList<Node> nodeList;
 
     static {
-        instace = new NodeList();
+        instance = new NodeList();
         nodeList = new ArrayList();
     }
 
@@ -13,7 +13,7 @@ class NodeList {
     }
 
     public static NodeList getInstance() {
-        return instace;
+        return instance;
     }
 
     public void addNode(Node node) {
