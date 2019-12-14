@@ -73,6 +73,12 @@ public class SybilSimulator extends Application implements Constants {
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
         createAttackNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
+        Label nodeLabel = new Label(createdANode.addressToString());
+        anchorPane.getChildren().add(nodeLabel);
+        nodeLabel.relocate(createdANode.getLocation().getX()-15,createdANode.getLocation().getY()+20);
+        Label nodeLabel2 = new Label("Attack Nod");
+        anchorPane.getChildren().add(nodeLabel2);
+        nodeLabel2.relocate(createdANode.getLocation().getX()-20,createdANode.getLocation().getY()-20);
     }
 
     public Circle create() {

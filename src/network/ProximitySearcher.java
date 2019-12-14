@@ -25,7 +25,7 @@ public class ProximitySearcher {
             int nox = node.getLocation().getX();
             int noy = node.getLocation().getY();
             if(nox != nx && noy!=ny){
-                if(Math.abs((nox-nx))<90  && Math.abs(noy-ny)<90){
+                if(Math.abs((nox-nx))<=100  && Math.abs(noy-ny)<=100){
                     neighbours.add(node);
                 }
             }
