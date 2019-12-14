@@ -1,13 +1,14 @@
 package network;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class LocationCreator implements Constants {
     private static LocationCreator instance ;
-    private static Location createdLocations[];
+    private static ArrayList<Location> createdLocations;
 
     static {
-        createdLocations = new Location[NUM_OF_NODES];
+        createdLocations = new ArrayList<>();
         instance = new LocationCreator();
     }
 
@@ -25,8 +26,8 @@ public class LocationCreator implements Constants {
     }
 
     public boolean locationExists(Location location) {
-        for (Location location2 : createdLocations) {
-            if (location2.x == location.x || location2.y == location.y) {
+        for (Location l : createdLocations) {
+            if (l.x == location.x || l.y == location.y) {
                 return true;
             }
         }
