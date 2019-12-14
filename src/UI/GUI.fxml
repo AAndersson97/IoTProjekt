@@ -50,7 +50,7 @@
    <HBox layoutY="364.0" prefHeight="36.0" prefWidth="600.0">
       <children>
       
-          <Button prefHeight="27.0" prefWidth="96.0" text="Create Node">
+          <Button fx:id="createNode" prefHeight="27.0" prefWidth="96.0" text="Create Node">
             <HBox.margin>
                <Insets left="5.0" top="5.0" />
             </HBox.margin>
@@ -60,9 +60,14 @@
                <Insets left="10.0" top="5.0" />
             </HBox.margin>
          </Button>
+         <Button layoutX="121.0" layoutY="15.0" prefHeight="27.0" prefWidth="142.0" text="Start Sybil Attack" textFill="#c20202">
+            <HBox.margin>
+               <Insets left="180.0" top="5.0" />
+            </HBox.margin>
+         </Button>
       </children>
    </HBox>
-   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff1f1f" height="20.0" layoutX="185.0" layoutY="147.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
-   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff1f1f" height="20.0" layoutX="249.0" layoutY="248.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff1f1f" height="20.0" layoutX="185.0" layoutY="147.0" opacity="0.63" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+   <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff1f1f" height="20.0" layoutX="249.0" layoutY="248.0" opacity="0.63" stroke="BLACK" strokeType="INSIDE" width="20.0" />
 
 </AnchorPane>
