@@ -8,10 +8,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -19,7 +17,6 @@ import javafx.stage.Stage;
 import network.*;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class SybilSimulator extends Application implements Constants {
@@ -109,9 +106,8 @@ public class SybilSimulator extends Application implements Constants {
 
 
     }
-    public Line packetLine(int startX,int startY,int endX,int endY){
+    public void packetLine(int startX, int startY, int endX, int endY){
         Line line = new Line(startX,startY,endX,endY);
         anchorPane.getChildren().add(line);
-        return line;
     }
 }
