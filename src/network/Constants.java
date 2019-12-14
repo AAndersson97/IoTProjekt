@@ -6,4 +6,5 @@ public interface Constants {
     int HEADER_SIZE = 20;
     int WINDOW_WIDTH = 640;
     int WINDOW_HEIGHT = 400;
+    int TCP_PROTOCOL = 6;
 }
