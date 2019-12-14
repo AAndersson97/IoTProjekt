@@ -201,15 +201,18 @@ public class TCPHeader implements Constants {
     }
 
     public boolean isFlagOn(TCPFlags flag) {
-        return true;
+        return ((flags&flag.getNum()) == flag.getNum());
     }
 
     public enum TCPFlags {
-         ABC(5), B(7);
+         URG(32), ACK(16), PSH(8), RST(4), SYN(2), FIN(1);
 
-
+        private int num;
          TCPFlags(int num) {
-
+            this.num = num;
+         }
+         public int getNum() {
+             return num;
          }
     }
 }

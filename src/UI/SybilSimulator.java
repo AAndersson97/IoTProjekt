@@ -8,8 +8,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import network.Constants;
+
+import java.util.Objects;
 
 public class SybilSimulator extends Application implements Constants {
     @FXML
@@ -27,7 +30,6 @@ public class SybilSimulator extends Application implements Constants {
         Parent root = FXMLLoader.load(getClass().getResource("GUI.fxml"));
         stage.setTitle("Sybil Simulator");
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
-
         stage.show();
     }
 
@@ -39,5 +41,12 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
+    }
+
+    public Circle clone(Circle c) {
+        Circle circle = new Circle();
+        circle.setFill(c.getFill());
+        circle.setRadius(c.getRadius());
+        return circle;
     }
 }
