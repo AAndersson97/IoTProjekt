@@ -92,13 +92,15 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onSimPackets(ActionEvent actionEvent) {
-        for(Node node:NodeList.getInstance().getNodeList().values()){
-            ArrayList<Node> neighbours = ProximitySearcher.getInstance().findClosestNeighbours(node);
-            for(Node neighbour : neighbours){
-                packetLine(node.getLocation().getX()+10, node.getLocation().getY()+10,neighbour.getLocation().getX()+10,neighbour.getLocation().getY()+10);
+        //Thread thread = new Thread(()->{});
+            for (Node node : NodeList.getInstance().getNodeList().values()) {
+                ArrayList<Node> neighbours = ProximitySearcher.getInstance().findClosestNeighbours(node);
+                for (Node neighbour : neighbours) {
+                    packetLine(node.getLocation().getX() + 10, node.getLocation().getY() + 10, neighbour.getLocation().getX() + 10, neighbour.getLocation().getY() + 10);
 
+                }
             }
-        }
+
 
     }
     public Line packetLine(int startX,int startY,int endX,int endY){
