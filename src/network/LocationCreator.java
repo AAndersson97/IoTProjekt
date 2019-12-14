@@ -23,7 +23,7 @@ public class LocationCreator implements Constants {
     private void createLocations() {
         for (int y = CIRCLE_RADIUS*5, x = 40; x <  WINDOW_WIDTH; y+=CIRCLE_RADIUS*2) {
             locations.add(new Location(x, y));
-            y += CIRCLE_RADIUS*1;
+            y += CIRCLE_RADIUS;
             if (y > WINDOW_HEIGHT-(CIRCLE_RADIUS*6)) {
                 y = (CIRCLE_RADIUS*4) + (int)(Math.random()*20);
                 x += CIRCLE_RADIUS*4;
