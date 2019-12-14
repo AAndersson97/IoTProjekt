@@ -16,7 +16,7 @@ public class Node implements Comparator<Node>, Constants {
 
     public Node() {
         location = LocationCreator.getInstance().getLocation();
-        //address = shortToByte(AddressGenerator.getInstance().generateAddress());
+        address = AddressGenerator.getInstance().generateAddress();
         NodeList.getInstance().addNode(this);
     }
 
@@ -33,7 +33,6 @@ public class Node implements Comparator<Node>, Constants {
         byte[] bytes = new byte[numbers.length];
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = numbers[i].byteValue();
-
         return bytes;
     }
 
