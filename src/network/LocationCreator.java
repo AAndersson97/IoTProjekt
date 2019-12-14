@@ -5,40 +5,37 @@ import java.util.Random;
 
 public class LocationCreator implements Constants {
     private static LocationCreator instance ;
-    private static ArrayList<Location> createdLocations;
+    private static ArrayList<Location> locations;
 
     static {
-        createdLocations = new ArrayList<>();
+        locations = new ArrayList<>();
         instance = new LocationCreator();
+    }
+
+    private LocationCreator() {
+        createLocations();
     }
 
     /**
      * Skapar ett Location-objekt med unika x- och y-koordinater. Koordinaterna tilldelas ett värde mellan 0 och 10.
      * @return Ett Location-objekt innehållandes x- och y-koordinater.
      */
-    public Location createLocation() {
-        Location location;
-        do {
-            location = new Location((int) (Math.random() * MAX_XCOORDINATE), (int) (Math.random() * MAX_YCOORDINATE));
-        } while(locationExists(location));
-        createdLocations.add(location);
-        return location;
+    private void createLocations() {
+        for (int y = CIRCLE_RADIUS*2, x = 10; x <  WINDOW_WIDTH; y+=CIRCLE_RADIUS*2) {
+            locations.add(new Location(x, y));
+            y += CIRCLE_RADIUS*2;
+            if (y > WINDOW_HEIGHT-(CIRCLE_RADIUS*4)) {
+                y = (CIRCLE_RADIUS*2) + (int)(Math.random()*20);
+                x += CIRCLE_RADIUS*2;
+            }
+        }
     }
 
-    public boolean locationExists(Location location) {
-        for (Location l : createdLocations) {
-            if (l.x == location.x && l.y == location.y) {
-                return true;
-            }
-            if((l.x > location.x && location.x+200 > l.x) && (l.y > location.y && location.y+200 > l.y)){
-                return true;
-            }else if((l.x<location.x && location.x-200<l.x) && (l.y<location.y && location.y-200<l.y)){
-                return true;
-            }
-
-        }
-
-        return false;
+    public Location getLocation() {
+        int index = (int)(Math.random() * (locations.size()-1));
+        Location location = locations.get(index);
+        locations.remove(index);
+        return location;
     }
 
     public static LocationCreator getInstance() {

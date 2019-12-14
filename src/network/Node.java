@@ -2,7 +2,7 @@ package network;
 
 import java.util.Comparator;
 
-public class Node implements Comparator<Node> {
+public class Node implements Comparator<Node>, Constants {
     private Short[] address;
     private LocationCreator.Location location;
 
@@ -16,8 +16,9 @@ public class Node implements Comparator<Node> {
     }
 
     public Node() {
-        location = LocationCreator.getInstance().createLocation();
+        location = LocationCreator.getInstance().getLocation();
         address = AddressGenerator.getInstance().generateAddress();
+        NodeList.getInstance().addNode(this);
     }
 
     @Override

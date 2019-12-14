@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.Constants;
 import network.Node;
+import network.NodeList;
 import network.SybilNode;
 
 import java.util.Objects;
@@ -47,8 +48,7 @@ public class SybilSimulator extends Application implements Constants {
         Node createdNode = new Node();
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getX(),createdNode.getLocation().getY());
-
-
+        createNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
     }
 
     public void onStartSybilAttack(ActionEvent actionEvent) {
@@ -66,6 +66,7 @@ public class SybilSimulator extends Application implements Constants {
         Node createdANode = new Node();
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
+        createAttackNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
     }
 
     public Circle create() {

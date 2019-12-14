@@ -3,7 +3,7 @@ package network;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-class NodeList {
+public class NodeList {
     private static NodeList instance;
     private static HashMap<Short[],Node> nodeList;
 
@@ -32,6 +32,10 @@ class NodeList {
             throw new IllegalArgumentException();
         nodeList.remove(address);
 
+    }
+
+    public int numOfNodes() {
+        return nodeList.size();
     }
 
 
