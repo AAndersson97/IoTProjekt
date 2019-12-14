@@ -26,7 +26,7 @@ public class SybilSimulator extends Application implements Constants {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("GUI.fxml"));
         stage.setTitle("Sybil Simulator");
-        stage.setScene(new Scene(root, 620, 400));
+        stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
 
         stage.show();
     }

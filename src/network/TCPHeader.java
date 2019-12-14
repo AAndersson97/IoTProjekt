@@ -3,8 +3,8 @@ package network;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TCPHeader {
-    private static final int HEADER_SIZE = 20;
+public class TCPHeader implements Constants {
+
     private int sourcePort;
     private int destinationPort;
     private long sequenceNumber;
