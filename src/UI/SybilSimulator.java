@@ -8,10 +8,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -19,7 +17,6 @@ import javafx.stage.Stage;
 import network.*;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class SybilSimulator extends Application implements Constants {
@@ -77,6 +74,12 @@ public class SybilSimulator extends Application implements Constants {
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
         createAttackNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
+        Label nodeLabel = new Label(createdANode.addressToString());
+        anchorPane.getChildren().add(nodeLabel);
+        nodeLabel.relocate(createdANode.getLocation().getX()-15,createdANode.getLocation().getY()+20);
+        Label nodeLabel2 = new Label("Attack Nod");
+        anchorPane.getChildren().add(nodeLabel2);
+        nodeLabel2.relocate(createdANode.getLocation().getX()-20,createdANode.getLocation().getY()-20);
     }
 
     public Circle create() {
@@ -96,18 +99,19 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onSimPackets(ActionEvent actionEvent) {
-        for(Node node:NodeList.getInstance().getNodeList().values()){
-            ArrayList<Node> neighbours = ProximitySearcher.getInstance().findClosestNeighbours(node);
-            for(Node neighbour : neighbours){
-                packetLine(node.getLocation().getX()+10, node.getLocation().getY()+10,neighbour.getLocation().getX()+10,neighbour.getLocation().getY()+10);
+        //Thread thread = new Thread(()->{});
+            for (Node node : NodeList.getInstance().getNodeList().values()) {
+                ArrayList<Node> neighbours = ProximitySearcher.getInstance().findClosestNeighbours(node);
+                for (Node neighbour : neighbours) {
+                    packetLine(node.getLocation().getX() + 10, node.getLocation().getY() + 10, neighbour.getLocation().getX() + 10, neighbour.getLocation().getY() + 10);
 
+                }
             }
-        }
+
 
     }
-    public Line packetLine(int startX,int startY,int endX,int endY){
+    public void packetLine(int startX, int startY, int endX, int endY){
         Line line = new Line(startX,startY,endX,endY);
         anchorPane.getChildren().add(line);
-        return line;
     }
 }
