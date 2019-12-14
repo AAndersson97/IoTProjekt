@@ -55,12 +55,12 @@
                <Insets left="5.0" top="5.0" />
             </HBox.margin>
          </Button>
-         <Button layoutX="15.0" layoutY="15.0" prefHeight="27.0" prefWidth="142.0" text="Create Attack Node" textFill="#e50505">
+         <Button fx:id="createAttackNode" layoutX="15.0" layoutY="15.0" onAction="#onCreateAttackNode" prefHeight="27.0" prefWidth="142.0" text="Create Attack Node" textFill="#e50505">
             <HBox.margin>
                <Insets left="10.0" top="5.0" />
             </HBox.margin>
          </Button>
-         <Button layoutX="121.0" layoutY="15.0" prefHeight="27.0" prefWidth="142.0" text="Start Sybil Attack" textFill="#c20202">
+         <Button fx:id="sybilAttack" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" text="Start Sybil Attack" textFill="#c20202">
             <HBox.margin>
                <Insets left="180.0" top="5.0" />
             </HBox.margin>

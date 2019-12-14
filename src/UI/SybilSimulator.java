@@ -12,7 +12,12 @@ import javafx.stage.Stage;
 import network.Constants;
 
 public class SybilSimulator extends Application implements Constants {
-
+    @FXML
+    Button createNode;
+    @FXML
+    Button createAttackNode;
+    @FXML
+    Button sybilAttack;
     public static void main(String[] args){
         launch(args);
     }
@@ -21,12 +26,18 @@ public class SybilSimulator extends Application implements Constants {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("GUI.fxml"));
         stage.setTitle("Sybil Simulator");
-        stage.setScene(new Scene(root, 300, 275));
+        stage.setScene(new Scene(root, 900, 800));
 
         stage.show();
     }
 
     public void onCreateNode(ActionEvent actionEvent) {
 
+    }
+
+    public void onStartSybilAttack(ActionEvent actionEvent) {
+    }
+
+    public void onCreateAttackNode(ActionEvent actionEvent) {
     }
 }
