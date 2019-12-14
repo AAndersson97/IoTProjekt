@@ -1,5 +1,6 @@
 package network;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 public class Node implements Comparator<Node>, Constants {
@@ -10,15 +11,11 @@ public class Node implements Comparator<Node>, Constants {
         return location;
     }
 
-    public void createNode() {
-
-
-    }
-
     public Node() {
         location = LocationCreator.getInstance().getLocation();
         address = AddressGenerator.getInstance().generateAddress();
         NodeList.getInstance().addNode(this);
+        System.out.println(Arrays.toString(address));
     }
 
     @Override
@@ -28,5 +25,9 @@ public class Node implements Comparator<Node>, Constants {
 
     public Short[] getAddress() {
         return address;
+    }
+
+    public String adressToString() {
+        return address[0] + "." + address[1] + "." + address[2] + "." + address[3];
     }
 }

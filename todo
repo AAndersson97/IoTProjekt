@@ -3,3 +3,5 @@
 * Se till att kommunikationen mellan noderna sker över TCP
 * Funktionalitet: ska kunna dirigera paket och kunna "drop" paket
 * Attacknoden kan isolera en nod genom att se till att all kommunikation
+* Kunna simulera beteendet om att ett paket skickas
+* Dra linje till kortaste noderna dynamiskt

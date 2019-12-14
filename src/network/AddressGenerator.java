@@ -20,6 +20,7 @@ public class AddressGenerator implements Constants {
             address[3] = 0;
         else
             address[3] = (short)(generated.get(generated.size()-1)[3]+1);
+        generated.add(address);
         return address;
     }
 
