@@ -1,6 +1,7 @@
 package UI;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,5 +26,9 @@ public class SybilSimulator extends Application implements Constants {
         stage.setScene(new Scene(root, 300, 275));
 
         stage.show();
+    }
+
+    public void onCreateNode(ActionEvent actionEvent) {
+
     }
 }

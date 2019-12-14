@@ -50,7 +50,7 @@
    <HBox layoutY="364.0" prefHeight="36.0" prefWidth="600.0">
       <children>
       
-          <Button fx:id="createNode" prefHeight="27.0" prefWidth="96.0" text="Create Node">
+          <Button fx:id="createNode" onAction="#onCreateNode" prefHeight="27.0" prefWidth="96.0" text="Create Node">
             <HBox.margin>
                <Insets left="5.0" top="5.0" />
             </HBox.margin>
