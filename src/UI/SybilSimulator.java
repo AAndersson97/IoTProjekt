@@ -9,12 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import network.Constants;
 import network.Node;
 
 import java.util.Objects;
+
 
 public class SybilSimulator extends Application implements Constants {
     @FXML
@@ -40,10 +43,10 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateNode(ActionEvent actionEvent) {
-        Circle displayedNode = clone(regNode);
+        Circle displayedNode = create();
         Node createdNode = new Node();
         anchorPane.getChildren().add(displayedNode);
-        displayedNode.relocate(createdNode.getLocation().getY(),createdNode.getLocation().getX());
+        displayedNode.relocate(createdNode.getLocation().getX(),createdNode.getLocation().getY());
 
 
     }
@@ -52,12 +55,18 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
+        Circle displayedANode = create();
+        displayedANode.setFill(Color.RED);
+        Node createdANode = new Node();
+        anchorPane.getChildren().add((displayedANode));
+        displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
     }
 
-    public Circle clone(Circle c) {
+    public Circle create() {
         Circle circle = new Circle();
-        circle.setFill(c.getFill());
-        circle.setRadius(c.getRadius());
+        circle.setFill(Color.BLUE);
+        circle.setRadius(10);
+        circle.setStroke(Color.BLACK);
         return circle;
     }
 }
