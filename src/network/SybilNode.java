@@ -1,5 +1,6 @@
 package network;
 
-public class SybilNode extends AttackNode{
+public class SybilNode extends Node
+{
 
 }

@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -49,6 +50,9 @@ public class SybilSimulator extends Application implements Constants {
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getX(),createdNode.getLocation().getY());
         createNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
+        Label nodeLabel = new Label(createdNode.addressToString());
+        anchorPane.getChildren().add(nodeLabel);
+        nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
     }
 
     public void onStartSybilAttack(ActionEvent actionEvent) {
