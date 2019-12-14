@@ -21,7 +21,7 @@ public class LocationCreator implements Constants {
         do {
             location = new Location((int) (Math.random() * MAX_XCOORDINATE), (int) (Math.random() * MAX_YCOORDINATE));
         } while(locationExists(location));
-
+        createdLocations.add(location);
         return location;
     }
 
