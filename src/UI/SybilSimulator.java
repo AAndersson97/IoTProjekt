@@ -9,12 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import network.Constants;
 import network.Node;
 
 import java.util.Objects;
+
 
 public class SybilSimulator extends Application implements Constants {
     @FXML
@@ -52,12 +55,18 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
+        Circle displayedANode = clone(regNode);
+        displayedANode.setFill(Color.RED);
+        Node createdANode = new Node();
+        anchorPane.getChildren().add((displayedANode));
+        displayedANode.relocate(createdANode.getLocation().getY(),createdANode.getLocation().getX());
     }
 
     public Circle clone(Circle c) {
         Circle circle = new Circle();
         circle.setFill(c.getFill());
         circle.setRadius(c.getRadius());
+        circle.setStroke(c.getStroke());
         return circle;
     }
 }
