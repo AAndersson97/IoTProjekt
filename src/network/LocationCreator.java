@@ -27,9 +27,16 @@ public class LocationCreator implements Constants {
 
     public boolean locationExists(Location location) {
         for (Location l : createdLocations) {
-            if (l.x == location.x || l.y == location.y) {
+            if (l.x == location.x && l.y == location.y) {
                 return true;
             }
+            if((l.x > location.x && location.x+20 > l.x) && (l.y > location.y && location.y+20 > l.y)){
+                return true;
+            }
+            if((l.x<location.x && location.x-20<l.x) && (l.y<location.y && location.y-20<l.y)){
+                return true;
+            }
+
         }
 
         return false;
