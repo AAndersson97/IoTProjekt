@@ -27,7 +27,7 @@ public class Node implements Comparator<Node>, Constants {
         return address;
     }
 
-    public String adressToString() {
+    public String addressToString() {
         return address[0] + "." + address[1] + "." + address[2] + "." + address[3];
     }
 }
