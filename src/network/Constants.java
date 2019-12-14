@@ -6,6 +6,7 @@ public interface Constants {
     int WINDOW_WIDTH = 640;
     int WINDOW_HEIGHT = 400;
     int TCP_PROTOCOL = 6;
+    int ADDRESS_LENGTH = 4;
     int MAX_XCOORDINATE = WINDOW_WIDTH - 100;
     int MAX_YCOORDINATE = WINDOW_HEIGHT - 100;
 }
