@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class Node implements Comparator<Node>, Constants {
-    private Byte[] address;
+    private Short[] address;
     private LocationCreator.Location location;
     private IPPacket currentPacket;
 
@@ -25,15 +25,16 @@ public class Node implements Comparator<Node>, Constants {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 
-    public Byte[] getAddress() {
+    public Short[] getAddress() {
         return address;
     }
 
-    private static byte[] shortToByte(short[] numbers) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(numbers.length);
-        ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
-        shortBuffer.put(numbers);
-        return byteBuffer.array();
+    private static byte[] shortToByte(Short[] numbers) {
+        byte[] bytes = new byte[numbers.length];
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = numbers[i].byteValue();
+
+        return bytes;
     }
 
     public String addressToString() {
@@ -41,7 +42,18 @@ public class Node implements Comparator<Node>, Constants {
     }
 
     public void receivePacket(IPPacket packet) {
+        byte[] byteAddress = shortToByte(address);
+        byte[] destination = packet.getIpHeader().destinationAdress;
+        if (Arrays.compare(destination,byteAddress) == 0) {
+            System.out.println("Package has reached its final destination");
+            Communication.addPacket(packet);
+        } else
+            forwardPacket(packet);
+        packet.addTravelNode(address);
 
-       // if (Arrays.compare(packet.getIpHeader().destinationAdress,address) == 0);
+    }
+
+    private void forwardPacket(IPPacket packet) {
+
     }
 }

@@ -2,14 +2,23 @@ package network;
 
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 
 public class Communication {
+    private static ArrayList<IPPacket> sentPackets;
+    private static PacketListener packetListener;
 
-
+    static {
+        sentPackets = new ArrayList<IPPacket>();
+    }
     public static boolean sendMessage(String message, short[] source, short[] destination) {
         IPPacket ipPacket = createPackage(message, source, destination);
         NodeList.getInstance().getNode(source).receivePacket(ipPacket);
         return true;
+    }
+
+    public static void addPacketListener(PacketListener listener) {
+        packetListener = listener;
     }
 
     private static IPPacket createPackage(String message, short[] source, short[] destination) {
@@ -33,7 +42,10 @@ public class Communication {
         return byteBuffer.array();
     }
 
-    public static void findNeighbours() {
+    public static void addPacket(IPPacket packet) {
+        sentPackets.add(packet);
+        if (packetListener != null)
+            packetListener.packetAdded(packet);
 
     }
 }

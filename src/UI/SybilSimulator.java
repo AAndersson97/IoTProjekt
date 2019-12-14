@@ -44,6 +44,10 @@ public class SybilSimulator extends Application implements Constants {
         stage.setTitle("Sybil Simulator");
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.show();
+
+        Communication.addPacketListener((packet) -> {
+            System.out.println("Packet Added!");
+        });
     }
 
     public void onCreateNode(ActionEvent actionEvent) {
