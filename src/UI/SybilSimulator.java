@@ -27,7 +27,10 @@ public class SybilSimulator extends Application implements Constants {
     @FXML
     public AnchorPane anchorPane;
     @FXML
+    Button simPacketsButton;
+    @FXML
     Button createNode;
+
     @FXML
     Button createAttackNode;
     @FXML
@@ -87,5 +90,9 @@ public class SybilSimulator extends Application implements Constants {
         rectangle.setWidth(20);
         rectangle.setStroke(Color.BLACK);
         return rectangle;
+    }
+
+    public void onSimPackets(ActionEvent actionEvent) {
+
     }
 }
