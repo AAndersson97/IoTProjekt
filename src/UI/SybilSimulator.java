@@ -8,13 +8,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import network.Constants;
+import network.Node;
 
 import java.util.Objects;
 
 public class SybilSimulator extends Application implements Constants {
+    @FXML
+    public AnchorPane anchorPane;
+    @FXML
+    public Circle regNode;
     @FXML
     Button createNode;
     @FXML
@@ -34,6 +40,13 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateNode(ActionEvent actionEvent) {
+        Circle displayedNode = clone(regNode);
+        Node createdNode = new Node();
+        displayedNode.relocate(createdNode.getLocation().getY(),createdNode.getLocation().getX());
+
+
+
+
 
     }
 

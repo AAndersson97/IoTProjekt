@@ -11,7 +11,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
+<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
    <Line endX="-9.999984741210938" endY="98.99998474121094" layoutX="178.0" layoutY="149.0" startX="-94.99998474121094" startY="17.999984741210938" />
    <Line endX="-19.999984741210938" endY="88.99998474121094" layoutX="188.0" layoutY="159.0" startX="155.0" startY="-20.000015258789062" />
    <Line endX="122.0" endY="143.0" layoutX="188.0" layoutY="159.0" startX="-19.292892456054688" startY="89.70707702636719" />
@@ -22,7 +22,7 @@
    <Line endX="101.0" endY="127.0" layoutX="158.0" layoutY="131.0" startX="10.707107543945312" startY="117.70707702636719" stroke="#fa0a06" />
    <Line endX="81.70710754394531" endY="-90.70713806152344" layoutX="168.0" layoutY="141.0" startX="91.0" startY="117.0" stroke="#fa0a06" />
    <Line endX="71.00001525878906" endY="-100.00001525878906" layoutX="178.0" layoutY="151.0" startX="132.70709228515625" startY="151.70709228515625" stroke="#fa0a06" />
-   <Circle fill="DODGERBLUE" layoutX="83.0" layoutY="167.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+   <Circle fx:id="regNode" fill="DODGERBLUE" layoutX="83.0" layoutY="167.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
    <Circle fill="#ff1f1f" layoutX="249.0" layoutY="51.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
    <Circle fill="DODGERBLUE" layoutX="168.0" layoutY="248.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
    <Circle fill="DODGERBLUE" layoutX="343.0" layoutY="139.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
