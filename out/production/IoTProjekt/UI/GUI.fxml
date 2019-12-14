@@ -61,9 +61,14 @@
                <Insets left="10.0" top="5.0" />
             </HBox.margin>
          </Button>
+         <Button fx:id="simPacketsButton" layoutX="15.0" layoutY="15.0" onAction="#onSimPackets" prefHeight="27.0" prefWidth="115.0" text="Simulate Packets">
+            <HBox.margin>
+               <Insets left="40.0" top="5.0" />
+            </HBox.margin>
+         </Button>
          <Button fx:id="sybilAttack" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" text="Start Sybil Attack" textFill="#c20202">
             <HBox.margin>
-               <Insets left="180.0" top="5.0" />
+               <Insets left="40.0" top="5.0" />
             </HBox.margin>
          </Button>
       </children>
