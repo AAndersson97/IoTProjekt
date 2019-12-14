@@ -43,7 +43,7 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateNode(ActionEvent actionEvent) {
-        Circle displayedNode = clone(regNode);
+        Circle displayedNode = create();
         Node createdNode = new Node();
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getY(),createdNode.getLocation().getX());
@@ -55,18 +55,18 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
-        Circle displayedANode = clone(regNode);
+        Circle displayedANode = create();
         displayedANode.setFill(Color.RED);
         Node createdANode = new Node();
         anchorPane.getChildren().add((displayedANode));
-        displayedANode.relocate(createdANode.getLocation().getY(),createdANode.getLocation().getX());
+        displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
     }
 
-    public Circle clone(Circle c) {
+    public Circle create() {
         Circle circle = new Circle();
-        circle.setFill(c.getFill());
-        circle.setRadius(c.getRadius());
-        circle.setStroke(c.getStroke());
+        circle.setFill(Color.BLUE);
+        circle.setRadius(10);
+        circle.setStroke(Color.BLACK);
         return circle;
     }
 }
