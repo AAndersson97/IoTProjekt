@@ -1,4 +1,5 @@
 * Skapa virtuella nätverksnoder (använda tredjepartsprogram) 
 * Skicka meddelande mellan nätverksnoder i paket (t.ex. enkelt "hej"-meddelande) 
 * Se till att kommunikationen mellan noderna sker över TCP
-*
+* Funktionalitet: ska kunna dirigera paket och kunna "drop" paket
+* Attacknoden kan isolera en nod genom att se till att all kommunikation
