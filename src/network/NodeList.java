@@ -27,6 +27,10 @@ public class NodeList {
         return new HashMap<>(nodeList);
     }
 
+    public Node getNode(short[] address) {
+        return nodeList.get(address);
+    }
+
     public void removeNode(Short[] address) {
         if (address == null)
             throw new IllegalArgumentException();

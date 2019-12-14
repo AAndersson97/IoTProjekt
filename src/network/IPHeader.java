@@ -18,7 +18,6 @@ public class IPHeader implements Constants {
 
     public IPHeader(byte[] baseHeader) {
         if (baseHeader.length == HEADER_SIZE) {
-
             version = (byte)((baseHeader[0]>>4)&15);
             headerLength = (byte)(baseHeader[0]&15);
             typeOfService = (short)(baseHeader[1]&63);
@@ -43,11 +42,11 @@ public class IPHeader implements Constants {
         }
     }
 
-    public IPHeader(int totalLength, byte[] sourceAdress, byte[] destinationAdress) {
+    public IPHeader(byte[] sourceAdress, byte[] destinationAdress) {
         this.version = 4;
         this.headerLength = 5;
         this.typeOfService = 0;
-        this.totalLength = totalLength;
+        this.totalLength = headerLength;
         this.id = offset = 0;
         this.flags = 2;
         this.timeToLive = 64;

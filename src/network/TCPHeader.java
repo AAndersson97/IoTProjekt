@@ -22,8 +22,8 @@ public class TCPHeader implements Constants {
 
     public TCPHeader(byte[] baseHeader) {
         if (baseHeader.length == HEADER_SIZE) {
-            sourcePort = ( ( ( baseHeader[0] << 8 ) & 65280 ) | ( baseHeader[1 ] & 255 ));
-            destinationPort = (int)(((baseHeader[2]<<8)&65280)|(baseHeader[3]&255));
+            sourcePort = (((baseHeader[0] << 8 ) & 65280 ) | ( baseHeader[1] & 255));
+            destinationPort = (((baseHeader[2]<<8)&65280)|(baseHeader[3]&255));
 
             sequenceNumber = (((baseHeader[4]<<24)&4278190080l)
                     |((baseHeader[5]<<16)&16711680l)
@@ -100,7 +100,7 @@ public class TCPHeader implements Constants {
     }
 
     public static class TCPHeaderBuilder {
-        TCPHeader tcpHeader = new TCPHeader();
+        private TCPHeader tcpHeader = new TCPHeader();
         public TCPHeaderBuilder() {
         }
 

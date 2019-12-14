@@ -9,6 +9,11 @@ public class TCPPacket {
         this.header = header;
     }
 
+    public TCPPacket(TCPHeader header, byte[] data) {
+        this.header = header;
+        this.data = data;
+    }
+
     public int getLength() {
         return header.length() + (data == null ? 0 : data.length);
     }
