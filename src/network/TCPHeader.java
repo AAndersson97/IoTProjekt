@@ -201,7 +201,7 @@ public class TCPHeader {
     }
 
     public boolean isFlagOn(TCPFlags flag) {
-
+        return true;
     }
 
     public enum TCPFlags {
@@ -209,7 +209,7 @@ public class TCPHeader {
 
 
          TCPFlags(int num) {
-             this.
+
          }
     }
 }
