@@ -4,13 +4,18 @@ import java.util.Comparator;
 
 public class Node implements Comparator<Node> {
     private String address;
+
+    public LocationCreator.Location getLocation() {
+        return location;
+    }
+
     private LocationCreator.Location location;
     public void createNode() {
 
 
     }
 
-    Node() {
+    public Node() {
         location = LocationCreator.getInstance().createLocation();
     }
 
