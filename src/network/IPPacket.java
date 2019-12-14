@@ -1,7 +1,5 @@
 package network;
 
-import java.util.Arrays;
-
 public class IPPacket {
     private IPHeader ipHeader;
     private TCPPacket tcpPacket;
@@ -11,8 +9,23 @@ public class IPPacket {
         this.tcpPacket = tcpPacket;
     }
 
-    public byte[] toByteArray() {
+    public int length() {
+        return (ipHeader.getTotalLength() + tcpPacket.getLength());
+    }
 
-     return null;
+    public IPHeader getIpHeader() {
+        return ipHeader;
+    }
+
+    public void setIpHeader(IPHeader ipHeader) {
+        this.ipHeader = ipHeader;
+    }
+
+    public TCPPacket getTcpPacket() {
+        return tcpPacket;
+    }
+
+    public void setTcpPacket(TCPPacket tcpPacket) {
+        this.tcpPacket = tcpPacket;
     }
 }
