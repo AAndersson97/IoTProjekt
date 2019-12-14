@@ -7,7 +7,7 @@ import java.util.Comparator;
 public class ProximitySearcher {
 
     public void findNeighbours(LocationCreator.Location location) {
-        ArrayList<Node> nodes = NodeList.getInstance().getNodeList();
+        //ArrayList<Node> nodes = NodeList.getInstance().getNodeList();
         //Collections.sort(nodes);
 
     }

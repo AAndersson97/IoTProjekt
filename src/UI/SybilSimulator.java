@@ -12,9 +12,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.Constants;
 import network.Node;
+import network.SybilNode;
 
 import java.util.Objects;
 
@@ -22,8 +24,6 @@ import java.util.Objects;
 public class SybilSimulator extends Application implements Constants {
     @FXML
     public AnchorPane anchorPane;
-    @FXML
-    public Circle regNode;
     @FXML
     Button createNode;
     @FXML
@@ -52,6 +52,12 @@ public class SybilSimulator extends Application implements Constants {
     }
 
     public void onStartSybilAttack(ActionEvent actionEvent) {
+        for(int i=0;i<3;i++){
+            Rectangle displayedSybilNode = createRectangle();
+            Node createdSNode = new Node();
+            anchorPane.getChildren().add(displayedSybilNode);
+            displayedSybilNode.relocate((createdSNode.getLocation().getX()),createdSNode.getLocation().getY());
+        }
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
@@ -68,5 +74,13 @@ public class SybilSimulator extends Application implements Constants {
         circle.setRadius(10);
         circle.setStroke(Color.BLACK);
         return circle;
+    }
+    public Rectangle createRectangle(){
+        Rectangle rectangle = new Rectangle();
+        rectangle.setFill(Color.INDIANRED);
+        rectangle.setHeight(20);
+        rectangle.setWidth(20);
+        rectangle.setStroke(Color.BLACK);
+        return rectangle;
     }
 }

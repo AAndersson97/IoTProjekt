@@ -30,10 +30,9 @@ public class LocationCreator implements Constants {
             if (l.x == location.x && l.y == location.y) {
                 return true;
             }
-            if((l.x > location.x && location.x+20 > l.x) && (l.y > location.y && location.y+20 > l.y)){
+            if((l.x > location.x && location.x+200 > l.x) && (l.y > location.y && location.y+200 > l.y)){
                 return true;
-            }
-            if((l.x<location.x && location.x-20<l.x) && (l.y<location.y && location.y-20<l.y)){
+            }else if((l.x<location.x && location.x-200<l.x) && (l.y<location.y && location.y-200<l.y)){
                 return true;
             }
 
