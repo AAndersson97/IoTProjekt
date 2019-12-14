@@ -42,10 +42,8 @@ public class SybilSimulator extends Application implements Constants {
     public void onCreateNode(ActionEvent actionEvent) {
         Circle displayedNode = clone(regNode);
         Node createdNode = new Node();
+        anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getY(),createdNode.getLocation().getX());
-
-
-
 
 
     }

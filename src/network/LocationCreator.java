@@ -19,7 +19,7 @@ public class LocationCreator implements Constants {
     public Location createLocation() {
         Location location;
         do {
-            location = new Location((int)Math.random()*MAX_COORDINATE,(int)Math.random()*MAX_COORDINATE);
+            location = new Location((int) (Math.random() * MAX_XCOORDINATE), (int) (Math.random() * MAX_YCOORDINATE));
         } while(locationExists(location));
 
         return location;
