@@ -3,7 +3,6 @@ package network;
 import java.util.ArrayList;
 
 public class IPPacket extends Packet {
-    private ArrayList<Short[]> travelNodes;
     private IPHeader ipHeader;
     private TCPPacket tcpPacket;
 
@@ -30,9 +29,5 @@ public class IPPacket extends Packet {
 
     public void setTcpPacket(TCPPacket tcpPacket) {
         this.tcpPacket = tcpPacket;
-    }
-
-    public void addTravelNode(Short[] address) {
-        travelNodes.add(address);
     }
 }

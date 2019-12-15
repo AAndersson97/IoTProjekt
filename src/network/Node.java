@@ -24,7 +24,6 @@ public class Node implements Comparator<Node>, Constants {
         routingTable = new HashMap<>();
         NodeList.getInstance().addNode(this);
         active = true;
-        new ABC();
 
     }
 

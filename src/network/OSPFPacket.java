@@ -12,4 +12,8 @@ public class OSPFPacket extends Packet {
         SizeOf.sizeOf(this);
     }
 
+    public int length() {
+        return 0;
+    }
+
 }
