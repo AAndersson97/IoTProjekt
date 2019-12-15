@@ -1,8 +1,5 @@
 package network;
 
-import javafx.css.Size;
-import net.sourceforge.sizeof.SizeOf;
-
 public class IPHeader implements Constants {
 
     private byte version;
@@ -56,13 +53,6 @@ public class IPHeader implements Constants {
         this.checksum = 0;
         this.sourceAdress = sourceAdress;
         this.destinationAdress = destinationAdress;
-        this.totalLength = (int)calculateLength();
-    }
-
-    public long calculateLength() {
-        return SizeOf.sizeOf(this) + SizeOf.sizeOf(sourceAdress) +
-                SizeOf.sizeOf(destinationAdress) +
-                (options == null ? 0 : SizeOf.sizeOf(options));
     }
 
     public byte[] getHeader() {

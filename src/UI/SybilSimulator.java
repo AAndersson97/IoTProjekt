@@ -14,7 +14,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import net.sourceforge.sizeof.SizeOf;
 import network.*;
 
 import java.util.ArrayList;
