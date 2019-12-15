@@ -2,7 +2,7 @@ package network;
 
 import java.util.ArrayList;
 
-public class IPPacket {
+public class IPPacket extends Packet {
     private ArrayList<Short[]> travelNodes;
     private IPHeader ipHeader;
     private TCPPacket tcpPacket;

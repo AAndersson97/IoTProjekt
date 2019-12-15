@@ -4,11 +4,13 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class Node implements Comparator<Node>, Constants {
     private Short[] address;
     private LocationCreator.Location location;
-    private IPPacket currentPacket;
+    private boolean active;
+    private HashMap<Short[], Node> routingTable;
 
     public LocationCreator.Location getLocation() {
         return location;
@@ -17,7 +19,9 @@ public class Node implements Comparator<Node>, Constants {
     public Node() {
         location = LocationCreator.getInstance().getLocation();
         address = AddressGenerator.getInstance().generateAddress();
+        routingTable = new HashMap<>();
         NodeList.getInstance().addNode(this);
+        active = true;
     }
 
     @Override
@@ -53,7 +57,15 @@ public class Node implements Comparator<Node>, Constants {
 
     }
 
-    private void forwardPacket(IPPacket packet) {
+    private void forwardPacket(Packet packet) {
 
+    }
+
+    public void turnOff() {
+        active = false;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }
