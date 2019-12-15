@@ -16,7 +16,7 @@ public class Node implements Comparator<Node>, Constants {
 
     public Node() {
         location = LocationCreator.getInstance().getLocation();
-        //address = shortToByte(AddressGenerator.getInstance().generateAddress());
+        address = AddressGenerator.getInstance().generateAddress();
         NodeList.getInstance().addNode(this);
     }
 
