@@ -1,7 +1,8 @@
 package network;
 
-public class IPHeader implements Constants {
-
+public class IPHeader {
+    private static final int HEADER_SIZE = 20;
+    private static final int TCP_PROTOCOL = 6;
     private byte version;
     private byte headerLength;
     private short typeOfService;

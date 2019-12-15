@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class TCPHeader implements Constants {
-
+    private static final int HEADER_SIZE = 20;
     private int sourcePort;
     private int destinationPort;
     private long sequenceNumber;
