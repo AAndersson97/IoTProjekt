@@ -1,14 +1,15 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-class NodeList {
+public class NodeList {
     private static NodeList instance;
-    private static ArrayList<Node> nodeList;
+    private static HashMap<Short[],Node> nodeList;
 
     static {
         instance = new NodeList();
-        nodeList = new ArrayList();
+        nodeList = new HashMap<>();
     }
 
     NodeList() {
@@ -19,16 +20,26 @@ class NodeList {
     }
 
     public void addNode(Node node) {
-        nodeList.add(node);
+        nodeList.put(node.getAddress(),node);
     }
 
-    public ArrayList<Node> getNodeList() {
-        return new ArrayList<>(nodeList);
+    public HashMap<Short[],Node> getNodeList() {
+        return new HashMap<>(nodeList);
     }
 
-    public void removeNode(int index) {
-        if (index < 0 || index >= nodeList.size())
-            throw new IllegalArgumentException("Index out of bounds. Min index: 0, max index: " + (nodeList.size()-1));
+    public Node getNode(short[] address) {
+        return nodeList.get(address);
+    }
+
+    public void removeNode(Short[] address) {
+        if (address == null)
+            throw new IllegalArgumentException();
+        nodeList.remove(address);
+
+    }
+
+    public int numOfNodes() {
+        return nodeList.size();
     }
 
 
