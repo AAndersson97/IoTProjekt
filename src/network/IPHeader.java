@@ -42,9 +42,10 @@ public class IPHeader implements Constants {
         }
     }
 
-    public IPHeader(byte[] sourceAdress, byte[] destinationAdress) {
+    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress) {
         this.version = 4;
         this.headerLength = 5;
+        this.totalLength = headerLength + length;
         this.typeOfService = 0;
         this.id = offset = 0;
         this.flags = 2;

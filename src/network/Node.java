@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 public class Node implements Comparator<Node>, Constants {
+    private Communication communication;
     private Short[] address;
     private LocationCreator.Location location;
     private boolean active;
@@ -20,7 +21,7 @@ public class Node implements Comparator<Node>, Constants {
         routingTable = new HashMap<>();
         NodeList.getInstance().addNode(this);
         active = true;
-
+        communication = Communication.getInstance();
     }
 
     @Override
