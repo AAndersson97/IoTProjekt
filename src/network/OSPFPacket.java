@@ -1,5 +1,7 @@
 package network;
-import java.lang.instrument.Instrumentation;
+
+
+import net.sourceforge.sizeof.SizeOf;
 
 public class OSPFPacket extends Packet {
     private short version;
@@ -7,7 +9,7 @@ public class OSPFPacket extends Packet {
     private int length;
 
     OSPFPacket() {
-
+        SizeOf.sizeOf(this);
     }
 
 }
