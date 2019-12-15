@@ -65,6 +65,8 @@ public class Checksum {
 
         // Kalkylera första komplementet av summan
         sum = (~sum&0xFFFF);
+
+        return sum;
     }
 
 }
