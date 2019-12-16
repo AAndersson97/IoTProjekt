@@ -115,5 +115,7 @@ public class SybilSimulator extends Application implements Constants {
     public void packetLine(int startX, int startY, int endX, int endY){
         Line line = new Line(startX,startY,endX,endY);
         anchorPane.getChildren().add(line);
+        line.toBack();
+
     }
 }
