@@ -19,7 +19,7 @@ public class Node implements Comparator<Node>, Constants {
         location = LocationCreator.getInstance().getLocation();
         address = AddressGenerator.getInstance().generateAddress();
         routingTable = new HashMap<>();
-        NodeList.getInstance().addNode(this);
+        Network.getInstance().addNode(this);
         active = true;
         communication = Communication.getInstance();
     }
@@ -61,8 +61,20 @@ public class Node implements Comparator<Node>, Constants {
 
     }
 
+    private void sendHelloPackets() {
+        Thread thread = new Thread(() -> {
+            try {
+                //communication.sendMessage("hello", address,new short[]{140,1,1,0});
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     public void turnOff() {
         active = false;
+        Network.getInstance().removeNode(address);
     }
 
     public boolean isActive() {

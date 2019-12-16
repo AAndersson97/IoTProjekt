@@ -1,5 +1,7 @@
 package network;
 
+import utilities.Checksum;
+
 public class IPHeader {
     private static final int HEADER_SIZE = 20;
     private static final int TCP_PROTOCOL = 6;
@@ -52,9 +54,13 @@ public class IPHeader {
         this.flags = 2;
         this.timeToLive = 64;
         this.protocol = TCP_PROTOCOL;
-        this.checksum = 0;
+        //this.checksum = Checksum.generateChecksum();
         this.sourceAdress = sourceAdress;
         this.destinationAdress = destinationAdress;
+    }
+
+    public byte[] toByteArray() {
+        return null;
     }
 
     public byte[] getHeader() {

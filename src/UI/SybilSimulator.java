@@ -54,7 +54,7 @@ public class SybilSimulator extends Application implements Constants {
         Node createdNode = new Node();
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getX(),createdNode.getLocation().getY());
-        createNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
+        createNode.setDisable(Network.getInstance().numOfNodes() >= MAX_NODES);
         Label nodeLabel = new Label(createdNode.addressToString());
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
@@ -75,7 +75,7 @@ public class SybilSimulator extends Application implements Constants {
         Node createdANode = new Node();
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdANode.getLocation().getX(),createdANode.getLocation().getY());
-        createAttackNode.setDisable(NodeList.getInstance().numOfNodes() >= MAX_NODES);
+        createAttackNode.setDisable(Network.getInstance().numOfNodes() >= MAX_NODES);
         Label nodeLabel = new Label(createdANode.addressToString());
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdANode.getLocation().getX()-15,createdANode.getLocation().getY()+20);
@@ -102,7 +102,7 @@ public class SybilSimulator extends Application implements Constants {
 
     public void onSimPackets(ActionEvent actionEvent) {
         //Thread thread = new Thread(()->{});
-            for (Node node : NodeList.getInstance().getNodeList().values()) {
+            for (Node node : Network.getInstance().getNodeList().values()) {
                 ArrayList<Node> neighbours = ProximitySearcher.getInstance().findClosestNeighbours(node);
                 for (Node neighbour : neighbours) {
                     packetLine(node.getLocation().getX() + 10, node.getLocation().getY() + 10, neighbour.getLocation().getX() + 10, neighbour.getLocation().getY() + 10);

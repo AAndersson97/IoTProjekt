@@ -1,21 +1,20 @@
 package network;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
-public class NodeList {
-    private static NodeList instance;
+public class Network {
+    private static Network instance;
     private static HashMap<Short[],Node> nodeList;
 
     static {
-        instance = new NodeList();
+        instance = new Network();
         nodeList = new HashMap<>();
     }
 
-    NodeList() {
+    Network() {
     }
 
-    public static NodeList getInstance() {
+    public static Network getInstance() {
         return instance;
     }
 
@@ -35,7 +34,6 @@ public class NodeList {
         if (address == null)
             throw new IllegalArgumentException();
         nodeList.remove(address);
-
     }
 
     public int numOfNodes() {

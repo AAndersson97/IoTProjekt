@@ -1,8 +1,6 @@
 package network;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class ProximitySearcher {
     private static ProximitySearcher instance;
@@ -21,7 +19,7 @@ public class ProximitySearcher {
         ArrayList<Node>neighbours = new ArrayList<>();
         int nx = n.getLocation().getX();
         int ny = n.getLocation().getY();
-        for(Node node : NodeList.getInstance().getNodeList().values()){
+        for(Node node : Network.getInstance().getNodeList().values()){
             int nox = node.getLocation().getX();
             int noy = node.getLocation().getY();
             if(nox != nx && noy!=ny){

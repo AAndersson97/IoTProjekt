@@ -3,6 +3,7 @@ package network;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Communication {
     private static Communication instance;
@@ -17,17 +18,18 @@ public class Communication {
     private Communication() {
 
     }
-    public static boolean sendMessage(String message, short[] source, short[] destination) {
-        IPPacket ipPacket = createPackage(message, source, destination);
-        NodeList.getInstance().getNode(source).receivePacket(ipPacket);
+    public boolean sendMessage(String message, Short[] source, Short[] destination) {
+        //short[] source2 = Arrays.stream(source).mapToInt(i -> i.shortValue()).toArray();
+        //IPPacket ipPacket = createPackage(message, source, destination);
+        //Network.getInstance().getNode(source).receivePacket(ipPacket);
         return true;
     }
 
-    public static void addPacketListener(PacketListener listener) {
+    public void addPacketListener(PacketListener listener) {
         packetListener = listener;
     }
 
-    private static IPPacket createPackage(String message, short[] source, short[] destination) {
+    /*private static IPPacket createPackage(String message, short[] source, short[] destination) {
         TCPHeader tcpHeader = new TCPHeader.TCPHeaderBuilder()
                 .flags((byte) 0)
                 .sequenceNumber(0)
@@ -37,14 +39,14 @@ public class Communication {
         TCPPacket packet = new TCPPacket(tcpHeader,byteMsg);
         IPHeader ipHeader = new IPHeader(byteMsg.length,shortToByte(source), shortToByte(destination));
         return new IPPacket(ipHeader, packet);
-    }
+    }*/
 
-    private static byte[] shortToByte(short[] numbers) {
+    /*private static byte[] shortToByte(Short[] numbers) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(numbers.length);
         ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
         shortBuffer.put(numbers);
         return byteBuffer.array();
-    }
+    }*/
 
     public static void addPacket(IPPacket packet) {
         sentPackets.add(packet);
