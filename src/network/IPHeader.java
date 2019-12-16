@@ -1,7 +1,8 @@
 package network;
 
-public class IPHeader implements Constants {
-
+public class IPHeader {
+    private static final int HEADER_SIZE = 20;
+    private static final int TCP_PROTOCOL = 6;
     private byte version;
     private byte headerLength;
     private short typeOfService;
@@ -42,11 +43,11 @@ public class IPHeader implements Constants {
         }
     }
 
-    public IPHeader(byte[] sourceAdress, byte[] destinationAdress) {
+    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress) {
         this.version = 4;
         this.headerLength = 5;
+        this.totalLength = headerLength + length;
         this.typeOfService = 0;
-        this.totalLength = headerLength;
         this.id = offset = 0;
         this.flags = 2;
         this.timeToLive = 64;

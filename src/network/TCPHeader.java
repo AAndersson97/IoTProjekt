@@ -1,10 +1,12 @@
 package network;
 
+import utilities.Checksum;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class TCPHeader implements Constants {
-
+    private static final int HEADER_SIZE = 20;
     private int sourcePort;
     private int destinationPort;
     private long sequenceNumber;
@@ -102,16 +104,9 @@ public class TCPHeader implements Constants {
     public static class TCPHeaderBuilder {
         private TCPHeader tcpHeader = new TCPHeader();
         public TCPHeaderBuilder() {
-        }
-
-        public TCPHeaderBuilder sourcePort(int port) {
-            tcpHeader.sourcePort = port;
-            return this;
-        }
-
-        public TCPHeaderBuilder destinationPort(int port) {
-            tcpHeader.destinationPort = port;
-            return this;
+            tcpHeader.sourcePort = tcpHeader.destinationPort = 0;
+            tcpHeader.flags = 0;
+            tcpHeader.ackNum = 0;
         }
 
         public TCPHeaderBuilder sequenceNumber(long seqNum) {
@@ -129,9 +124,15 @@ public class TCPHeader implements Constants {
             return this;
         }
 
+        public TCPHeaderBuilder ackNum(long ackNum) {
+            tcpHeader.ackNum = ackNum;
+            return this;
+        }
+
         public TCPHeader build() {
             tcpHeader.dataOffset = HEADER_SIZE / 4;
-            tcpHeader.checksum = tcpHeader.urgentPointer = 0;
+            tcpHeader.urgentPointer = 0;
+            tcpHeader.checksum = Checksum.generateChecksum(tcpHeader.toByteArray());
             return tcpHeader;
         }
     }
@@ -140,16 +141,8 @@ public class TCPHeader implements Constants {
         return sourcePort;
     }
 
-    public void setSourcePort(int sourcePort) {
-        this.sourcePort = sourcePort;
-    }
-
     public int getDestinationPort() {
         return destinationPort;
-    }
-
-    public void setDestinationPort(int destinationPort) {
-        this.destinationPort = destinationPort;
     }
 
     public long getSequenceNumber() {
@@ -164,32 +157,16 @@ public class TCPHeader implements Constants {
         return ackNum;
     }
 
-    public void setAckNum(long ackNum) {
-        this.ackNum = ackNum;
-    }
-
     public int getDataOffset() {
         return dataOffset;
-    }
-
-    public void setDataOffset(int dataOffset) {
-        this.dataOffset = dataOffset;
     }
 
     public int getWindowSize() {
         return windowSize;
     }
 
-    public void setWindowSize(int windowSize) {
-        this.windowSize = windowSize;
-    }
-
     public int getChecksum() {
         return checksum;
-    }
-
-    public void setChecksum(int checksum) {
-        this.checksum = checksum;
     }
 
     public int getUrgentPointer() {
@@ -214,5 +191,19 @@ public class TCPHeader implements Constants {
          public int getNum() {
              return num;
          }
+    }
+
+    public byte[] toByteArray(){
+        ByteArrayOutputStream out = new ByteArrayOutputStream( );
+        try {
+            out.write(getHeader());
+            if (options != null) {
+                out.write(this.options);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return out.toByteArray();
     }
 }

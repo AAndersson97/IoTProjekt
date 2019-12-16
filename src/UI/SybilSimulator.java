@@ -45,6 +45,8 @@ public class SybilSimulator extends Application implements Constants {
         Communication.addPacketListener((packet) -> {
             System.out.println("Packet Added!");
         });
+
+
     }
 
     public void onCreateNode(ActionEvent actionEvent) {

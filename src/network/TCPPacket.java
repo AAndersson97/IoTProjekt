@@ -1,5 +1,8 @@
 package network;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 public class TCPPacket {
 
     private TCPHeader header;
@@ -42,4 +45,29 @@ public class TCPPacket {
         return data != null;
     }
 
+    public byte[] getData() {
+        return data;
+    }
+
+    public byte[] toByteArray(){
+
+        byte[] headerBytes = header.toByteArray() ;
+        ByteArrayOutputStream out = new ByteArrayOutputStream( );
+
+        try{
+            out.write( headerBytes ) ;
+
+            if( this.data != null ){
+                out.write( data ) ;
+            }
+
+            return out.toByteArray() ;
+
+        }
+        catch(IOException ex){
+            System.out.println( ex.toString() ) ;
+        }
+
+        return null ;
+    }
 }
