@@ -42,7 +42,7 @@ public class SybilSimulator extends Application implements Constants {
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.show();
 
-        Communication.addPacketListener((packet) -> {
+        Communication.getInstance().addPacketListener((packet) -> {
             System.out.println("Packet Added!");
         });
 
