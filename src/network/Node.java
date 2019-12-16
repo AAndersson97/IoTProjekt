@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Node implements Comparator<Node>, Constants {
     private Communication communication;
-    private Short[] address;
+    private short[] address;
     private LocationCreator.Location location;
     private boolean active;
     private HashMap<Short[], Node> routingTable;
@@ -29,14 +29,14 @@ public class Node implements Comparator<Node>, Constants {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 
-    public Short[] getAddress() {
+    public short[] getAddress() {
         return address;
     }
 
-    private static byte[] shortToByte(Short[] numbers) {
+    private static byte[] shortToByte(short[] numbers) {
         byte[] bytes = new byte[numbers.length];
         for (int i = 0; i < bytes.length; i++)
-            bytes[i] = numbers[i].byteValue();
+            bytes[i] = (byte)numbers[i];
 
         return bytes;
     }
@@ -45,14 +45,19 @@ public class Node implements Comparator<Node>, Constants {
         return address[0] + "." + address[1] + "." + address[2] + "." + address[3];
     }
 
-    public void receivePacket(IPPacket packet) {
-        byte[] byteAddress = shortToByte(address);
-        byte[] destination = packet.getIpHeader().destinationAdress;
-        if (Arrays.compare(destination,byteAddress) == 0) {
-            System.out.println("Package has reached its final destination");
-            Communication.addPacket(packet);
-        } else
-            forwardPacket(packet);
+    public void receivePacket(Packet packet) {
+        if (packet instanceof OSPFPacket) {
+
+        } else if (packet instanceof IPPacket){
+            IPPacket ipPacket = (IPPacket) packet;
+            byte[] byteAddress = shortToByte(address);
+            byte[] destination = ipPacket.getIpHeader().destinationAdress;
+            if (Arrays.compare(destination, byteAddress) == 0) {
+                System.out.println("Package has reached its final destination");
+                Communication.addPacket(ipPacket);
+            } else
+                forwardPacket(packet);
+        }
         packet.addTravelNode(address);
 
     }

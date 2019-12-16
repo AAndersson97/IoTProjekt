@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 public class AddressGenerator implements Constants {
     private static AddressGenerator instance;
-    private static ArrayList<Short[]> generated;
+    private static ArrayList<short[]> generated;
 
     static {
         generated = new ArrayList<>();
         instance = new AddressGenerator();
     }
 
-    public Short[] generateAddress() {
-        Short[] address = new Short[ADDRESS_LENGTH];
+    public short[] generateAddress() {
+        short[] address = new short[ADDRESS_LENGTH];
         address[0] = 140;
         address[1] = 1;
         address[2] = 1;

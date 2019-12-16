@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Network {
     private static Network instance;
-    private static HashMap<Short[],Node> nodeList;
+    private static HashMap<short[],Node> nodeList;
 
     static {
         instance = new Network();
@@ -22,7 +22,7 @@ public class Network {
         nodeList.put(node.getAddress(),node);
     }
 
-    public HashMap<Short[],Node> getNodeList() {
+    public HashMap<short[],Node> getNodeList() {
         return new HashMap<>(nodeList);
     }
 
@@ -30,7 +30,7 @@ public class Network {
         return nodeList.get(address);
     }
 
-    public void removeNode(Short[] address) {
+    public void removeNode(short[] address) {
         if (address == null)
             throw new IllegalArgumentException();
         nodeList.remove(address);

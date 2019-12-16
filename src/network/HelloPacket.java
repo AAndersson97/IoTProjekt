@@ -3,7 +3,7 @@ package network;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class HelloPacket  extends Packet{
+public class HelloPacket extends OSPFPacket{
     private OSPFHeader header;
     private int interfaceID;
     private byte priority;

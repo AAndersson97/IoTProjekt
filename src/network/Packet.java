@@ -3,12 +3,12 @@ package network;
 import java.util.ArrayList;
 
 public abstract class Packet {
-    private ArrayList<Short[]> travelNodes;
+    private ArrayList<short[]> travelNodes;
 
     Packet() {
         travelNodes = new ArrayList<>();
     }
-    public void addTravelNode(Short[] address) {
+    public void addTravelNode(short[] address) {
         travelNodes.add(address);
     }
 
