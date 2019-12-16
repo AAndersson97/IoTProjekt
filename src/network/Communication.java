@@ -18,10 +18,13 @@ public class Communication {
     private Communication() {
 
     }
-    public boolean sendMessage(String message, short[] source, short[] destination) {
+    public void sendMessage(String message, short[] source, short[] destination) {
         IPPacket ipPacket = createPackage(message, source, destination);
-        Network.getInstance().getNode(source).receivePacket(ipPacket);
-        return true;
+        Network.getInstance().getNode(destination).receivePacket(ipPacket);
+    }
+
+    public void sendMessage(Packet packet, short[] source, short[] destination) {
+        Network.getInstance().getNode(destination).receivePacket(packet);
     }
 
     public void addPacketListener(PacketListener listener) {
@@ -41,10 +44,11 @@ public class Communication {
     }
 
     private static byte[] shortToByte(short[] numbers) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(numbers.length);
-        ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
-        shortBuffer.put(numbers);
-        return byteBuffer.array();
+        byte[] bytes = new byte[numbers.length];
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = (byte)numbers[i];
+
+        return bytes;
     }
 
     public static void addPacket(IPPacket packet) {

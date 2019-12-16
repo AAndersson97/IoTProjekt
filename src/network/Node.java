@@ -64,17 +64,21 @@ public class Node implements Comparator<Node>, Constants {
 
     private void forwardPacket(Packet packet) {
 
+        System.out.println("Forward packet");
     }
 
     private void sendHelloPackets() {
         Thread thread = new Thread(() -> {
             try {
-                //communication.sendMessage("hello", address,new short[]{140,1,1,0});
-                Thread.sleep(1000);
+                while (true) {
+                    communication.sendMessage("Hello", address, address);
+                    Thread.sleep(2000);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });
+
     }
 
     public void turnOff() {
