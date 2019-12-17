@@ -3,25 +3,26 @@ package network;
 import utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
-public class OSPFHeader {
+public class OSPFHeader extends Header {
     private static final int HEADER_SIZE = 24;
-    private byte version;
+    // Då programmet använder IPv4 används version 2 av OSPF-protokollet
+    private final byte version = (byte) 2;
     private int type;
     private int length;
     private int routerID;
     private int areaID;
     private int checkSum;
-    private byte instanceID;
-    private byte reserved;
+    private short authentication;
 
-    OSPFHeader(OSPFPacketType type, int length, int id) {
-        version = (byte)3;
+    OSPFHeader(OSPFPacketType type, int dataLength, int areaID, int routerID) {
         this.type = type.value;
-        this.length = length;
-        routerID = areaID = 0;
-        instanceID = (byte) id;
+        this.length = HEADER_SIZE + dataLength;
+        this.routerID = routerID;
+        // Area som paketet tillhör/ska till
+        this.areaID = areaID;
+        // Ingen autentisering
+        authentication = 0;
         checkSum = Checksum.generateChecksum(toByteArray());
     }
 
@@ -35,11 +36,10 @@ public class OSPFHeader {
         out.write(type);
         out.write(routerID);
         out.write(areaID);
-        out.write(instanceID);
-        out.write(reserved);
-
+        out.write(length);
+        out.write(authentication);
+        out.write(checkSum);
         return out.toByteArray();
-
     }
 
 }

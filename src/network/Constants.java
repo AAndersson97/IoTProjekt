@@ -11,6 +11,7 @@ public interface Constants {
     int IP_PROTOCOL = 4;
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 5;
+    int DEAD_INTERVAL = 10;
     int MAX_XCOORDINATE = WINDOW_WIDTH - 100;
     int MAX_YCOORDINATE = WINDOW_HEIGHT - 100;
 }
