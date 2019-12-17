@@ -3,12 +3,19 @@ package network;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class Node implements Comparator<Node>, Constants {
     private Communication communication;
+    // Routerns adress är dess identifikation (Router Id)
     private short[] address;
     private LocationCreator.Location location;
     private boolean active;
+    private short areaId;
+    private ScheduledFuture pendingTask;
+    // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
     private HashMap<Short[], Node> routingTable;
 
@@ -21,6 +28,7 @@ public class Node implements Comparator<Node>, Constants {
         routingTable = new HashMap<>();
         active = true;
         communication = Communication.getInstance();
+        sendHelloPackets();
     }
 
     @Override
@@ -67,16 +75,10 @@ public class Node implements Comparator<Node>, Constants {
     }
 
     private void sendHelloPackets() {
-        Thread thread = new Thread(() -> {
-            try {
-                while (true) {
-                    communication.sendMessage("Hello", address, address);
-                    Thread.sleep(2000);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
+        Runnable runnable = () -> {
+
+        };
+        pendingTask = Network.getExecutor().scheduleAtFixedRate(runnable,0,HELLO_INTERVAL, TimeUnit.SECONDS);
 
     }
 
@@ -85,10 +87,10 @@ public class Node implements Comparator<Node>, Constants {
     }
 
     public void turnOff() {
-        active = false;
+        pendingTask.cancel(true);
     }
 
     public boolean isActive() {
-        return active;
+        return pendingTask.isCancelled();
     }
 }

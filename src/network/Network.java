@@ -1,18 +1,24 @@
 package network;
 
+import javafx.concurrent.ScheduledService;
+
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Network implements Constants {
     private static int numOfNodes;
     private static int numOfAreas;
+    private static ScheduledExecutorService executor;
     private static ArrayList<Area> areas;
 
     static {
         numOfAreas = numOfNodes = 0;
         areas = new ArrayList<>();
+        // Skapar en gemensam tråd för alla noder att använda för uppgifter som ska utföras regelbundet
+        executor = Executors.newScheduledThreadPool(1);
     }
     private Network() {
-
     }
 
     public static void newNodeAdded() {
@@ -46,5 +52,9 @@ public class Network implements Constants {
             if (areas.get(i).getNumOfNodes() < area.getNumOfNodes())
                 area = areas.get(i);
         return area;
+    }
+
+    public static ScheduledExecutorService getExecutor() {
+        return executor;
     }
 }
