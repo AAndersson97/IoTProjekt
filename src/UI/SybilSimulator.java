@@ -16,9 +16,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.*;
 
-import java.util.ArrayList;
-
-
 public class SybilSimulator extends Application implements Constants {
     @FXML
     public AnchorPane anchorPane;
@@ -55,9 +52,9 @@ public class SybilSimulator extends Application implements Constants {
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getX(),createdNode.getLocation().getY());
         createNode.setDisable(Network.getNumOfNodes() >= MAX_NODES);
-        Label nodeLabel = new Label(createdNode.addressToString());
-        anchorPane.getChildren().add(nodeLabel);
-        nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
+        //Label nodeLabel = new Label(createdNode.addressToString());
+        //anchorPane.getChildren().add(nodeLabel);
+        //nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
     }
 
     public void onStartSybilAttack(ActionEvent actionEvent) {

@@ -77,7 +77,7 @@ public class Node implements Comparator<Node>, Constants {
         Runnable runnable = () -> {
 
         };
-        pendingTask = Network.getExecutor().scheduleAtFixedRate(runnable,0,HELLO_INTERVAL, TimeUnit.SECONDS);
+        //pendingTask = Network.getExecutor().scheduleAtFixedRate(runnable,0,HELLO_INTERVAL, TimeUnit.SECONDS);
 
     }
 

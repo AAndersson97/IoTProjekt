@@ -29,29 +29,27 @@ public class Network implements Constants {
         return numOfNodes;
     }
 
-    public static Area createNewArea() {
-        if (numOfAreas >= MAX_NUM_OF_AREAS) {
-            return findArea();
-        }
+    private static void createNewArea() {
         short[] firstAddress = new short[4];
         firstAddress[0] = (short)(100 + ((numOfAreas+1)*10));
         firstAddress[1] = firstAddress[2] = firstAddress[3] = 0;
-        Area newArea = new Area(numOfAreas++,firstAddress, 24);
-        areas.add(newArea);
-        return newArea;
+        areas.add(new Area(numOfAreas++,firstAddress, 24));
     }
 
-    /**
-     * Hitta område med lägst antal noder
-     */
-    public static Area findArea() {
-        if (areas.isEmpty())
-            return null;
-        Area area = areas.get(0);
-        for (int i = 1; i < areas.size(); i++)
-            if (areas.get(i).getNumOfNodes() < area.getNumOfNodes())
-                area = areas.get(i);
-        return area;
+    private void createAreas() {
+        while(numOfAreas < 6) {
+            createNewArea();
+        }
+    }
+
+    public static Area findArea(LocationCreator.Location location) {
+        int x = location.getX();
+        int y = location.getY();
+
+        if (x > 0 && x < WINDOW_WIDTH/3 && y > 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            return areas.get(2);
+        //if (x > 0 && x < (WINDOW_WIDTH/3)/2 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+        return null;
     }
 
     public static ScheduledExecutorService getExecutor() {
