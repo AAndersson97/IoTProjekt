@@ -9,6 +9,7 @@ public class Node implements Comparator<Node>, Constants {
     private short[] address;
     private LocationCreator.Location location;
     private boolean active;
+    private boolean isABR;
     private HashMap<Short[], Node> routingTable;
 
     public LocationCreator.Location getLocation() {
@@ -17,9 +18,7 @@ public class Node implements Comparator<Node>, Constants {
 
     public Node() {
         location = LocationCreator.getInstance().getLocation();
-        address = AddressGenerator.getInstance().generateAddress();
         routingTable = new HashMap<>();
-        Network.getInstance().addNode(this);
         active = true;
         communication = Communication.getInstance();
     }
@@ -81,9 +80,12 @@ public class Node implements Comparator<Node>, Constants {
 
     }
 
+    public void setIsABR(boolean isABR) {
+        this.isABR = isABR;
+    }
+
     public void turnOff() {
         active = false;
-        Network.getInstance().removeNode(address);
     }
 
     public boolean isActive() {

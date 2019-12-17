@@ -19,7 +19,7 @@ public class ProximitySearcher {
         ArrayList<Node>neighbours = new ArrayList<>();
         int nx = n.getLocation().getX();
         int ny = n.getLocation().getY();
-        for(Node node : Network.getInstance().getNodeList().values()){
+        /*for(Node node : Area.getNodeList().values()){
             int nox = node.getLocation().getX();
             int noy = node.getLocation().getY();
             if(nox != nx && noy!=ny){
@@ -28,7 +28,7 @@ public class ProximitySearcher {
                 }
             }
 
-        }
+        }*/
         //ArrayList<Node> nodes = (ArrayList<Node>) NodeList.getInstance().getNodeList().values();
         //Collections.sort(nodes);
         //nodes.sort((n1,n2)-> Math.abs((n1.getLocation().getY() - n2.getLocation().getX()) + (n1.getLocation().getY() - n2.getLocation().getY())));

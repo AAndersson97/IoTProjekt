@@ -1,9 +1,6 @@
 package network;
 
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Communication {
     private static Communication instance;
@@ -20,11 +17,11 @@ public class Communication {
     }
     public void sendMessage(String message, short[] source, short[] destination) {
         IPPacket ipPacket = createPackage(message, source, destination);
-        Network.getInstance().getNode(destination).receivePacket(ipPacket);
+        //Area.getInstance().getNode(destination).receivePacket(ipPacket);
     }
 
     public void sendMessage(Packet packet, short[] source, short[] destination) {
-        Network.getInstance().getNode(destination).receivePacket(packet);
+        //Area.getInstance().getNode(destination).receivePacket(packet);
     }
 
     public void addPacketListener(PacketListener listener) {
