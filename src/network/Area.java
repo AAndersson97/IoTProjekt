@@ -20,6 +20,7 @@ public class Area {
 
     public void addNode(Node node) {
         nodeList.put(node.getAddress(),node);
+        node.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();
     }
 

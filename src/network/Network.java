@@ -1,7 +1,5 @@
 package network;
 
-import javafx.concurrent.ScheduledService;
-
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,6 +15,7 @@ public class Network implements Constants {
         areas = new ArrayList<>();
         // Skapar en gemensam tråd för alla noder att använda för uppgifter som ska utföras regelbundet
         executor = Executors.newScheduledThreadPool(1);
+        createAreas();
     }
     private Network() {
     }
@@ -36,20 +35,35 @@ public class Network implements Constants {
         areas.add(new Area(numOfAreas++,firstAddress, 24));
     }
 
-    private void createAreas() {
+    private static void createAreas() {
         while(numOfAreas < 6) {
             createNewArea();
         }
     }
 
-    public static Area findArea(LocationCreator.Location location) {
-        int x = location.getX();
-        int y = location.getY();
-
-        if (x > 0 && x < WINDOW_WIDTH/3 && y > 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            return areas.get(2);
-        //if (x > 0 && x < (WINDOW_WIDTH/3)/2 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-        return null;
+    /**
+     * Returnerar ett områdes id till en nod baserad på nodens position
+     * @param node En nod i nätverket som saknar område
+     */
+    public static int getArea(Node node) {
+        LocationCreator.Location location = node.getLocation();
+        int x = location.getX(), y = location.getY(), areaId = 0;
+        //System.out.println("(WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2: " + (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2);
+        //System.out.println("WINDOW_WIDTH/3: " + WINDOW_WIDTH/3);
+        //System.out.println("(2*WINDOW_WIDTH)/3: " + (2*WINDOW_WIDTH)/3);
+        if (x >= 0 && x < WINDOW_WIDTH/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            areaId = 2;
+        else if (x >= 0 && x < WINDOW_WIDTH/3 && y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            areaId = 1;
+        else if (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            areaId = 3;
+        //else if (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3 && y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+        else if (x >= (2*WINDOW_WIDTH)/3 && y >= 0 && y <= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            areaId = 4;
+        else if (x >= (2*WINDOW_WIDTH)/3 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
+            areaId = 5;
+        areas.get(areaId).addNode(node);
+        return areaId;
     }
 
     public static ScheduledExecutorService getExecutor() {

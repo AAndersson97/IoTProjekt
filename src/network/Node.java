@@ -12,7 +12,7 @@ public class Node implements Comparator<Node>, Constants {
     private short[] address;
     private LocationCreator.Location location;
     private boolean active;
-    private short areaId;
+    private int areaId;
     private ScheduledFuture pendingTask;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
@@ -27,7 +27,9 @@ public class Node implements Comparator<Node>, Constants {
         routingTable = new HashMap<>();
         active = true;
         communication = Communication.getInstance();
-        sendHelloPackets();
+        areaId = Network.getArea(this);
+        System.out.println("Area id: " + areaId + "  Adress: " + Arrays.toString(address) + " X: " + location.getX() + " Y:" + location.getY());
+        //sendHelloPackets();
     }
 
     @Override
@@ -91,5 +93,13 @@ public class Node implements Comparator<Node>, Constants {
 
     public boolean isActive() {
         return pendingTask.isCancelled();
+    }
+
+    public void assignAreaId(int areaId) {
+        this.areaId = areaId;
+    }
+
+    public void setAddress(short[] address) {
+        this.address = address;
     }
 }
