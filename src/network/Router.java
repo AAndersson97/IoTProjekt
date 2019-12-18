@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 
-public class Node implements Comparator<Node>, Constants {
+public class Router implements Comparator<Router>, Constants {
     private Communication communication;
     // Routerns adress är dess identifikation (Router Id)
     private short[] address;
@@ -15,13 +15,13 @@ public class Node implements Comparator<Node>, Constants {
     private ScheduledFuture pendingTask;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
-    private HashMap<Short[], Node> routingTable;
+    private HashMap<Short[], Router> routingTable;
 
     public LocationCreator.Location getLocation() {
         return location;
     }
 
-    public Node() {
+    public Router() {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
@@ -31,7 +31,7 @@ public class Node implements Comparator<Node>, Constants {
     }
 
     @Override
-    public int compare(Node o1, Node o2) {
+    public int compare(Router o1, Router o2) {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 

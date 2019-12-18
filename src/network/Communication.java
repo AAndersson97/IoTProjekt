@@ -15,8 +15,9 @@ public class Communication {
     private Communication() {
 
     }
-    public void sendMessage(String message, short[] source, short[] destination) {
+    public void sendMessage(String message,short[] source, short[] destination) {
         IPPacket ipPacket = createPackage(message, source, destination);
+
         //Area.getInstance().getNode(destination).receivePacket(ipPacket);
     }
 
@@ -28,7 +29,7 @@ public class Communication {
         packetListener = listener;
     }
 
-    private static IPPacket createPackage(String message, short[] source, short[] destination) {
+    public static IPPacket createPackage(String message, short[] source, short[] destination) {
         TCPHeader tcpHeader = new TCPHeader.TCPHeaderBuilder()
                 .flags((byte) 0)
                 .sequenceNumber(0)

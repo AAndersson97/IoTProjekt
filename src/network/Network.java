@@ -43,10 +43,10 @@ public class Network implements Constants {
 
     /**
      * Returnerar ett områdes id till en nod baserad på nodens position
-     * @param node En nod i nätverket som saknar område
+     * @param router En nod i nätverket som saknar område
      */
-    public static int getArea(Node node) {
-        LocationCreator.Location location = node.getLocation();
+    public static int getArea(Router router) {
+        LocationCreator.Location location = router.getLocation();
         int x = location.getX(), y = location.getY(), areaId = 0;
         //System.out.println("(WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2: " + (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2);
         //System.out.println("WINDOW_WIDTH/3: " + WINDOW_WIDTH/3);
@@ -62,7 +62,7 @@ public class Network implements Constants {
             areaId = 4;
         else if (x >= (2*WINDOW_WIDTH)/3 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
             areaId = 5;
-        areas.get(areaId).addNode(node);
+        areas.get(areaId).addNode(router);
         return areaId;
     }
 

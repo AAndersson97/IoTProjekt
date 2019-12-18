@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
-    private static HashMap<short[],Node> nodeList;
+    private static HashMap<short[], Router> nodeList;
     /**
      *
      * @param num Områdets nummer, område 0 är ett backbone area, alla områden har en uppkoppling till område 0
@@ -18,19 +18,19 @@ public class Area {
         addressGenerator = new AddressGenerator(firstAddress, subnetMask);
     }
 
-    public void addNode(Node node) {
-        if (nodeList.isEmpty())
-            node.setIsABR(true);
-        nodeList.put(node.getAddress(),node);
-        node.setAddress(addressGenerator.generateAddress());
+    public void addNode(Router router) {
+        if (nodeList.isEmpty() && num != 0)
+            router.setIsABR(true);
+        nodeList.put(router.getAddress(), router);
+        router.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();
     }
 
-    public HashMap<short[],Node> getNodeList() {
+    public HashMap<short[], Router> getNodeList() {
         return new HashMap<>(nodeList);
     }
 
-    public Node getNode(short[] address) {
+    public Router getNode(short[] address) {
         return nodeList.get(address);
     }
 
