@@ -16,6 +16,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.*;
 
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+
 public class SybilSimulator extends Application implements Constants {
     @FXML
     public AnchorPane anchorPane;
@@ -91,10 +95,10 @@ public class SybilSimulator extends Application implements Constants {
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdARouter.getLocation().getX(), createdARouter.getLocation().getY());
         createAttackNode.setDisable(Network.getNumOfNodes() >= MAX_NODES);
-        Label nodeLabel = new Label(createdARouter.addressToString());
+        Label nodeLabel = new Label(createdARouter.getAddress().getHostAddress());
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdARouter.getLocation().getX()-15, createdARouter.getLocation().getY()+20);
-        Label nodeLabel2 = new Label("Attack Nod");
+        Label nodeLabel2 = new Label("Attacknod");
         anchorPane.getChildren().add(nodeLabel2);
         nodeLabel2.relocate(createdARouter.getLocation().getX()-20, createdARouter.getLocation().getY()-20);
     }
@@ -124,6 +128,17 @@ public class SybilSimulator extends Application implements Constants {
 
                 }
             }*/
+
+        Socket socket;
+        PrintWriter printWriter;
+            try {
+                socket = new Socket(InetAddress.getByAddress(new byte[]{(byte)150,0,0,0}), 9090);
+                printWriter = new PrintWriter(socket.getOutputStream(),true);
+                printWriter.println("HEJ");
+            } catch (Exception e) {
+
+            }
+
 
 
     }

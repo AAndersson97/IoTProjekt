@@ -1,6 +1,12 @@
 package network;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,6 +15,11 @@ import java.util.concurrent.ScheduledFuture;
 
 public class Router implements Comparator<Router>, Constants {
     private Communication communication;
+    private ServerSocket server;
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
+    private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private InetAddress address;
     private LocationCreator.Location location;
@@ -29,8 +40,32 @@ public class Router implements Comparator<Router>, Constants {
         active = true;
         communication = Communication.getInstance();
         areaId = Network.getArea(this);
-        System.out.println(address.getHostName());
+        configureSocket();
+        System.out.println(address.getHostAddress());
         //sendHelloPackets();
+    }
+
+    private void configureSocket() {
+        try {
+            //server = new ServerSocket(address);
+            socket = server.accept();
+            out = new PrintWriter(socket.getOutputStream(),true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        thread = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    String readLine;
+                    System.out.println((readLine = in.readLine()) == null ? "Null" : readLine);
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+                    System.out.println("Exception: " + e.getMessage());
+                    break;
+                }
+            }
+        });
     }
 
     @Override
@@ -65,9 +100,8 @@ public class Router implements Comparator<Router>, Constants {
 
     private void sendHelloPackets() {
         Runnable runnable = () -> {
-
         };
-        //pendingTask = Network.getExecutor().scheduleAtFixedRate(runnable,0,HELLO_INTERVAL, TimeUnit.SECONDS);
+
 
     }
 

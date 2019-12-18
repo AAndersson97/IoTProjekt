@@ -7,14 +7,11 @@ import java.util.concurrent.ScheduledExecutorService;
 public class Network implements Constants {
     private static int numOfNodes;
     private static int numOfAreas;
-    private static ScheduledExecutorService executor;
     private static ArrayList<Area> areas;
 
     static {
         numOfAreas = numOfNodes = 0;
         areas = new ArrayList<>();
-        // Skapar en gemensam tråd för alla noder att använda för uppgifter som ska utföras regelbundet
-        executor = Executors.newScheduledThreadPool(1);
         createAreas();
     }
     private Network() {
@@ -64,9 +61,5 @@ public class Network implements Constants {
             areaId = 5;
         areas.get(areaId).addNode(router);
         return areaId;
-    }
-
-    public static ScheduledExecutorService getExecutor() {
-        return executor;
     }
 }
