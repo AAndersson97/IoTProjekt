@@ -1,11 +1,12 @@
 package network;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 
 public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
-    private static HashMap<short[], Router> nodeList;
+    private static HashMap<InetAddress, Router> nodeList;
     /**
      *
      * @param num Områdets nummer, område 0 är ett backbone area, alla områden har en uppkoppling till område 0
@@ -26,7 +27,7 @@ public class Area {
         Network.newNodeAdded();
     }
 
-    public HashMap<short[], Router> getNodeList() {
+    public HashMap<InetAddress, Router> getNodeList() {
         return new HashMap<>(nodeList);
     }
 

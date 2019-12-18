@@ -1,5 +1,7 @@
 package network;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,7 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 public class Router implements Comparator<Router>, Constants {
     private Communication communication;
     // Routerns adress är dess identifikation (Router Id)
-    private short[] address;
+    private InetAddress address;
     private LocationCreator.Location location;
     private boolean active;
     private int areaId;
@@ -27,6 +29,7 @@ public class Router implements Comparator<Router>, Constants {
         active = true;
         communication = Communication.getInstance();
         areaId = Network.getArea(this);
+        System.out.println(address.getHostName());
         //sendHelloPackets();
     }
 
@@ -35,30 +38,17 @@ public class Router implements Comparator<Router>, Constants {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 
-    public short[] getAddress() {
+    public InetAddress getAddress() {
         return address;
-    }
-
-    private static byte[] shortToByte(short[] numbers) {
-        byte[] bytes = new byte[numbers.length];
-        for (int i = 0; i < bytes.length; i++)
-            bytes[i] = (byte)numbers[i];
-
-        return bytes;
-    }
-
-    public String addressToString() {
-        return address[0] + "." + address[1] + "." + address[2] + "." + address[3];
     }
 
     public void receivePacket(Packet packet) {
         if (packet instanceof OSPFPacket) {
-
         } else if (packet instanceof IPPacket){
             IPPacket ipPacket = (IPPacket) packet;
-            byte[] byteAddress = shortToByte(address);
             byte[] destination = ipPacket.getIpHeader().destinationAdress;
-            if (Arrays.compare(destination, byteAddress) == 0) {
+            //InetAddress.getByName(ipPacket.getIpHeader().destinationAdress);
+            if (Arrays.compare(destination, address.getAddress()) == 0) {
                 System.out.println("Package has reached its final destination");
                 Communication.addPacket(ipPacket);
             } else
@@ -97,7 +87,11 @@ public class Router implements Comparator<Router>, Constants {
         this.areaId = areaId;
     }
 
-    public void setAddress(short[] address) {
-        this.address = address;
+    public void setAddress(byte[] address) {
+        try {
+            this.address = InetAddress.getByAddress(address);
+        } catch (UnknownHostException e) {
+            System.out.println("Host unknown or wrong format of the host address");
+        }
     }
 }

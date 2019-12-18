@@ -1,7 +1,7 @@
 package network;
 
 public class AddressGenerator implements Constants {
-    private short[] highestAddress;
+    private byte[] highestAddress;
     private final short[] firstAddress;
     private final int submask;
 
@@ -20,19 +20,19 @@ public class AddressGenerator implements Constants {
      * i detta fall
      * @return En array med short-variabler där varje variabel representerar en del av den fullständiga IPv4-address
      */
-    public short[] generateAddress() {
-        short[] address = new short[ADDRESS_LENGTH];
-        address[0] = firstAddress[0];
+    public byte[] generateAddress() {
+        byte[] address = new byte[ADDRESS_LENGTH];
+        address[0] = (byte) firstAddress[0];
         // Om submask är 8 eller lägre ska denna del av adressen varieras, annars inte
         address[1] = 0;
         address[2] = 0;
-        address[3] = (short)(highestAddress == null ? 0 : highestAddress[3] + 1);
+        address[3] = (byte)(highestAddress == null ? 0 : Byte.toUnsignedInt(highestAddress[3]) + 1);
         highestAddress = address;
-        checkAddress(address);
         return address;
     }
 
-    private void checkAddress(short[] address) {
+    // Addressen sparas som array med bytes, behövs konverteras innan kontroll kan ske
+    /*private void checkAddress(byte[] address) {
         if (submask >= 24 && address[3] > 255)
             throw new IllegalStateException("The fourth part of the address must not exceed 255 when the submask is of number 24 or higher");
         else if (submask <= 16 && address[3] >= 255) {
@@ -43,7 +43,7 @@ public class AddressGenerator implements Constants {
             address[2] = 0;
             address[1]++;
         }
-    }
+    }*/
 
 
 }

@@ -1,14 +1,15 @@
 package network;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 public abstract class Packet {
-    private ArrayList<short[]> travelNodes;
+    private ArrayList<InetAddress> travelNodes;
 
     Packet() {
         travelNodes = new ArrayList<>();
     }
-    public void addTravelNode(short[] address) {
+    public void addTravelNode(InetAddress address) {
         travelNodes.add(address);
     }
 

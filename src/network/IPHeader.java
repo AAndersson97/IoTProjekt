@@ -2,6 +2,8 @@ package network;
 
 import utilities.Checksum;
 
+import java.net.InetAddress;
+
 public class IPHeader extends Header {
     private static final int HEADER_SIZE = 20;
     private static final int TCP_PROTOCOL = 6;
