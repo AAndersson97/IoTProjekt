@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class Node implements Comparator<Node>, Constants {
     private Communication communication;
@@ -28,7 +27,6 @@ public class Node implements Comparator<Node>, Constants {
         active = true;
         communication = Communication.getInstance();
         areaId = Network.getArea(this);
-        System.out.println("Area id: " + areaId + "  Adress: " + Arrays.toString(address) + " X: " + location.getX() + " Y:" + location.getY());
         //sendHelloPackets();
     }
 

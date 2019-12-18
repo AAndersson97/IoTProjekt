@@ -19,6 +19,8 @@ public class Area {
     }
 
     public void addNode(Node node) {
+        if (nodeList.isEmpty())
+            node.setIsABR(true);
         nodeList.put(node.getAddress(),node);
         node.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();

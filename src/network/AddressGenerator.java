@@ -22,14 +22,13 @@ public class AddressGenerator implements Constants {
      */
     public short[] generateAddress() {
         short[] address = new short[ADDRESS_LENGTH];
-        if (highestAddress == null)
-            highestAddress = address;
         address[0] = firstAddress[0];
         // Om submask är 8 eller lägre ska denna del av adressen varieras, annars inte
         address[1] = 0;
         address[2] = 0;
-        address[3] = (short)(highestAddress[3] + 1);
+        address[3] = (short)(highestAddress == null ? 0 : highestAddress[3] + 1);
         highestAddress = address;
+        checkAddress(address);
         return address;
     }
 

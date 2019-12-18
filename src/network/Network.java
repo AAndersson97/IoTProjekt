@@ -30,7 +30,7 @@ public class Network implements Constants {
 
     private static void createNewArea() {
         short[] firstAddress = new short[4];
-        firstAddress[0] = (short)(100 + ((numOfAreas+1)*10));
+        firstAddress[0] = (short)(numOfAreas == 0? 0 : 100 + ((numOfAreas+1)*10));
         firstAddress[1] = firstAddress[2] = firstAddress[3] = 0;
         areas.add(new Area(numOfAreas++,firstAddress, 24));
     }
