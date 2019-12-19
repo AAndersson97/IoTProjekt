@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="rocksaw-1.0.3" level="project" />
+    <orderEntry type="library" name="javafx-swt" level="application" />
   </component>
 </module>
