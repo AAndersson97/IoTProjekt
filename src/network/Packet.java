@@ -14,4 +14,6 @@ public abstract class Packet {
     }
 
     public abstract int length();
+
+    public abstract byte[] toByteArray();
 }

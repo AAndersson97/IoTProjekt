@@ -1,21 +1,36 @@
 package network;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.Set;
 
 
 public class Communication {
-    private static Communication instance;
-    private static ArrayList<IPPacket> sentPackets;
+    //private static ArrayList<IPPacket> sentPackets;
     private static PacketListener packetListener;
+    private PrintWriter writer;
+    private BufferedReader reader;
+    private Socket socket;
+    private ServerSocket serverSocket;
 
-    static {
-        sentPackets = new ArrayList<>();
-        instance = new Communication();
+    public Communication(InetAddress address) {
+
     }
 
-    private Communication() {
-
+    public void stop() {
+        writer.close();
+        try {
+            reader.close();
+            socket.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
+
     public void sendMessage(String message,short[] source, short[] destination) {
         IPPacket ipPacket = createPackage(message, source, destination);
 
@@ -50,14 +65,4 @@ public class Communication {
         return bytes;
     }
 
-    public static void addPacket(IPPacket packet) {
-        sentPackets.add(packet);
-        if (packetListener != null)
-            packetListener.packetAdded(packet);
-
-    }
-
-    public static Communication getInstance() {
-        return instance;
-    }
 }

@@ -24,4 +24,9 @@ public class HelloPacket extends OSPFPacket{
     public int length() {
         return header.length() + 20 + neighborIds.length;
     }
+
+    @Override
+    public byte[] toByteArray() {
+        return super.toByteArray();
+    }
 }

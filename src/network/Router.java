@@ -26,10 +26,9 @@ public class Router implements Comparator<Router>, Constants {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
-        communication = Communication.getInstance();
+        communication = new Communication(address);
         areaId = Network.getArea(this);
         System.out.println(address.getHostAddress());
-        new OSPFServer(address);
         //sendHelloPackets();
     }
 
@@ -50,7 +49,6 @@ public class Router implements Comparator<Router>, Constants {
             //InetAddress.getByName(ipPacket.getIpHeader().destinationAdress);
             if (Arrays.compare(destination, address.getAddress()) == 0) {
                 System.out.println("Package has reached its final destination");
-                Communication.addPacket(ipPacket);
             } else
                 forwardPacket(packet);
         }

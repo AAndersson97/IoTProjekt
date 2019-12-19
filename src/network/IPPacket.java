@@ -1,6 +1,7 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class IPPacket extends Packet {
     private IPHeader ipHeader;
@@ -29,5 +30,15 @@ public class IPPacket extends Packet {
 
     public void setTcpPacket(TCPPacket tcpPacket) {
         this.tcpPacket = tcpPacket;
+    }
+
+    @Override
+    public byte[] toByteArray() {
+        byte[] tcp = tcpPacket.toByteArray();
+        byte[] ip = ipHeader.toByteArray();
+        byte[] combined = new byte[tcp.length + ip.length];
+        System.arraycopy(tcp,0,combined,0,tcp.length);
+        System.arraycopy(ip,0,combined,tcp.length, ip.length);
+        return combined;
     }
 }

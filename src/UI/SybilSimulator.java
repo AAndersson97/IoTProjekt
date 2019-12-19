@@ -42,9 +42,9 @@ public class SybilSimulator extends Application implements Constants {
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.show();
 
-        Communication.getInstance().addPacketListener((packet) -> {
+        /*Communication.getInstance().addPacketListener((packet) -> {
             System.out.println("Packet Added!");
-        });
+        });*/
 
     }
 
@@ -132,7 +132,7 @@ public class SybilSimulator extends Application implements Constants {
         Socket socket;
         PrintWriter printWriter;
             try {
-                socket = new Socket(InetAddress.getByAddress(new byte[]{(byte)150,0,0,0}), 9090);
+                socket = new Socket(InetAddress.getByAddress(new byte[]{(byte)160,0,0,0}), 9090);
                 printWriter = new PrintWriter(socket.getOutputStream(),true);
                 printWriter.println("HEJ");
             } catch (Exception e) {
