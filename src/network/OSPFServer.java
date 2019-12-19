@@ -7,7 +7,6 @@ import java.net.InetAddress;
 
 public class OSPFServer implements Constants {
     private RawSocket socket;
-    private int a;
     private boolean multicast;
     public OSPFServer(InetAddress address) {
         multicast = false;

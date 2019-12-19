@@ -4,4 +4,5 @@ module IoTProjekt {
     requires rocksaw;
 
     opens UI;
+    opens network;
 }
