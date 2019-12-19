@@ -10,6 +10,7 @@ public interface Constants {
     int MAX_ROUTERS_AREA = 50;
     int IP_PROTOCOL = 4;
     short[] MULTI_CAST = new short[]{224,0,0,5};
+    int TIME_OUT = 0;
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 5;
     int DEAD_INTERVAL = 10;

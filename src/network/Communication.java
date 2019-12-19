@@ -2,6 +2,7 @@ package network;
 
 import java.util.ArrayList;
 
+
 public class Communication {
     private static Communication instance;
     private static ArrayList<IPPacket> sentPackets;

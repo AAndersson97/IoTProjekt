@@ -38,6 +38,7 @@ public class Network implements Constants {
         }
     }
 
+    // Att göra:
     /**
      * Returnerar ett områdes id till en nod baserad på nodens position
      * @param router En nod i nätverket som saknar område

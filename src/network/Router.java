@@ -1,31 +1,19 @@
 package network;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.concurrent.ScheduledFuture;
 
 public class Router implements Comparator<Router>, Constants {
     private Communication communication;
-    private ServerSocket server;
-    private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private InetAddress address;
     private LocationCreator.Location location;
     private boolean active;
     private int areaId;
-    private ScheduledFuture pendingTask;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
     private HashMap<Short[], Router> routingTable;
@@ -40,32 +28,9 @@ public class Router implements Comparator<Router>, Constants {
         active = true;
         communication = Communication.getInstance();
         areaId = Network.getArea(this);
-        configureSocket();
         System.out.println(address.getHostAddress());
+        new OSPFServer(address);
         //sendHelloPackets();
-    }
-
-    private void configureSocket() {
-        try {
-            //server = new ServerSocket(address);
-            socket = server.accept();
-            out = new PrintWriter(socket.getOutputStream(),true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        thread = new Thread(() -> {
-            for (int i = 0; i < 5; i++) {
-                try {
-                    String readLine;
-                    System.out.println((readLine = in.readLine()) == null ? "Null" : readLine);
-                    Thread.sleep(3000);
-                } catch (Exception e) {
-                    System.out.println("Exception: " + e.getMessage());
-                    break;
-                }
-            }
-        });
     }
 
     @Override
@@ -110,11 +75,11 @@ public class Router implements Comparator<Router>, Constants {
     }
 
     public void turnOff() {
-        pendingTask.cancel(true);
+
     }
 
     public boolean isActive() {
-        return pendingTask.isCancelled();
+        return true;
     }
 
     public void assignAreaId(int areaId) {
