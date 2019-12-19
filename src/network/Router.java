@@ -1,14 +1,16 @@
 package network;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class Router implements Comparator<Router>, Constants {
+public class Router extends Thread implements Comparator<Router>, Constants {
     private Communication communication;
-    private Thread thread;
+    private Socket OSPFSocket;
+    private Socket FTPSocket;
     // Routerns adress är dess identifikation (Router Id)
     private InetAddress address;
     private LocationCreator.Location location;
@@ -29,7 +31,29 @@ public class Router implements Comparator<Router>, Constants {
         communication = new Communication(address);
         areaId = Network.getArea(this);
         System.out.println(address.getHostAddress());
-        //sendHelloPackets();
+        OSPFSocket = new Socket(address, OSPF_PORT);
+        FTPSocket = new Socket(address, FTP_PORT);
+        OSPFSocket.open();
+        FTPSocket.open();
+        start();
+        
+    }
+
+    @Override
+    public void run() {
+        byte[] data = null;
+        while (true) {
+            try {
+                if (OSPFSocket.bytesToRead() > 0)
+                    data = OSPFSocket.read();
+                else if (FTPSocket.bytesToRead() > 0)
+                    data = FTPSocket.read();
+                System.out.println(data == null ? "No data" : "Length: " + data.length);
+                Thread.sleep(1000);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -64,8 +88,6 @@ public class Router implements Comparator<Router>, Constants {
     private void sendHelloPackets() {
         Runnable runnable = () -> {
         };
-
-
     }
 
     public void setIsABR(boolean isABR) {
@@ -90,5 +112,6 @@ public class Router implements Comparator<Router>, Constants {
         } catch (UnknownHostException e) {
             System.out.println("Host unknown or wrong format of the host address");
         }
+        Address.generated = this.address;
     }
 }

@@ -6,41 +6,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Socket implements Constants {
     private boolean open;
-    private int[] openPorts;
+    private int port;
     private PipedInputStream input;
-    private PipedOutputStream output;
     private InetAddress address;
-    private DataListener listener;
 
-    public Socket(InetAddress address, int[] openPorts) {
+    public Socket(InetAddress address, int port) {
         this.address = address;
-        this.openPorts = openPorts;
+        this.port = port;
     }
 
-    public void open() throws IOException {
-        output = new PipedOutputStream();
-        input = new PipedInputStream(output);
+    public void open() {
+        input = new PipedInputStream();
         open = true;
     }
 
-    public synchronized void send(Packet packet, int port) throws IOException {
+    public synchronized void connect(PipedOutputStream output) throws IOException {
         if (!open)
             throw new IOException("Socket is down");
-        output.write(packet.toByteArray());
-        listener.dataRetrieved(port);
+        input.connect(output);
     }
 
-    public boolean isPortOpen(int port) {
-        for (int i = 0; i < openPorts.length; i++)
-            if (openPorts[i] == port)
-                return true;
-        return false;
+    public synchronized void disconnect() throws IOException {
+        input.close();
     }
 
     public byte[] read() throws IOException{
         if (!open)
             throw new IOException("Socket is down");
         return input.readAllBytes();
+    }
+
+    public int bytesToRead() throws IOException {
+        return input.available();
     }
 
     public boolean isOpen() {
@@ -52,11 +49,9 @@ public class Socket implements Constants {
             throw new IOException("Socket is already closed");
         open = false;
         input.close();
-        output.close();
     }
 
-    @FunctionalInterface
-    interface DataListener {
-        void dataRetrieved(int port);
+    public int getPort() {
+        return port;
     }
 }
