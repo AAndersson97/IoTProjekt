@@ -2,10 +2,7 @@ package network;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Socket implements Constants {
     private boolean open;
@@ -13,25 +10,31 @@ public class Socket implements Constants {
     private PipedInputStream input;
     private PipedOutputStream output;
     private InetAddress address;
+    private DataListener listener;
 
     public Socket(InetAddress address, int[] openPorts) {
         this.address = address;
         this.openPorts = openPorts;
     }
 
-    public void listen() {
-    }
-
-    public void open() throws IOException{
+    public void open() throws IOException {
         output = new PipedOutputStream();
         input = new PipedInputStream(output);
         open = true;
     }
 
-    public synchronized void send(Packet packet) throws IOException {
+    public synchronized void send(Packet packet, int port) throws IOException {
         if (!open)
             throw new IOException("Socket is down");
         output.write(packet.toByteArray());
+        listener.dataRetrieved(port);
+    }
+
+    public boolean isPortOpen(int port) {
+        for (int i = 0; i < openPorts.length; i++)
+            if (openPorts[i] == port)
+                return true;
+        return false;
     }
 
     public byte[] read() throws IOException{
@@ -50,5 +53,10 @@ public class Socket implements Constants {
         open = false;
         input.close();
         output.close();
+    }
+
+    @FunctionalInterface
+    interface DataListener {
+        void dataRetrieved(int port);
     }
 }

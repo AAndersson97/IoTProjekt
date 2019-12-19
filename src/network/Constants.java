@@ -11,6 +11,8 @@ public interface Constants {
     int IP_PROTOCOL = 4;
     short[] MULTI_CAST = new short[]{224,0,0,5};
     int TIME_OUT = 0;
+    int FTP_PORT = 20;
+    int OSPF_PORT = 89;
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 5;
     int DEAD_INTERVAL = 10;
