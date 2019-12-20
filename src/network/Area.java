@@ -1,11 +1,14 @@
 package network;
 
+import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
+    private ArrayList<Socket> multicastGroup;
     private static HashMap<InetAddress, Router> nodeList;
     /**
      *
@@ -17,6 +20,7 @@ public class Area {
         nodeList = new HashMap<>();
         this.num = num;
         addressGenerator = new AddressGenerator(firstAddress, subnetMask);
+        multicastGroup = new ArrayList<>();
     }
 
     public void addNode(Router router) {
@@ -39,6 +43,19 @@ public class Area {
         if (address == null)
             throw new IllegalArgumentException();
         nodeList.remove(address);
+    }
+
+    public void multicast(Packet packet) {
+        PipedOutputStream out = new PipedOutputStream();
+        multicastGroup.forEach(socket -> {
+            try {
+                if (socket.isOpen()) {
+                    socket.connect(out);
+                    out.write(packet.toByteArray());
+                    socket.disconnect();
+                }
+            } catch (Exception e) {}
+        });
     }
 
     public int getNumOfNodes() {

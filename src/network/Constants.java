@@ -13,6 +13,7 @@ public interface Constants {
     int TIME_OUT = 0;
     int FTP_PORT = 20;
     int OSPF_PORT = 89;
+    int MULTICAST_PORT = 6789;
     int ROUTER_UPDATE_RATE = 1000; // I millisekunder
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 5;
