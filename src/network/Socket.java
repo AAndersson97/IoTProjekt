@@ -2,7 +2,6 @@ package network;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Socket implements Constants {
     private boolean open;

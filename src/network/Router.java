@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class Router extends Thread implements Comparator<Router>, Constants {
+public class Router implements Comparator<Router>, Constants, Runnable {
     private Communication communication;
+    private Thread thread;
     private Socket OSPFSocket;
     private Socket FTPSocket;
     // Routerns adress är dess identifikation (Router Id)
@@ -35,8 +36,7 @@ public class Router extends Thread implements Comparator<Router>, Constants {
         FTPSocket = new Socket(address, FTP_PORT);
         OSPFSocket.open();
         FTPSocket.open();
-        start();
-        
+        thread = new Thread(this);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class Router extends Thread implements Comparator<Router>, Constants {
                 else if (FTPSocket.bytesToRead() > 0)
                     data = FTPSocket.read();
                 System.out.println(data == null ? "No data" : "Length: " + data.length);
-                Thread.sleep(1000);
+                Thread.sleep(ROUTER_UPDATE_RATE);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -95,11 +95,11 @@ public class Router extends Thread implements Comparator<Router>, Constants {
     }
 
     public void turnOff() {
-
+        thread.interrupt();
     }
 
     public boolean isActive() {
-        return true;
+        return thread.isAlive();
     }
 
     public void assignAreaId(int areaId) {
