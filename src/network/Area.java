@@ -9,6 +9,7 @@ public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
     private ArrayList<Socket> multicastGroup;
+    private InetAddress ABR;
     private static HashMap<InetAddress, Router> nodeList;
     /**
      *
@@ -24,8 +25,10 @@ public class Area {
     }
 
     public void addNode(Router router) {
-        if (nodeList.isEmpty() && num != 0)
+        if (nodeList.isEmpty() && num != 0) {
             router.setIsABR(true);
+            ABR = router.getAddress();
+        }
         nodeList.put(router.getAddress(), router);
         router.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();
@@ -45,22 +48,12 @@ public class Area {
         nodeList.remove(address);
     }
 
-    public void multicast(Packet packet) {
-        PipedOutputStream out = new PipedOutputStream();
-        multicastGroup.forEach(socket -> {
-            try {
-                if (socket.isOpen()) {
-                    socket.connect(out);
-                    out.write(packet.toByteArray());
-                    socket.disconnect();
-                }
-            } catch (Exception e) {}
-        });
-    }
-
     public int getNumOfNodes() {
         return nodeList.size();
     }
 
+    public InetAddress getABRAddress() {
+        return ABR;
+    }
 
 }

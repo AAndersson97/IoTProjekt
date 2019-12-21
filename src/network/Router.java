@@ -10,8 +10,6 @@ import java.util.HashMap;
 public class Router implements Comparator<Router>, Constants, Runnable {
     private Communication communication;
     private Thread thread;
-    private Socket OSPFSocket;
-    private Socket FTPSocket;
     // Routerns adress är dess identifikation (Router Id)
     private InetAddress address;
     private LocationCreator.Location location;
@@ -32,28 +30,12 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         communication = new Communication(address);
         areaId = Network.getArea(this);
         System.out.println(address.getHostAddress());
-        OSPFSocket = new Socket(address, OSPF_PORT);
-        FTPSocket = new Socket(address, FTP_PORT);
-        OSPFSocket.open();
-        FTPSocket.open();
         thread = new Thread(this);
     }
 
     @Override
     public void run() {
-        byte[] data = null;
-        while (true) {
-            try {
-                if (OSPFSocket.bytesToRead() > 0)
-                    data = OSPFSocket.read();
-                else if (FTPSocket.bytesToRead() > 0)
-                    data = FTPSocket.read();
-                System.out.println(data == null ? "No data" : "Length: " + data.length);
-                Thread.sleep(ROUTER_UPDATE_RATE);
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+
     }
 
     @Override
@@ -113,5 +95,9 @@ public class Router implements Comparator<Router>, Constants, Runnable {
             System.out.println("Host unknown or wrong format of the host address");
         }
         Address.generated = this.address;
+    }
+
+    public void requestConnection(InetAddress address) {
+
     }
 }
