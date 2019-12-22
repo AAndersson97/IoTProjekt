@@ -1,14 +1,13 @@
 package network;
 
-import java.io.PipedOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
-    private ArrayList<Socket> multicastGroup;
+    private WifiChannel wifiChannel;
     private InetAddress ABR;
     private static HashMap<InetAddress, Router> nodeList;
     /**
@@ -21,7 +20,7 @@ public class Area {
         nodeList = new HashMap<>();
         this.num = num;
         addressGenerator = new AddressGenerator(firstAddress, subnetMask);
-        multicastGroup = new ArrayList<>();
+        wifiChannel = new WifiChannel();
     }
 
     public void addNode(Router router) {
@@ -38,7 +37,7 @@ public class Area {
         return new HashMap<>(nodeList);
     }
 
-    public Router getNode(short[] address) {
+    public Router getNode(InetAddress address) {
         return nodeList.get(address);
     }
 
@@ -54,6 +53,10 @@ public class Area {
 
     public InetAddress getABRAddress() {
         return ABR;
+    }
+
+    public void sendPacket(Packet packet, InetAddress destination) throws IOException {
+        wifiChannel.send(packet, destination);
     }
 
 }

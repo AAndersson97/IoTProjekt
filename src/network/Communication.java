@@ -11,7 +11,6 @@ import java.util.Set;
 
 public class Communication {
     //private static ArrayList<IPPacket> sentPackets;
-    private static PacketListener packetListener;
     private PrintWriter writer;
     private BufferedReader reader;
     private Socket socket;
@@ -39,10 +38,6 @@ public class Communication {
 
     public void sendMessage(Packet packet, short[] source, short[] destination) {
         //Area.getInstance().getNode(destination).receivePacket(packet);
-    }
-
-    public void addPacketListener(PacketListener listener) {
-        packetListener = listener;
     }
 
     public static IPPacket createPackage(String message, short[] source, short[] destination) {

@@ -1,5 +1,7 @@
 package network;
 
+import java.net.InetAddress;
+
 public interface Constants {
     int MAX_NODES = 20;
     int WINDOW_WIDTH = 660;
@@ -9,11 +11,8 @@ public interface Constants {
     int MAX_NUM_OF_AREAS = 6;
     int MAX_ROUTERS_AREA = 50;
     int IP_PROTOCOL = 4;
-    short[] MULTI_CAST = new short[]{224,0,0,5};
+    byte[] MULTI_CAST = new byte[]{(byte) 0b11111111,0,0,5};
     int TIME_OUT = 0;
-    int FTP_PORT = 20;
-    int OSPF_PORT = 89;
-    int MULTICAST_PORT = 6789;
     int ROUTER_UPDATE_RATE = 1000; // I millisekunder
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 5;

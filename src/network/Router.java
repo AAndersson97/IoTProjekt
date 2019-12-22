@@ -2,6 +2,7 @@ package network;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketImpl;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -31,6 +32,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         areaId = Network.getArea(this);
         System.out.println(address.getHostAddress());
         thread = new Thread(this);
+        thread.start();
     }
 
     @Override
@@ -47,18 +49,22 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         return address;
     }
 
-    public void receivePacket(Packet packet) {
+    public void receivePacket(Packet packet, InetAddress destination) {
         if (packet instanceof OSPFPacket) {
         } else if (packet instanceof IPPacket){
             IPPacket ipPacket = (IPPacket) packet;
-            byte[] destination = ipPacket.getIpHeader().destinationAdress;
-            //InetAddress.getByName(ipPacket.getIpHeader().destinationAdress);
-            if (Arrays.compare(destination, address.getAddress()) == 0) {
-                System.out.println("Package has reached its final destination");
-            } else
-                forwardPacket(packet);
+            if (destination.equals(address)) {
+                byte[] dest= ipPacket.getIpHeader().destinationAdress;
+                //InetAddress.getByName(ipPacket.getIpHeader().destinationAdress);
+                if (Arrays.compare(dest, address.getAddress()) == 0) {
+                    System.out.println("Package has reached its final destination");
+                } else
+                    forwardPacket(packet);
+            } else if (Arrays.compare(destination.getAddress(),MULTI_CAST) == 0) {
+
+            }
         }
-        packet.addTravelNode(address);
+        // packet.addTravelNode(address);
 
     }
 
@@ -97,7 +103,5 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         Address.generated = this.address;
     }
 
-    public void requestConnection(InetAddress address) {
 
-    }
 }

@@ -5,10 +5,12 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
 
 public class Network implements Constants {
     private static int numOfNodes;
     private static int numOfAreas;
+    private SynchronousQueue<Packet> packets;
     private static ArrayList<Area> areas;
 
     static {
@@ -62,11 +64,22 @@ public class Network implements Constants {
         return areaId;
     }
 
-    public int connect(int fd, InetAddress source, InetAddress remote,int remotePort) throws IOException {
-        for (Area area : areas) {
-            //if (area.getABRAddress().getHostAddress().contains(source.getHostAddress().substring(0,)))
-        }
-        return 0;
+    /**
+     *
+     * @param source Avsändarens IP-address
+     * @param remote Mottagarens IP-address
+     * @param packet Paketet som ska skickas
+     * @throws IOException Om paketsändningen misslyckades kastas ett IOException
+     */
+    public static synchronized void sendPacket(InetAddress remote, InetAddress source, Packet packet) throws IOException {
+        if (remote == null ||source == null)
+            throw new IllegalArgumentException("Source address neither remote address must not be null");
+        String areaIdentifier = source.getHostAddress().substring(1, 2);
+        int areaNum = Integer.parseInt(areaIdentifier);
+        areaNum -= areaNum == 0 ? 0 : 1;
+        assert areaNum >= 0 && areaNum < areas.size() : ("connect: Area index out of bounds");
+
+        areas.get(areaNum).sendPacket(packet, remote);
     }
 
 }
