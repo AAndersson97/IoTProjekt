@@ -5,15 +5,21 @@ import java.util.Arrays;
 
 public class IPPacket extends Packet {
     private IPHeader ipHeader;
-    private TCPPacket tcpPacket;
+    private TCPPacket TCPPacket;
 
-    public IPPacket(IPHeader ipHeader, TCPPacket tcpPacket) {
+    public IPPacket(IPHeader ipHeader, TCPPacket packet) {
         this.ipHeader = ipHeader;
-        this.tcpPacket = tcpPacket;
+        this.TCPPacket = packet;
+    }
+
+    public IPPacket(IPPacket packet) {
+        ipHeader = new IPHeader(packet.getIpHeader());
+        TCPPacket = new TCPPacket(packet.TCPPacket);
+
     }
 
     public int length() {
-        return (ipHeader.getTotalLength() + tcpPacket.getLength());
+        return (ipHeader.getTotalLength() + TCPPacket.getLength());
     }
 
     public IPHeader getIpHeader() {
@@ -24,21 +30,28 @@ public class IPPacket extends Packet {
         this.ipHeader = ipHeader;
     }
 
-    public TCPPacket getTcpPacket() {
-        return tcpPacket;
+    public TCPPacket getTCPPacket() {
+        return TCPPacket;
     }
 
-    public void setTcpPacket(TCPPacket tcpPacket) {
-        this.tcpPacket = tcpPacket;
+    public void setPacket(TCPPacket packet) {
+        this.TCPPacket = packet;
     }
 
     @Override
     public byte[] toByteArray() {
-        byte[] tcp = tcpPacket.toByteArray();
+        byte[] packetBytes = TCPPacket.toByteArray();
         byte[] ip = ipHeader.toByteArray();
-        byte[] combined = new byte[tcp.length + ip.length];
-        System.arraycopy(tcp,0,combined,0,tcp.length);
-        System.arraycopy(ip,0,combined,tcp.length, ip.length);
+        byte[] combined = new byte[packetBytes.length + ip.length];
+        System.arraycopy(packetBytes,0,combined,0,packetBytes.length);
+        System.arraycopy(ip,0,combined,packetBytes.length, ip.length);
         return combined;
     }
+
+    @Override
+    public Packet copy() {
+        return new IPPacket(this);
+    }
+
+
 }

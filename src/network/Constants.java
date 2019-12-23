@@ -10,6 +10,8 @@ public interface Constants {
     int CIRCLE_RADIUS = 20;
     int MAX_NUM_OF_AREAS = 6;
     int MAX_ROUTERS_AREA = 50;
+    short TCP_PROTOCOL = 6;
+    short OSPF_PROTOCOL = 89;
     int IP_PROTOCOL = 4;
     byte[] MULTI_CAST = new byte[]{(byte) 0b11111111,0,0,5};
     int TIME_OUT = 0;

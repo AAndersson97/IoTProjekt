@@ -2,14 +2,15 @@ package network;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
-public class TCPPacket {
-
+public class TCPPacket extends Packet{
     private TCPHeader header;
     private byte[] data;
 
-    public TCPPacket(TCPHeader header) {
-        this.header = header;
+    public TCPPacket(TCPPacket packet) {
+        this.header = new TCPHeader(packet.header);
+        this.data = Arrays.copyOf(packet.data, packet.data.length);
     }
 
     public TCPPacket(TCPHeader header, byte[] data) {
@@ -49,25 +50,29 @@ public class TCPPacket {
         return data;
     }
 
+    @Override
+    public int length() {
+        return header.length() + data.length;
+    }
+
     public byte[] toByteArray(){
-
         byte[] headerBytes = header.toByteArray() ;
-        ByteArrayOutputStream out = new ByteArrayOutputStream( );
-
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         try{
-            out.write( headerBytes ) ;
-
-            if( this.data != null ){
+            out.write(headerBytes) ;
+            if( this.data != null ) {
                 out.write( data ) ;
             }
-
             return out.toByteArray() ;
-
         }
         catch(IOException ex){
             System.out.println( ex.toString() ) ;
         }
-
         return null ;
+    }
+
+    @Override
+    public Packet copy() {
+        return new TCPPacket(this);
     }
 }

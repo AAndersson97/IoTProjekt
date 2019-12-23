@@ -7,7 +7,6 @@ import java.util.HashMap;
 public class Area {
     private final int num;
     private final AddressGenerator addressGenerator;
-    private WifiChannel wifiChannel;
     private InetAddress ABR;
     private static HashMap<InetAddress, Router> nodeList;
     /**
@@ -20,7 +19,6 @@ public class Area {
         nodeList = new HashMap<>();
         this.num = num;
         addressGenerator = new AddressGenerator(firstAddress, subnetMask);
-        wifiChannel = new WifiChannel();
     }
 
     public void addNode(Router router) {
@@ -53,10 +51,6 @@ public class Area {
 
     public InetAddress getABRAddress() {
         return ABR;
-    }
-
-    public void sendPacket(Packet packet, InetAddress destination) throws IOException {
-        wifiChannel.send(packet, destination);
     }
 
 }

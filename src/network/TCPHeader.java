@@ -4,8 +4,9 @@ import utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
-public class TCPHeader implements Constants {
+public class TCPHeader extends Header implements Constants {
     private static final int HEADER_SIZE = 20;
     private int sourcePort;
     private int destinationPort;
@@ -19,7 +20,29 @@ public class TCPHeader implements Constants {
     private int urgentPointer;
     private byte[] options;
 
-    private TCPHeader() {
+    public TCPHeader(int sourcePort, int destinationPort, long seqNum, long ackNum, int winSize) {
+        this.sourcePort = sourcePort;
+        this.destinationPort = destinationPort;
+        this.sequenceNumber = seqNum;
+        this.ackNum = ackNum;
+        this.windowSize = winSize;
+        this.dataOffset = HEADER_SIZE / 4;
+        this.checksum = Checksum.generateChecksum(toByteArray());
+    }
+
+    public TCPHeader(TCPHeader header) {
+        sourcePort = header.sourcePort;
+        destinationPort = header.destinationPort;
+        sequenceNumber = header.sequenceNumber;
+        dataOffset = header.dataOffset;
+        ackNum = header.ackNum;
+        flags = header.flags;
+        windowSize = header.windowSize;
+        urgentPointer = header.urgentPointer;
+        checksum = header.checksum;
+        if (header.options != null)
+            options = Arrays.copyOf(header.options, header.options.length);
+
     }
 
     public TCPHeader(byte[] baseHeader) {
@@ -27,13 +50,13 @@ public class TCPHeader implements Constants {
             sourcePort = (((baseHeader[0] << 8 ) & 65280 ) | ( baseHeader[1] & 255));
             destinationPort = (((baseHeader[2]<<8)&65280)|(baseHeader[3]&255));
 
-            sequenceNumber = (((baseHeader[4]<<24)&4278190080l)
-                    |((baseHeader[5]<<16)&16711680l)
+            sequenceNumber = (((baseHeader[4]<<24)& 4278190080L)
+                    |((baseHeader[5]<<16)& 16711680L)
                     |((baseHeader[6]<<8)&65280)
                     |(baseHeader[7]&255));
 
-            ackNum = (((baseHeader[8]<<24)&4278190080l)
-                    |((baseHeader[9]<<16)&16711680l)
+            ackNum = (((baseHeader[8]<<24)& 4278190080L)
+                    |((baseHeader[9]<<16)& 16711680L)
                     |((baseHeader[10]<<8)&65280)
                     |(baseHeader[11]&255));
 
@@ -101,42 +124,6 @@ public class TCPHeader implements Constants {
         this.flags = flags;
     }
 
-    public static class TCPHeaderBuilder {
-        private TCPHeader tcpHeader = new TCPHeader();
-        public TCPHeaderBuilder() {
-            tcpHeader.sourcePort = tcpHeader.destinationPort = 0;
-            tcpHeader.flags = 0;
-            tcpHeader.ackNum = 0;
-        }
-
-        public TCPHeaderBuilder sequenceNumber(long seqNum) {
-            tcpHeader.sequenceNumber = seqNum;
-            return this;
-        }
-
-        public TCPHeaderBuilder flags(byte flags) {
-            tcpHeader.flags = flags;
-            return this;
-        }
-
-        public TCPHeaderBuilder windowSize(int winSize) {
-            tcpHeader.windowSize = winSize;
-            return this;
-        }
-
-        public TCPHeaderBuilder ackNum(long ackNum) {
-            tcpHeader.ackNum = ackNum;
-            return this;
-        }
-
-        public TCPHeader build() {
-            tcpHeader.dataOffset = HEADER_SIZE / 4;
-            tcpHeader.urgentPointer = 0;
-            tcpHeader.checksum = Checksum.generateChecksum(tcpHeader.toByteArray());
-            return tcpHeader;
-        }
-    }
-
     public int getSourcePort() {
         return sourcePort;
     }
@@ -194,16 +181,11 @@ public class TCPHeader implements Constants {
     }
 
     public byte[] toByteArray(){
-        ByteArrayOutputStream out = new ByteArrayOutputStream( );
-        try {
-            out.write(getHeader());
-            if (options != null) {
-                out.write(this.options);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return getHeader();
+    }
 
-        return out.toByteArray();
+    @Override
+    public Header copy() {
+        return new TCPHeader(this);
     }
 }

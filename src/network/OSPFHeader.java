@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 public class OSPFHeader extends Header {
     private static final int HEADER_SIZE = 24;
     // Då programmet använder IPv4 används version 2 av OSPF-protokollet
-    private final byte version = (byte) 2;
+    private final byte version = (byte) 0b10;
     private int type;
     private int length;
     private int routerID;
@@ -15,6 +15,14 @@ public class OSPFHeader extends Header {
     private int checkSum;
     private short authentication;
 
+    OSPFHeader(OSPFHeader header) {
+        this.type = header.type;
+        this.length = header.length;
+        this.routerID = header.routerID;
+        this.areaID = header.areaID;
+        this.checkSum = header.checkSum;
+        this.authentication = header.authentication;
+    }
     OSPFHeader(OSPFPacketType type, int dataLength, int areaID, int routerID) {
         this.type = type.value;
         this.length = HEADER_SIZE + dataLength;
@@ -42,4 +50,8 @@ public class OSPFHeader extends Header {
         return out.toByteArray();
     }
 
+    @Override
+    public Header copy() {
+        return new OSPFHeader(this);
+    }
 }

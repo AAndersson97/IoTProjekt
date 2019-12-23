@@ -4,16 +4,16 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 
 public abstract class Packet {
-    private ArrayList<InetAddress> travelNodes;
-
     Packet() {
-        travelNodes = new ArrayList<>();
+
     }
-    public void addTravelNode(InetAddress address) {
-        travelNodes.add(address);
+    // En kopieringskonstruktor
+    Packet(Packet packet) {
     }
 
     public abstract int length();
 
     public abstract byte[] toByteArray();
+
+    public abstract Packet copy();
 }

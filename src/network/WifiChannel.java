@@ -10,9 +10,10 @@ import java.util.ArrayList;
 public class WifiChannel extends Channel {
     public ArrayList<Router> observers;
 
-    public void send(Packet packet, InetAddress destination) throws IOException {
+    public void send(Packet packet) throws IOException {
         Simulator.scheduleTask(() -> {
-            observers.forEach(node -> node.receivePacket(packet, destination));
+            observers.forEach(node -> {
+                node.receivePacket(packet);});
         });
     }
 }

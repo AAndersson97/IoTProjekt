@@ -10,7 +10,7 @@ import java.util.concurrent.SynchronousQueue;
 public class Network implements Constants {
     private static int numOfNodes;
     private static int numOfAreas;
-    private SynchronousQueue<Packet> packets;
+    private static WifiChannel wifiChannel;
     private static ArrayList<Area> areas;
 
     static {
@@ -34,6 +34,7 @@ public class Network implements Constants {
         firstAddress[0] = (short)(numOfAreas == 0? 0 : 100 + ((numOfAreas+1)*10));
         firstAddress[1] = firstAddress[2] = firstAddress[3] = 0;
         areas.add(new Area(numOfAreas++,firstAddress, 24));
+        wifiChannel = new WifiChannel();
     }
 
     private static void createAreas() {
@@ -79,7 +80,7 @@ public class Network implements Constants {
         areaNum -= areaNum == 0 ? 0 : 1;
         assert areaNum >= 0 && areaNum < areas.size() : ("connect: Area index out of bounds");
 
-        areas.get(areaNum).sendPacket(packet, remote);
+        wifiChannel.send(packet);
     }
 
 }

@@ -3,10 +3,10 @@ package network;
 import utilities.Checksum;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 
 public class IPHeader extends Header {
     private static final int HEADER_SIZE = 20;
-    private static final int TCP_PROTOCOL = 6;
     private byte version;
     private byte headerLength;
     private short typeOfService;
@@ -46,19 +46,31 @@ public class IPHeader extends Header {
             throw new RuntimeException("Failed to create a IP Header") ;
         }
     }
+    {
+        version = 4;
+        headerLength = 5;
+        flags = 2;
+        timeToLive = 64;
+    }
+    public IPHeader(IPHeader header) {
+        sourceAdress = Arrays.copyOf(header.sourceAdress, header.sourceAdress.length);
+        destinationAdress = Arrays.copyOf(header.destinationAdress, header.sourceAdress.length);
+        if (header.getOptions() != null)
+            options = Arrays.copyOf(header.options, header.options.length);
+        totalLength = header.getTotalLength();
+        protocol = header.getProtocol();
+        offset = header.offset;
+        id = header.id;
+        checksum = header.checksum;
+    }
 
-    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress) {
-        this.version = 4;
-        this.headerLength = 5;
+    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress, short protocol) {
         this.totalLength = headerLength + length;
-        this.typeOfService = 0;
-        this.id = offset = 0;
-        this.flags = 2;
-        this.timeToLive = 64;
-        this.protocol = TCP_PROTOCOL;
+        this.protocol = protocol;
         //this.checksum = Checksum.generateChecksum();
         this.sourceAdress = sourceAdress;
         this.destinationAdress = destinationAdress;
+        checksum = Checksum.generateChecksum(toByteArray());
     }
 
     public byte[] toByteArray() {
@@ -146,10 +158,19 @@ public class IPHeader extends Header {
         return destinationAdress;
     }
 
+    public int getLength() {
+        return totalLength - headerLength;
+    }
+
     public boolean isFragmentOn() {
         return ((flags&2) == 2);
     }
     public boolean isMoreFragmentsOn() {
         return ((flags&1) == 1);
+    }
+
+    @Override
+    public Header copy() {
+        return new IPHeader(this);
     }
 }

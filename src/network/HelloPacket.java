@@ -1,7 +1,8 @@
 package network;
 
-public class HelloPacket extends OSPFPacket{
-    private OSPFHeader header;
+import java.util.Arrays;
+
+public class HelloPacket extends OSPFPacket {
     private int networkMask;
     private byte priority;
     private short helloInterval;
@@ -11,22 +12,39 @@ public class HelloPacket extends OSPFPacket{
     // Lista med grannars Id som routern nyligen inhämtat Hello-meddelanden
     private int[] neighborIds;
 
-    HelloPacket(OSPFHeader header, int[] neighborIds, int DRId) {
+    HelloPacket(HelloPacket packet) {
+        networkMask = packet.networkMask;
+        priority = packet.priority;
+        helloInterval = packet.helloInterval;
+        deadInterval = packet.deadInterval;
+        designatedRouterId = packet.designatedRouterId;
+        backupDRId = packet.backupDRId;
+        neighborIds = Arrays.copyOf(packet.neighborIds, packet.neighborIds.length);
+    }
+
+    HelloPacket(IPHeader ipHeader, OSPFHeader header, int[] neighborIds, int DRId) {
+        this.ipHeader = ipHeader;
         helloInterval = Constants.HELLO_INTERVAL;
         deadInterval = Constants.DEAD_INTERVAL;
         priority = 1;
         backupDRId = 0;
         designatedRouterId = DRId;
-        this.header = header;
+        this.neighborIds = neighborIds;
+        this.OSPFHeader = header;
     }
     // Paketets alla fält förutom neighborIds och header upptar 20 bytes
     @Override
     public int length() {
-        return header.length() + 20 + neighborIds.length;
+        return OSPFHeader.length() + 20 + neighborIds.length;
     }
 
     @Override
     public byte[] toByteArray() {
-        return super.toByteArray();
+        return null;
+    }
+
+    @Override
+    public OSPFPacket copy() {
+        return new HelloPacket(this);
     }
 }
