@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.*;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -86,6 +87,12 @@ public class SybilSimulator extends Application implements Constants {
         rectangle6.setStroke(Color.BLACK);
         rectangle6.setFill(Color.TRANSPARENT);
         anchorPane.getChildren().addAll(rectangle, rectangle2, rectangle3, rectangle4, rectangle5, rectangle6);
+        Router router = Network.getArea(1).getFirstRouter();
+        try {
+            Network.sendPacket(router.getAddress(),router.getAddress(),HelloPacket.getEmptyPacket(router));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {

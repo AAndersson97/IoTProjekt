@@ -27,8 +27,8 @@ public class Simulator {
 
     public static void shutdown() {
         synchronized (queue) {
-            queue.notifyAll();
             shutdown = true;
+            queue.notifyAll();
         }
     }
 

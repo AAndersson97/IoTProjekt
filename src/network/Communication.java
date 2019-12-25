@@ -41,14 +41,10 @@ public class Communication {
     }
 
     public static IPPacket createPackage(String message, short[] source, short[] destination) {
-        TCPHeader tcpHeader = new TCPHeader.TCPHeaderBuilder()
-                .flags((byte) 0)
-                .sequenceNumber(0)
-                .windowSize(1)
-                .build();
+        TCPHeader tcpHeader = new TCPHeader(0, 0, 0, 0, 0);
         byte[] byteMsg = message.getBytes();
         TCPPacket packet = new TCPPacket(tcpHeader,byteMsg);
-        IPHeader ipHeader = new IPHeader(byteMsg.length,shortToByte(source), shortToByte(destination));
+        IPHeader ipHeader = new IPHeader(byteMsg.length,shortToByte(source), shortToByte(destination), Constants.TCP_PROTOCOL);
         return new IPPacket(ipHeader, packet);
     }
 

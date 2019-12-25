@@ -8,12 +8,21 @@ import java.util.ArrayList;
  * Klassen representerar ett trådlöst nätverkskanal där router på nätverket tar emot paket
  */
 public class WifiChannel extends Channel {
-    public ArrayList<Router> observers;
+    // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
+    private ArrayList<Router> observers;
 
-    public void send(Packet packet) throws IOException {
-        Simulator.scheduleTask(() -> {
-            observers.forEach(node -> {
-                node.receivePacket(packet);});
-        });
+    {
+        observers = new ArrayList<>();
     }
+
+    public void send(Packet packet) {
+        if (observers.isEmpty())
+            throw new NullPointerException("There is no observers on this network");
+        Simulator.scheduleTask(() -> observers.forEach(node -> node.receivePacket(packet)));
+    }
+
+    public void addObserver(Router router) {
+        observers.add(router);
+    }
+
 }

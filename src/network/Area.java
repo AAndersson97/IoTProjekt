@@ -35,6 +35,13 @@ public class Area {
         return new HashMap<>(nodeList);
     }
 
+    // TA BORT
+    public Router getFirstRouter() {
+        for (Router router : nodeList.values())
+            return router;
+        return null;
+    }
+
     public Router getNode(InetAddress address) {
         return nodeList.get(address);
     }

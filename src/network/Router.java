@@ -2,8 +2,11 @@ package network;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayDeque;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Router implements Comparator<Router>, Constants, Runnable {
     private Communication communication;
@@ -12,6 +15,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     private InetAddress address;
     private LocationCreator.Location location;
     private boolean active;
+    private static ArrayDeque<Runnable> queue;
     private int areaId;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
@@ -22,6 +26,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     public Router() {
+        queue = new ArrayDeque<>();
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
@@ -34,6 +39,21 @@ public class Router implements Comparator<Router>, Constants, Runnable {
 
     @Override
     public void run() {
+        while (true) {
+            synchronized (queue) {
+                while (queue.isEmpty() && active) {
+                    try {
+                        queue.wait();
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+                if (!active)
+                    break;
+                else
+                    queue.removeFirst().run();
+            }
+        }
 
     }
 
@@ -47,11 +67,32 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     public void receivePacket(Packet packet) {
+        if (Thread.currentThread().equals(thread)) {
+            queue.addLast(() -> receivePacket(packet));
+            System.out.println("Here");
+            return;
+        }
+        System.out.println("Here2");
+        /*
         if (packet instanceof OSPFPacket) {
+            handleOSPFPacket((OSPFPacket) packet);
         } else if (packet instanceof IPPacket){
 
-        }
+        }*/
+    }
 
+
+
+    private void handleOSPFPacket(OSPFPacket packet) {
+        // Om paketets AreaId ej överenstämmer med routerns areaid ska packetet ej bearbetas
+        if (packet.OSPFHeader.getAreaID() == areaId){
+            /*switch (packet.OSPFHeader.getType()){
+                case OSPFPacketType.Hello.getValue():
+                    break;
+
+            }*/
+            System.out.println("Package arrived");
+        }
     }
 
     private void forwardPacket(Packet packet) {
@@ -74,6 +115,10 @@ public class Router implements Comparator<Router>, Constants, Runnable {
 
     public boolean isActive() {
         return thread.isAlive();
+    }
+
+    public int getAreaId() {
+        return areaId;
     }
 
     public void assignAreaId(int areaId) {

@@ -16,6 +16,7 @@ public class Network implements Constants {
     static {
         numOfAreas = numOfNodes = 0;
         areas = new ArrayList<>();
+        wifiChannel = new WifiChannel();
         createAreas();
     }
     private Network() {
@@ -34,7 +35,6 @@ public class Network implements Constants {
         firstAddress[0] = (short)(numOfAreas == 0? 0 : 100 + ((numOfAreas+1)*10));
         firstAddress[1] = firstAddress[2] = firstAddress[3] = 0;
         areas.add(new Area(numOfAreas++,firstAddress, 24));
-        wifiChannel = new WifiChannel();
     }
 
     private static void createAreas() {
@@ -62,7 +62,14 @@ public class Network implements Constants {
         else if (x >= (2*WINDOW_WIDTH)/3 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
             areaId = 5;
         areas.get(areaId).addNode(router);
+        wifiChannel.addObserver(router);
         return areaId;
+    }
+
+    public static Area getArea(int id) {
+        if (id < 0 || id >= areas.size())
+            throw new IllegalArgumentException("Area id is out of bounds, min: 0 max: " + (areas.size()-1));
+        return areas.get(id);
     }
 
     /**
@@ -75,11 +82,6 @@ public class Network implements Constants {
     public static synchronized void sendPacket(InetAddress remote, InetAddress source, Packet packet) throws IOException {
         if (remote == null ||source == null)
             throw new IllegalArgumentException("Source address neither remote address must not be null");
-        String areaIdentifier = source.getHostAddress().substring(1, 2);
-        int areaNum = Integer.parseInt(areaIdentifier);
-        areaNum -= areaNum == 0 ? 0 : 1;
-        assert areaNum >= 0 && areaNum < areas.size() : ("connect: Area index out of bounds");
-
         wifiChannel.send(packet);
     }
 
