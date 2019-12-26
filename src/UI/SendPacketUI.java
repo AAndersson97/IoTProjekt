@@ -25,11 +25,12 @@ public class SendPacketUI {
 
     private ObservableList<Router> destAddresses;
 
+
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
         destAddresses = FXCollections.observableArrayList();
-        //fillChoiceBoxes();
+        fillChoiceBoxes();
         stage.show();
     }
 
@@ -40,6 +41,5 @@ public class SendPacketUI {
     private void fillChoiceBoxes() {
         ArrayList<Router> routerList = Network.getNodeList();
         destAddresses.addAll(routerList);
-        destAddress.setItems(FXCollections.observableArrayList(routerList));
     }
 }

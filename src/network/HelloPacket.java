@@ -1,5 +1,6 @@
 package network;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 
 public class HelloPacket extends OSPFPacket {
@@ -10,7 +11,7 @@ public class HelloPacket extends OSPFPacket {
     private int designatedRouterId;
     private int backupDRId;
     // Lista med grannars Id som routern nyligen inhämtat Hello-meddelanden
-    private int[] neighborIds;
+    private InetAddress[] neighborIds;
 
     HelloPacket(HelloPacket packet) {
         networkMask = packet.networkMask;
@@ -22,7 +23,7 @@ public class HelloPacket extends OSPFPacket {
         neighborIds = Arrays.copyOf(packet.neighborIds, packet.neighborIds.length);
     }
 
-    public HelloPacket(IPHeader ipHeader, OSPFHeader header, int[] neighborIds, int DRId) {
+    public HelloPacket(IPHeader ipHeader, OSPFHeader header, InetAddress[] neighborIds, int DRId) {
         this.ipHeader = ipHeader;
         helloInterval = Constants.HELLO_INTERVAL;
         deadInterval = Constants.DEAD_INTERVAL;

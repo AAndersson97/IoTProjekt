@@ -2,8 +2,6 @@ package network;
 
 import utilities.Checksum;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class TCPHeader extends Header implements Constants {

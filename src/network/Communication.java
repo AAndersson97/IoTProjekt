@@ -2,12 +2,8 @@ package network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Set;
-
 
 public class Communication {
     //private static ArrayList<IPPacket> sentPackets;
@@ -44,7 +40,12 @@ public class Communication {
         TCPHeader tcpHeader = new TCPHeader(0, 0, 0, 0, 0);
         byte[] byteMsg = message.getBytes();
         TCPPacket packet = new TCPPacket(tcpHeader,byteMsg);
-        IPHeader ipHeader = new IPHeader(byteMsg.length,shortToByte(source), shortToByte(destination), Constants.TCP_PROTOCOL);
+        IPHeader ipHeader = null;
+        try {
+            ipHeader = new IPHeader(byteMsg.length,shortToByte(source), shortToByte(destination), Constants.TCP_PROTOCOL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return new IPPacket(ipHeader, packet);
     }
 

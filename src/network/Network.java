@@ -80,9 +80,15 @@ public class Network implements Constants {
      * @param packet Paketet som ska skickas
      * @throws IOException Om paketsändningen misslyckades kastas ett IOException
      */
-    public static synchronized void sendPacket(InetAddress remote, InetAddress source, Packet packet) throws IOException {
+    public static void sendPacket(InetAddress remote, InetAddress source, Packet packet) {
         if (remote == null ||source == null)
             throw new IllegalArgumentException("Source address neither remote address must not be null");
+        wifiChannel.send(packet, source);
+    }
+
+    public static synchronized void sendMulticast(InetAddress source, Packet packet) {
+        if (source == null)
+            throw new IllegalArgumentException("Source address must not be null");
         wifiChannel.send(packet, source);
     }
 

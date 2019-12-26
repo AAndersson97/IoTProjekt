@@ -66,12 +66,8 @@ public class Debug implements Constants {
         Router router = Network.getArea(1).getFirstRouter();
         if (router == null)
             return;
-        try {
-            Network.sendPacket(router.getAddress(),router.getAddress(), getEmptyPacket(router));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+        Network.sendPacket(router.getAddress(),router.getAddress(), getEmptyPacket(router));
+}
 
     private static HelloPacket getEmptyPacket(Router router) {
         try {

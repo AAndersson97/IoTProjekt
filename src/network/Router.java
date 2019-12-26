@@ -1,5 +1,7 @@
 package network;
 
+import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -96,7 +98,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
                     break;
 
             }*/
-            System.out.println("Package arrived");
+            System.out.println("Packet arrived");
         }
     }
 
@@ -106,8 +108,17 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     private void sendHelloPackets() {
-
-        HelloPacket helloPacket = new HelloPacket();
+        InetAddress[] neigbors = new InetAddress[0];
+        OSPFHeader header = null;
+        IPHeader ipHeader = null;
+        try {
+            header = new OSPFHeader(OSPFPacketType.Hello, 0, areaId, address);
+            ipHeader = new IPHeader(0, address.getAddress(), MULTI_CAST, OSPF_PROTOCOL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        HelloPacket helloPacket = new HelloPacket(ipHeader, header, neigbors, 0);
+        Network.sendMulticast(address, helloPacket);
     }
 
     public void setIsABR(boolean isABR) {

@@ -2,7 +2,8 @@ package network;
 
 import utilities.Checksum;
 
-import java.net.InetAddress;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class IPHeader extends Header {
@@ -64,7 +65,7 @@ public class IPHeader extends Header {
         checksum = header.checksum;
     }
 
-    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress, short protocol) {
+    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress, short protocol) throws IOException {
         this.totalLength = headerLength + length;
         this.protocol = protocol;
         //this.checksum = Checksum.generateChecksum();
@@ -73,8 +74,25 @@ public class IPHeader extends Header {
         checksum = Checksum.generateChecksum(toByteArray());
     }
 
-    public byte[] toByteArray() {
-        return null;
+    public byte[] toByteArray() throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(version);
+        out.write(headerLength);
+        out.write(typeOfService);
+        out.write(id);
+        out.write(totalLength);
+        out.write(id);
+        out.write(flags);
+        out.write(offset);
+        out.write(timeToLive);
+        out.write(protocol);
+        out.write(checksum);
+        out.write(sourceAdress);
+        out.write(destinationAdress);
+        if (options != null)
+            out.write(options);
+
+        return out.toByteArray();
     }
 
     public byte[] getHeader() {
