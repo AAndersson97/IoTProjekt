@@ -15,7 +15,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     private InetAddress address;
     private LocationCreator.Location location;
     private boolean active;
-    private static ArrayDeque<Runnable> queue;
+    private final static ArrayDeque<Runnable> queue;
     private int areaId;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
@@ -25,14 +25,17 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         return location;
     }
 
-    public Router() {
+    static {
         queue = new ArrayDeque<>();
+    }
+
+    public Router() { ;
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
         communication = new Communication(address);
         areaId = Network.getArea(this);
-        System.out.println(address.getHostAddress());
+        //System.out.println(address.getHostAddress());
         thread = new Thread(this);
         thread.start();
     }
@@ -48,13 +51,14 @@ public class Router implements Comparator<Router>, Constants, Runnable {
                         System.out.println(e.getMessage());
                     }
                 }
-                if (!active)
+                if (!active) {
+                    System.out.println("Thread: " + thread.getId() + " is shutdown");
                     break;
+                }
                 else
                     queue.removeFirst().run();
             }
         }
-
     }
 
     @Override
@@ -67,18 +71,20 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     public void receivePacket(Packet packet) {
-        if (Thread.currentThread().equals(thread)) {
-            queue.addLast(() -> receivePacket(packet));
-            System.out.println("Here");
-            return;
+        synchronized (queue) {
+            queue.addLast(() -> handlePacket(packet));
+            queue.notifyAll();
         }
+        System.out.println("Here");
+    }
+
+    private void handlePacket(Packet packet) {
         System.out.println("Here2");
-        /*
         if (packet instanceof OSPFPacket) {
             handleOSPFPacket((OSPFPacket) packet);
         } else if (packet instanceof IPPacket){
 
-        }*/
+        }
     }
 
 
@@ -110,7 +116,11 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     public void turnOff() {
-        thread.interrupt();
+        active = false;
+        System.out.println("Turn off");
+        synchronized (queue) {
+            queue.notifyAll();
+        }
     }
 
     public boolean isActive() {

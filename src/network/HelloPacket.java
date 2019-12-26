@@ -16,9 +16,6 @@ public class HelloPacket extends OSPFPacket {
     // Lista med grannars Id som routern nyligen inhämtat Hello-meddelanden
     private int[] neighborIds;
 
-
-    //public final static HelloPacket EMPTY = new HelloPacket(null, );//Ta bort när programmet är färdig
-
     HelloPacket(HelloPacket packet) {
         networkMask = packet.networkMask;
         priority = packet.priority;
@@ -29,21 +26,7 @@ public class HelloPacket extends OSPFPacket {
         neighborIds = Arrays.copyOf(packet.neighborIds, packet.neighborIds.length);
     }
 
-    /**
-     * Ta bort innan programmet färdigställs!
-     */
-    public static HelloPacket getEmptyPacket(Router router) {
-        try {
-            network.OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, router.getAreaId(), router.getAddress());
-            return new HelloPacket(null, ospfHeader, null, 0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    HelloPacket(IPHeader ipHeader, OSPFHeader header, int[] neighborIds, int DRId) {
+    public HelloPacket(IPHeader ipHeader, OSPFHeader header, int[] neighborIds, int DRId) {
         this.ipHeader = ipHeader;
         helloInterval = Constants.HELLO_INTERVAL;
         deadInterval = Constants.DEAD_INTERVAL;

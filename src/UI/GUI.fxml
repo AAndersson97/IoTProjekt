@@ -1,34 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
-   <HBox layoutY="364.0" prefHeight="36.0" prefWidth="600.0">
-      <children>
-      
-          <Button fx:id="createNode" onAction="#onCreateNode" prefHeight="27.0" prefWidth="96.0" text="Create Node">
-            <HBox.margin>
-               <Insets left="5.0" top="5.0" />
-            </HBox.margin>
-         </Button>
-         <Button fx:id="createAttackNode" layoutX="15.0" layoutY="15.0" onAction="#onCreateAttackNode" prefHeight="27.0" prefWidth="142.0" text="Create Attack Node" textFill="#e50505">
-            <HBox.margin>
-               <Insets left="10.0" top="5.0" />
-            </HBox.margin>
-         </Button>
-         <Button fx:id="simPacketsButton" layoutX="15.0" layoutY="15.0" onAction="#onSimPackets" prefHeight="27.0" prefWidth="115.0" text="Simulate Packets">
-            <HBox.margin>
-               <Insets left="40.0" top="5.0" />
-            </HBox.margin>
-         </Button>
-         <Button fx:id="sybilAttack" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" text="Start Sybil Attack" textFill="#c20202">
-            <HBox.margin>
-               <Insets left="40.0" top="5.0" />
-            </HBox.margin>
-         </Button>
-      </children>
-   </HBox>
+<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="660.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
+   <children>
+      <HBox layoutY="364.0" prefHeight="36.0" prefWidth="660.0" AnchorPane.bottomAnchor="0.0">
+         <children>
+         
+                   <Button fx:id="createNode" onAction="#onCreateNode" stylesheets="@Style.css" text="Create Node">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" />
+               </HBox.margin>
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="simPacketsButton" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSimPackets" prefHeight="27.0" prefWidth="115.0" stylesheets="@Style.css" text="Send packet">
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="130.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="sybilAttack" alignment="CENTER" contentDisplay="RIGHT" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" stylesheets="@Style.css" text="Start Sybil Attack" textFill="#c20202">
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="130.0" right="10.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+   </children>
 
 </AnchorPane>

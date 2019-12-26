@@ -25,4 +25,8 @@ public class WifiChannel extends Channel {
         observers.add(router);
     }
 
+    public ArrayList<Router> getObservers() {
+        return observers;
+    }
+
 }

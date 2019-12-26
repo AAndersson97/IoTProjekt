@@ -25,7 +25,7 @@ public class OSPFHeader extends Header {
         this.checkSum = header.checkSum;
         this.authentication = header.authentication;
     }
-    OSPFHeader(OSPFPacketType type, int dataLength, int areaID, InetAddress routerID) throws IOException {
+    public OSPFHeader(OSPFPacketType type, int dataLength, int areaID, InetAddress routerID) throws IOException {
         this.type = type.getValue();
         this.length = HEADER_SIZE + dataLength;
         this.routerID = routerID;

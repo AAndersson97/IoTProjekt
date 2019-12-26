@@ -85,4 +85,10 @@ public class Network implements Constants {
         wifiChannel.send(packet);
     }
 
+    public static void shutdownNetwork() {
+        for (Router router : wifiChannel.getObservers()) {
+            router.turnOff();
+        }
+    }
+
 }
