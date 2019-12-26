@@ -19,7 +19,7 @@
                   <Font name="Cambria" size="14.0" />
                </font>
             </Button>
-            <Button fx:id="simPacketsButton" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSimPackets" prefHeight="27.0" prefWidth="115.0" stylesheets="@Style.css" text="Send packet">
+            <Button fx:id="sendPacketBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSendPacket" prefHeight="27.0" prefWidth="115.0" stylesheets="@Style.css" text="Send packet">
                <font>
                   <Font name="Cambria" size="14.0" />
                </font>

@@ -3,6 +3,7 @@ package network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -82,13 +83,17 @@ public class Network implements Constants {
     public static synchronized void sendPacket(InetAddress remote, InetAddress source, Packet packet) throws IOException {
         if (remote == null ||source == null)
             throw new IllegalArgumentException("Source address neither remote address must not be null");
-        wifiChannel.send(packet);
+        wifiChannel.send(packet, source);
     }
 
     public static void shutdownNetwork() {
         for (Router router : wifiChannel.getObservers()) {
             router.turnOff();
         }
+    }
+
+    public static ArrayList<Router> getNodeList() {
+        return wifiChannel.getObservers();
     }
 
 }

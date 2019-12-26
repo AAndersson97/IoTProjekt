@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,26 +12,20 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import network.*;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.Socket;
-
 public class SybilSimulator extends Application implements Constants {
     @FXML
-    public AnchorPane anchorPane;
+    AnchorPane anchorPane;
     @FXML
-    Button simPacketsButton;
+    Button sendPacketBtn;
     @FXML
     Button createNode;
     @FXML
-    Button createAttackNode;
-    @FXML
     Button sybilAttack;
+
+    static SybilSimulator instance;
 
     public static void main(String[] args){
         launch(args);
@@ -40,18 +33,19 @@ public class SybilSimulator extends Application implements Constants {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("GUI.fxml"));
-        stage.setTitle("Sybil Simulator");
+        Parent root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
+        stage.setTitle(Constants.WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
+        Debug.registerKeyEvents(stage.getScene(), instance);
+        instance = null;
         stage.show();
-
-        /*Communication.getInstance().addPacketListener((packet) -> {
-            System.out.println("Packet Added!");
-        });*/
-
     }
 
-    public void onCreateNode(ActionEvent actionEvent) {
+    public SybilSimulator() {
+        instance = this;
+    }
+
+    public void onCreateNode() {
         Circle displayedNode = create();
         Router createdRouter = new Router();
         anchorPane.getChildren().add(displayedNode);
@@ -77,7 +71,6 @@ public class SybilSimulator extends Application implements Constants {
         Router createdARouter = new Router();
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdARouter.getLocation().getX(), createdARouter.getLocation().getY());
-        createAttackNode.setDisable(Network.getNumOfNodes() >= MAX_NODES);
         Label nodeLabel = new Label(createdARouter.getAddress().getHostAddress());
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdARouter.getLocation().getX()-15, createdARouter.getLocation().getY()+20);
@@ -94,17 +87,12 @@ public class SybilSimulator extends Application implements Constants {
         return circle;
     }
 
-    public Rectangle createRectangle(){
-        Rectangle rectangle = new Rectangle();
-        rectangle.setFill(Color.INDIANRED);
-        rectangle.setHeight(20);
-        rectangle.setWidth(20);
-        rectangle.setStroke(Color.BLACK);
-        return rectangle;
-    }
-
-    public void onSimPackets(ActionEvent actionEvent) {
-
+    public void onSendPacket() {
+        try {
+            new SendPacketUI().showUI();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override

@@ -1,11 +1,9 @@
 package UI;
 
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import network.*;
 
 import java.io.IOException;
@@ -18,13 +16,14 @@ public class Debug implements Constants {
     private static Rectangle[] rectangles;
     private static boolean areaActive = false;
     private static Pane pane;
-    public static void registerKeyEvents(Scene scene, Pane root) {
+    public static void registerKeyEvents(Scene scene, SybilSimulator sybilSimulator) {
         createRectangles();
-        pane = root;
+        pane = sybilSimulator.anchorPane;
         scene.setOnKeyPressed((key) -> {
             switch (key.getCode()) {
                 case A:
                     displayAreas();
+                    areaActive ^= true;
                     break;
                 case S:
                     sendPacket();
@@ -65,6 +64,8 @@ public class Debug implements Constants {
 
     private static void sendPacket() {
         Router router = Network.getArea(1).getFirstRouter();
+        if (router == null)
+            return;
         try {
             Network.sendPacket(router.getAddress(),router.getAddress(), getEmptyPacket(router));
         } catch (IOException e) {

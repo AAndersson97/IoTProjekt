@@ -15,10 +15,13 @@ public class WifiChannel extends Channel {
         observers = new ArrayList<>();
     }
 
-    public void send(Packet packet) {
+    public void send(Packet packet, InetAddress address) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
-        Simulator.scheduleTask(() -> observers.forEach(node -> node.receivePacket(packet)));
+        Simulator.scheduleTask(() -> observers.forEach(node -> {
+                if (!address.equals(node.getAddress()))
+                    node.receivePacket(packet);
+        }));
     }
 
     public void addObserver(Router router) {

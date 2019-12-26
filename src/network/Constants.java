@@ -10,6 +10,7 @@ public interface Constants {
     int CIRCLE_RADIUS = 20;
     int MAX_NUM_OF_AREAS = 6;
     int MAX_ROUTERS_AREA = 50;
+    String WINDOW_TITLE = "Sybil Simulator";
     short TCP_PROTOCOL = 6;
     short OSPF_PROTOCOL = 89;
     int IP_PROTOCOL = 4;

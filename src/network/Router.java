@@ -52,7 +52,6 @@ public class Router implements Comparator<Router>, Constants, Runnable {
                     }
                 }
                 if (!active) {
-                    System.out.println("Thread: " + thread.getId() + " is shutdown");
                     break;
                 }
                 else
@@ -75,11 +74,9 @@ public class Router implements Comparator<Router>, Constants, Runnable {
             queue.addLast(() -> handlePacket(packet));
             queue.notifyAll();
         }
-        System.out.println("Here");
     }
 
     private void handlePacket(Packet packet) {
-        System.out.println("Here2");
         if (packet instanceof OSPFPacket) {
             handleOSPFPacket((OSPFPacket) packet);
         } else if (packet instanceof IPPacket){
@@ -117,7 +114,6 @@ public class Router implements Comparator<Router>, Constants, Runnable {
 
     public void turnOff() {
         active = false;
-        System.out.println("Turn off");
         synchronized (queue) {
             queue.notifyAll();
         }

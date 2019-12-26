@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="320.0" prefWidth="200.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SendPacketUI">
+   <children>
+      <Label layoutX="51.0" layoutY="14.0" text="Source address">
+         <font>
+            <Font name="Arial" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="39.0" layoutY="72.0" text="Destination address">
+         <font>
+            <Font name="Arial" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="42.0" layoutY="140.0" text="Message (optional)">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <ChoiceBox fx:id="sourceAddress" layoutX="25.0" layoutY="36.0" prefWidth="150.0" />
+      <TextField fx:id="msgBox" layoutX="27.0" layoutY="168.0" prefHeight="74.0" prefWidth="149.0" />
+      <Button fx:id="sendButton" layoutX="73.0" layoutY="262.0" mnemonicParsing="false" text="Send" />
+      <ChoiceBox fx:id="destAddress" layoutX="25.0" layoutY="98.0" prefWidth="150.0" />
+   </children>
+</AnchorPane>
