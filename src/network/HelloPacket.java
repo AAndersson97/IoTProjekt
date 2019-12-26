@@ -1,9 +1,5 @@
 package network;
 
-import javafx.scene.Node;
-
-import java.io.IOException;
-import java.net.InetAddress;
 import java.util.Arrays;
 
 public class HelloPacket extends OSPFPacket {

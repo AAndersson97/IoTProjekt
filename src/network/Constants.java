@@ -18,7 +18,7 @@ public interface Constants {
     int TIME_OUT = 0;
     int ROUTER_UPDATE_RATE = 1000; // I millisekunder
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
-    int HELLO_INTERVAL = 5;
+    int HELLO_INTERVAL = 10000; // 10 sekunder, 10 000 millisekunder
     int DEAD_INTERVAL = 10;
     int MAX_XCOORDINATE = WINDOW_WIDTH - 100;
     int MAX_YCOORDINATE = WINDOW_HEIGHT - 100;

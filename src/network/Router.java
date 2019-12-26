@@ -2,9 +2,7 @@ package network;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayDeque;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -29,7 +27,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         queue = new ArrayDeque<>();
     }
 
-    public Router() { ;
+    public Router() {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
@@ -42,6 +40,12 @@ public class Router implements Comparator<Router>, Constants, Runnable {
 
     @Override
     public void run() {
+        Simulator.scheduleTaskPeriodically(new TimerTask() {
+            @Override
+            public void run() {
+                sendHelloPackets();
+            }
+        }, 0, HELLO_INTERVAL);
         while (true) {
             synchronized (queue) {
                 while (queue.isEmpty() && active) {
@@ -84,8 +88,6 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         }
     }
 
-
-
     private void handleOSPFPacket(OSPFPacket packet) {
         // Om paketets AreaId ej överenstämmer med routerns areaid ska packetet ej bearbetas
         if (packet.OSPFHeader.getAreaID() == areaId){
@@ -104,8 +106,8 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     private void sendHelloPackets() {
-        Runnable runnable = () -> {
-        };
+
+        HelloPacket helloPacket = new HelloPacket();
     }
 
     public void setIsABR(boolean isABR) {
