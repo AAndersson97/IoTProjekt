@@ -68,7 +68,6 @@ public class IPHeader extends Header {
     public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress, short protocol) throws IOException {
         this.totalLength = headerLength + length;
         this.protocol = protocol;
-        //this.checksum = Checksum.generateChecksum();
         this.sourceAdress = sourceAdress;
         this.destinationAdress = destinationAdress;
         checksum = Checksum.generateChecksum(toByteArray());

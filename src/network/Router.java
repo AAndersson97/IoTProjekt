@@ -98,7 +98,6 @@ public class Router implements Comparator<Router>, Constants, Runnable {
                     break;
 
             }*/
-            System.out.println("Packet arrived");
         }
     }
 

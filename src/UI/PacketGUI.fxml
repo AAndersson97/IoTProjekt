@@ -24,9 +24,9 @@
             <Font size="14.0" />
          </font>
       </Label>
-      <ChoiceBox fx:id="sourceAddress" layoutX="25.0" layoutY="36.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="sourceAddress" layoutX="25.0" layoutY="36.0" prefWidth="150.0" onMouseClicked="#fillSrcAddresses"/>
       <TextField fx:id="msgBox" layoutX="27.0" layoutY="168.0" prefHeight="74.0" prefWidth="149.0" />
-      <Button fx:id="sendButton" layoutX="73.0" layoutY="262.0" mnemonicParsing="false" text="Send" />
-      <ChoiceBox fx:id="destAddress" layoutX="25.0" layoutY="98.0" prefWidth="150.0" />
+      <Button fx:id="sendButton" layoutX="73.0" layoutY="262.0" mnemonicParsing="false" text="Send" onAction="#onSendPacket" />
+      <ChoiceBox fx:id="destAddress" layoutX="25.0" layoutY="98.0" prefWidth="150.0" onMouseClicked="#fillDestAddresses"/>
    </children>
 </AnchorPane>

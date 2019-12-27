@@ -20,6 +20,7 @@ public interface Constants {
     // Skicka ett Hello-paket varje 5 tidsenheter (sekunder)
     int HELLO_INTERVAL = 10000; // 10 sekunder, 10 000 millisekunder
     int DEAD_INTERVAL = 10;
+    int DEFAULT_WIN_SIZE = 65535; // antalet bytes, win size talar om för avsändaren hur mycket data kan skickas per gång
     int MAX_XCOORDINATE = WINDOW_WIDTH - 100;
     int MAX_YCOORDINATE = WINDOW_HEIGHT - 100;
 }
