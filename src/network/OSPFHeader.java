@@ -12,7 +12,7 @@ public class OSPFHeader extends Header {
     private final byte version = (byte) 0b10;
     private int type;
     private int length;
-    private InetAddress routerID;
+    private short[] routerID;
     private int areaID;
     private int checkSum;
     private short authentication;
@@ -25,7 +25,7 @@ public class OSPFHeader extends Header {
         this.checkSum = header.checkSum;
         this.authentication = header.authentication;
     }
-    public OSPFHeader(OSPFPacketType type, int dataLength, int areaID, InetAddress routerID) throws IOException {
+    public OSPFHeader(OSPFPacketType type, int dataLength, int areaID, short[] routerID) throws IOException {
         this.type = type.getValue();
         this.length = HEADER_SIZE + dataLength;
         this.routerID = routerID;
@@ -40,7 +40,7 @@ public class OSPFHeader extends Header {
         return length;
     }
 
-    public InetAddress getRouterID() {
+    public short[] getRouterID() {
         return routerID;
     }
 
@@ -56,7 +56,8 @@ public class OSPFHeader extends Header {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(version);
         out.write(type);
-        out.write(routerID.getAddress());
+        for (short num : routerID)
+            out.write(num);
         out.write(areaID);
         out.write(length);
         out.write(authentication);

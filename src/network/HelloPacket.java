@@ -1,6 +1,6 @@
 package network;
 
-import java.net.InetAddress;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 public class HelloPacket extends OSPFPacket {
@@ -11,7 +11,7 @@ public class HelloPacket extends OSPFPacket {
     private int designatedRouterId;
     private int backupDRId;
     // Lista med grannars Id som routern nyligen inhämtat Hello-meddelanden
-    private InetAddress[] neighborIds;
+    private short[][] neighborIds;
 
     HelloPacket(HelloPacket packet) {
         networkMask = packet.networkMask;
@@ -23,7 +23,7 @@ public class HelloPacket extends OSPFPacket {
         neighborIds = Arrays.copyOf(packet.neighborIds, packet.neighborIds.length);
     }
 
-    public HelloPacket(IPHeader ipHeader, OSPFHeader header, InetAddress[] neighborIds, int DRId) {
+    public HelloPacket(IPHeader ipHeader, OSPFHeader header, short[][] neighborIds, int DRId) {
         this.ipHeader = ipHeader;
         helloInterval = Constants.HELLO_INTERVAL;
         deadInterval = Constants.DEAD_INTERVAL;
@@ -34,17 +34,24 @@ public class HelloPacket extends OSPFPacket {
         this.OSPFHeader = header;
     }
     // Paketets alla fält förutom neighborIds och header upptar 20 bytes
-    @Override
-    public int length() {
-        return OSPFHeader.length() + 20 + neighborIds.length;
+    public static int length(HelloPacket packet) {
+        return packet.OSPFHeader.length() + 20 + (packet.neighborIds.length * packet.neighborIds[0].length);
     }
 
-    @Override
     public byte[] toByteArray() {
-        return null;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(networkMask);
+        out.write(priority);
+        out.write(helloInterval);
+        out.write(deadInterval);
+        out.write(designatedRouterId);
+        out.write(backupDRId);
+        for (short[] address : neighborIds)
+            for (short num : address)
+                out.write(num);
+        return out.toByteArray();
     }
 
-    @Override
     public OSPFPacket copy() {
         return new HelloPacket(this);
     }

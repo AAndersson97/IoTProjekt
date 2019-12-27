@@ -69,24 +69,21 @@ public class SendPacketUI implements Constants {
         int msgLength = msg.length();
         String[] srcAddress = sourceAddress.getSelectionModel().getSelectedItem().split(".");
         String[] destination = destAddress.getSelectionModel().getSelectedItem().split(".");
-        byte[] srcBytes = stringsToBytes(srcAddress);
         IPHeader ipHeader = null;
         TCPHeader tcpHeader = null;
-        try {
-            ipHeader = new IPHeader(msgLength, srcBytes,
-                    stringsToBytes(destination), TCP_PROTOCOL);
-            tcpHeader = new TCPHeader(0,0,0,0, DEFAULT_WIN_SIZE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        //ipHeader = new IPHeader(msgLength, ,
+        //        stringsToBytes(destination), TCP_PROTOCOL);
+        tcpHeader = new TCPHeader(0,0,0,0, DEFAULT_WIN_SIZE);
+
         TCPPacket packet = new TCPPacket(tcpHeader, msg.getBytes());
-        //Network.sendPacket(InetAddress.getByAddress(srcBytes),,packet);
+
     }
 
     private ObservableList<String> createAddressCollection(List<Router> routerList) {
         ObservableList<String> addresses = FXCollections.observableArrayList();
         for (Router router : routerList)
-            addresses.add(router.getAddress().getHostAddress());
+            addresses.add(router.getAddress().toString());
         return addresses;
     }
 

@@ -1,25 +1,19 @@
 package network;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Router implements Comparator<Router>, Constants, Runnable {
-    private Communication communication;
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
-    private InetAddress address;
+    private short[] address;
     private LocationCreator.Location location;
     private boolean active;
     private final static ArrayDeque<Runnable> queue;
     private int areaId;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
-    private HashMap<Short[], Router> routingTable;
+    private HashMap<short[], Router> routingTable;
 
     public LocationCreator.Location getLocation() {
         return location;
@@ -33,7 +27,6 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
-        communication = new Communication(address);
         areaId = Network.getArea(this);
         //System.out.println(address.getHostAddress());
         thread = new Thread(this);
@@ -71,7 +64,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 
-    public InetAddress getAddress() {
+    public short[] getAddress() {
         return address;
     }
 
@@ -107,12 +100,12 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     }
 
     private void sendHelloPackets() {
-        InetAddress[] neigbors = new InetAddress[0];
+        short[][] neigbors = new short[0][0];
         OSPFHeader header = null;
         IPHeader ipHeader = null;
         try {
             header = new OSPFHeader(OSPFPacketType.Hello, 0, areaId, address);
-            ipHeader = new IPHeader(0, address.getAddress(), MULTI_CAST, OSPF_PROTOCOL);
+            ipHeader = new IPHeader(0, address, MULTI_CAST, OSPF_PROTOCOL);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -142,15 +135,5 @@ public class Router implements Comparator<Router>, Constants, Runnable {
     public void assignAreaId(int areaId) {
         this.areaId = areaId;
     }
-
-    public void setAddress(byte[] address) {
-        try {
-            this.address = InetAddress.getByAddress(address);
-        } catch (UnknownHostException e) {
-            System.out.println("Host unknown or wrong format of the host address");
-        }
-        Address.generated = this.address;
-    }
-
 
 }

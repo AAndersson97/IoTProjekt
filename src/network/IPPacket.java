@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class IPPacket extends Packet {
+/**
+ * Klassen representerar ett IP Paket. Metoderna är statiska då det skapar onödigt "overhead" om varje paket ska ha sin egna kopia av metoden.
+ */
+public class IPPacket implements Packet {
     private IPHeader ipHeader;
     private TCPPacket TCPPacket;
 
@@ -14,37 +17,28 @@ public class IPPacket extends Packet {
     }
 
     public IPPacket(IPPacket packet) {
-        ipHeader = new IPHeader(packet.getIpHeader());
+        ipHeader = new IPHeader(getIpHeader(packet));
         TCPPacket = new TCPPacket(packet.TCPPacket);
 
     }
 
-    public int length() {
-        return (ipHeader.getTotalLength() + TCPPacket.getLength());
+    public static int length(IPPacket packet) {
+        return (packet.ipHeader.getTotalLength() + packet.TCPPacket.getLength());
     }
 
-    public IPHeader getIpHeader() {
-        return ipHeader;
+    public static IPHeader getIpHeader(IPPacket packet) {
+        return packet.ipHeader;
     }
 
-    public void setIpHeader(IPHeader ipHeader) {
-        this.ipHeader = ipHeader;
+    public static TCPPacket getTCPPacket(IPPacket packet) {
+        return packet.TCPPacket;
     }
 
-    public TCPPacket getTCPPacket() {
-        return TCPPacket;
-    }
-
-    public void setPacket(TCPPacket packet) {
-        this.TCPPacket = packet;
-    }
-
-    @Override
-    public byte[] toByteArray() {
-        byte[] packetBytes = TCPPacket.toByteArray();
+    public static byte[] toByteArray(IPPacket packet) {
+        byte[] packetBytes = packet.TCPPacket.toByteArray();
         byte[] ip = new byte[0];
         try {
-            ip = ipHeader.toByteArray();
+            ip = packet.ipHeader.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,10 +48,7 @@ public class IPPacket extends Packet {
         return combined;
     }
 
-    @Override
-    public Packet copy() {
-        return new IPPacket(this);
+    public static Packet copy(IPPacket packet) {
+        return new IPPacket(packet);
     }
-
-
 }

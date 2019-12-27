@@ -1,12 +1,7 @@
 package network;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.SynchronousQueue;
 
 public class Network implements Constants {
     private static int numOfNodes;
@@ -80,13 +75,13 @@ public class Network implements Constants {
      * @param packet Paketet som ska skickas
      * @throws IOException Om paketsändningen misslyckades kastas ett IOException
      */
-    public static void sendPacket(InetAddress remote, InetAddress source, Packet packet) {
-        if (remote == null ||source == null)
+    public static void sendPacket(short[] remote, short[] source, Packet packet) {
+        if (remote == null || source == null)
             throw new IllegalArgumentException("Source address neither remote address must not be null");
         wifiChannel.send(packet, source);
     }
 
-    public static synchronized void sendMulticast(InetAddress source, Packet packet) {
+    public static synchronized void sendMulticast(short[] source, Packet packet) {
         if (source == null)
             throw new IllegalArgumentException("Source address must not be null");
         wifiChannel.send(packet, source);

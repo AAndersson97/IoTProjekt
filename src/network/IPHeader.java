@@ -18,35 +18,10 @@ public class IPHeader extends Header {
     private short timeToLive;
     private short protocol;
     private int checksum;
-    byte[] sourceAdress = new byte[4];
-    byte[] destinationAdress = new byte[4];
+    short[] sourceAdress;
+    short[] destinationAdress;
     byte[] options;
 
-    public IPHeader(byte[] baseHeader) {
-        if (baseHeader.length == HEADER_SIZE) {
-            version = (byte)((baseHeader[0]>>4)&15);
-            headerLength = (byte)(baseHeader[0]&15);
-            typeOfService = (short)(baseHeader[1]&63);
-            totalLength = (((baseHeader[2]<<8)&65280)|(baseHeader[3]&255));
-            id = (((baseHeader[4]<<8)&65280)|(baseHeader[5]&255));
-            flags = (byte)((baseHeader[6]>>5)&7);
-            offset = (short)(baseHeader[6]&31);
-            timeToLive = (short)(baseHeader[8]&63);
-            protocol = (short)(baseHeader[9]&63);
-            checksum = (((baseHeader[10]<<8)&65280)|(baseHeader[11]&255));
-            sourceAdress[0] = baseHeader[12];
-            sourceAdress[1] = baseHeader[13];
-            sourceAdress[2] = baseHeader[14];
-            sourceAdress[3] = baseHeader[15];
-            destinationAdress[0] = baseHeader[16];
-            destinationAdress[1] = baseHeader[17];
-            destinationAdress[2] = baseHeader[18];
-            destinationAdress[3] = baseHeader[19];
-        }
-        else{
-            throw new RuntimeException("Failed to create a IP Header") ;
-        }
-    }
     {
         version = 4;
         headerLength = 5;
@@ -65,7 +40,7 @@ public class IPHeader extends Header {
         checksum = header.checksum;
     }
 
-    public IPHeader(int length, byte[] sourceAdress, byte[] destinationAdress, short protocol) throws IOException {
+    public IPHeader(int length, short[] sourceAdress, short[] destinationAdress, short protocol) throws IOException {
         this.totalLength = headerLength + length;
         this.protocol = protocol;
         this.sourceAdress = sourceAdress;
@@ -86,37 +61,14 @@ public class IPHeader extends Header {
         out.write(timeToLive);
         out.write(protocol);
         out.write(checksum);
-        out.write(sourceAdress);
-        out.write(destinationAdress);
+        for (short num : sourceAdress)
+            out.write(num);
+        for (short num : destinationAdress)
+            out.write(num);
         if (options != null)
             out.write(options);
 
         return out.toByteArray();
-    }
-
-    public byte[] getHeader() {
-        byte[] header = new byte[HEADER_SIZE];
-        header[0] = (byte)(((version&15)<<4)|(headerLength&15));
-        header[1] = (byte)(typeOfService&255);
-        header[2] = (byte)((totalLength>>8)&255);
-        header[3] = (byte)(totalLength&255);
-        header[4] = (byte)((id>>8)&255);
-        header[5] = (byte)(id&255);
-        header[6] = (byte)(((flags&7)<<5)|((offset>>8)&31));
-        header[7] = (byte)(offset&255);
-        header[8] = (byte)(timeToLive&255);
-        header[9] = (byte)(protocol&255);
-        header[10] = (byte)((checksum>>8)&255);
-        header[11] = (byte)(checksum&255);
-        header[12] = sourceAdress[0];
-        header[13] = sourceAdress[1];
-        header[14] = sourceAdress[2];
-        header[15] = sourceAdress[3];
-        header[16] = destinationAdress[0];
-        header[17] = destinationAdress[1];
-        header[18] = destinationAdress[2];
-        header[19] = destinationAdress[3];
-        return header;
     }
 
     public byte[] getOptions() {
@@ -167,11 +119,11 @@ public class IPHeader extends Header {
         return checksum;
     }
 
-    public byte[] getSourceAdress() {
+    public short[] getSourceAdress() {
         return sourceAdress;
     }
 
-    public byte[] getDestinationAdress() {
+    public short[] getDestinationAdress() {
         return destinationAdress;
     }
 

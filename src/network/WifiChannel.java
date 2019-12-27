@@ -1,7 +1,5 @@
 package network;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +13,7 @@ public class WifiChannel extends Channel {
         observers = new ArrayList<>();
     }
 
-    public void send(Packet packet, InetAddress address) {
+    public void send(Packet packet, short[] address) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> observers.forEach(node -> {
