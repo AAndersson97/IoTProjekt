@@ -34,12 +34,7 @@ public final class Constants {
     }
     public static final class AreaBoundaries {
         public static final BiFunction<Integer, Integer, Integer> area1or2 = (x, y) -> x >= 0 && x < WINDOW_WIDTH/3 ? (y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 ? 1 : 2 ) : -1;
-        //public static final BiFunction<Integer, Integer, Boolean> area1 = (x, y) -> x >= 0 && x < WINDOW_WIDTH/3 && y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2;
-        //public static final BiFunction<Integer, Integer, Boolean> area2 = (x, y) -> x >= 0 && x < WINDOW_WIDTH/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2;
         public static final BiFunction<Integer, Integer, Integer> area4or5 = (x,y) -> x >= (2*WINDOW_WIDTH)/3 ? (y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2? 5: 4) : -1;
         public static final BiFunction<Integer, Integer, Integer> area3or0 = (x,y) -> (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3)? (y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2? 3 : 0) : -1;
-        //public static final BiFunction<Integer, Integer, Boolean> area3 = (x, y) -> x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2;
-        //public static final BiFunction<Integer, Integer, Boolean> area4 = (x, y) -> x >= (2*WINDOW_WIDTH)/3 && y >= 0 && y <= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2;
-        //public static final BiFunction<Integer, Integer, Boolean> area5 = (x, y) -> x >= (2*WINDOW_WIDTH)/3 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2;
     }
 }

@@ -2,6 +2,9 @@ package network;
 
 import java.io.IOException;
 import java.util.*;
+
+import static network.Constants.GUI.*;
+import static network.Constants.GUI.CIRCLE_RADIUS;
 import static network.Constants.Node.*;
 
 public class Router implements Comparator<Router>, Runnable {
@@ -123,6 +126,25 @@ public class Router implements Comparator<Router>, Runnable {
         this.isABR = isABR;
     }
 
+    private static void reallocate(Router router) {
+        int areaId = router.areaId;
+        if (areaId == 1 || areaId == 2) {
+            router.location.setX((WINDOW_WIDTH/3) - (CIRCLE_RADIUS + 5));
+            if (areaId == 1)
+                router.location.setY(WINDOW_HEIGHT - (CIRCLE_RADIUS * 6));
+            else
+                router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 4);
+        } else if (areaId == 3) {
+            router.location.setX(WINDOW_WIDTH/2);
+            router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 2);
+        } else if (areaId == 4 || areaId == 5) {
+            router.location.setX((WINDOW_WIDTH)/3);
+            if (areaId == 4)
+                router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 - CIRCLE_RADIUS);
+            else
+                router.location.setY(WINDOW_HEIGHT - CIRCLE_RADIUS*6);
+        }
+    }
     public void turnOff() {
         active = false;
         synchronized (queue) {
@@ -140,6 +162,8 @@ public class Router implements Comparator<Router>, Runnable {
 
     public void assignAreaId(int areaId) {
         this.areaId = areaId;
+        if (isABR)
+            reallocate(this);
     }
 
     public void setAddress(short[] address) {

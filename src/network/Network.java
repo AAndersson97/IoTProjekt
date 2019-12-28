@@ -54,6 +54,7 @@ public class Network {
                     throw new Exception("Location out of bounds");
         areas.get(areaId).addNode(router);
         wifiChannel.addObserver(router);
+        router.assignAreaId(areaId);
         return areaId;
     }
 
