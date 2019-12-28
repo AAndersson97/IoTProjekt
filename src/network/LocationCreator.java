@@ -2,8 +2,9 @@ package network;
 
 import java.util.ArrayList;
 import java.util.Random;
+import static network.Constants.GUI.*;
 
-public class LocationCreator implements Constants {
+public class LocationCreator {
     private static LocationCreator instance ;
     private static ArrayList<Location> locations;
 

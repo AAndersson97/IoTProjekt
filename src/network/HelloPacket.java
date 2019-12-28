@@ -2,6 +2,8 @@ package network;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import static network.Constants.Node.HELLO_INTERVAL;
+import static network.Constants.Node.DEAD_INTERVAL;
 
 public class HelloPacket extends OSPFPacket {
     private int networkMask;
@@ -25,8 +27,8 @@ public class HelloPacket extends OSPFPacket {
 
     public HelloPacket(IPHeader ipHeader, OSPFHeader header, short[][] neighborIds, int DRId) {
         this.ipHeader = ipHeader;
-        helloInterval = Constants.HELLO_INTERVAL;
-        deadInterval = Constants.DEAD_INTERVAL;
+        helloInterval = HELLO_INTERVAL;
+        deadInterval = DEAD_INTERVAL;
         priority = 1;
         backupDRId = 0;
         designatedRouterId = DRId;

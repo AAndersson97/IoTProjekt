@@ -26,16 +26,14 @@ public class Area {
             ABR = router.getAddress();
         }
         nodeList.put(router.getAddress(), router);
-        //router.setAddress(addressGenerator.generateAddress());
+        router.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();
     }
 
-    public HashMap<short[], Router> getNodeList() {
-        return new HashMap<>(nodeList);
-    }
+    private void reallocate(Router router) {
+        switch (num) {
 
-    public Router getNode(InetAddress address) {
-        return nodeList.get(address);
+        }
     }
 
     public void removeNode(short[] address) {

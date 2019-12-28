@@ -1,7 +1,8 @@
 package network;
+import static network.Constants.Node.ADDRESS_LENGTH;
 
-public class AddressGenerator implements Constants {
-    private byte[] highestAddress;
+public class AddressGenerator {
+    private short[] highestAddress;
     private final short[] firstAddress;
     private final int submask;
 
@@ -20,13 +21,13 @@ public class AddressGenerator implements Constants {
      * i detta fall
      * @return En array med short-variabler där varje variabel representerar en del av den fullständiga IPv4-address
      */
-    public byte[] generateAddress() {
-        byte[] address = new byte[ADDRESS_LENGTH];
-        address[0] = (byte) firstAddress[0];
+    public short[] generateAddress() {
+        short[] address = new short[ADDRESS_LENGTH];
+        address[0] = firstAddress[0];
         // Om submask är 8 eller lägre ska denna del av adressen varieras, annars inte
         address[1] = 0;
         address[2] = 0;
-        address[3] = (byte)(highestAddress == null ? 0 : Byte.toUnsignedInt(highestAddress[3]) + 1);
+        address[3] = (short) (highestAddress == null ? 0 : highestAddress[3] + 1);
         highestAddress = address;
         return address;
     }

@@ -26,6 +26,8 @@ public class OSPFHeader extends Header {
         this.authentication = header.authentication;
     }
     public OSPFHeader(OSPFPacketType type, int dataLength, int areaID, short[] routerID) throws IOException {
+        if (type == null || routerID == null)
+            throw new IllegalArgumentException("Type and routerID must not be null");
         this.type = type.getValue();
         this.length = HEADER_SIZE + dataLength;
         this.routerID = routerID;

@@ -5,13 +5,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import network.*;
+import static network.Constants.GUI.*;
 
 import java.io.IOException;
 
 /**
  * Klass innehållandes metoder enbart för att felsöka programmet
  */
-public class Debug implements Constants {
+public class Debug {
 
     private static Rectangle[] rectangles;
     private static boolean areaActive = false;
@@ -63,7 +64,7 @@ public class Debug implements Constants {
     }
 
     private static void sendPacket() {
-        Router router = Network.getArea(1).getFirstRouter();
+        Router router = Network.getNodeList().get(0);
         if (router == null)
             return;
         Network.sendPacket(router.getAddress(),router.getAddress(), getEmptyPacket(router));

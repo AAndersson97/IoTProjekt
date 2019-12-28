@@ -6,19 +6,22 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import network.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class SendPacketUI implements Constants {
+import static network.Constants.Node.ADDRESS_LENGTH;
+import static network.Constants.Node.TCP_PROTOCOL;
+import static network.Constants.Node.DEFAULT_WIN_SIZE;
+
+public class SendPacketUI {
     @FXML
     ChoiceBox<String> sourceAddress;
     @FXML
@@ -26,16 +29,17 @@ public class SendPacketUI implements Constants {
     @FXML
     TextField msgBox;
 
-    SendPacketUI instance;
+    private short[][] listOfAddresses;
+    private ObservableList<String> addressStrings;
 
     public void start(Stage stage) throws Exception {
+        if (Network.getNumOfNodes() == 0) {
+            new Alert(Alert.AlertType.ERROR, "The number of nodes is zero, it is not possible to send packets", ButtonType.OK).show();
+            return;
+        }
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
         stage.show();
-    }
-
-    public SendPacketUI() {
-        instance = this;
     }
 
     public void showUI() throws Exception {
@@ -43,10 +47,10 @@ public class SendPacketUI implements Constants {
     }
 
     public void fillSrcAddresses() {
+        if (addressStrings == null)
+            createAddressCollections();
         if (sourceAddress.getItems().isEmpty()) {
-            ArrayList<Router> routerList = Network.getNodeList();
-            ObservableList<Router> srcAddresses = FXCollections.observableArrayList(routerList);
-            sourceAddress.setItems(createAddressCollection(srcAddresses));
+            sourceAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             sourceAddress.hide();
             sourceAddress.show();
@@ -54,10 +58,10 @@ public class SendPacketUI implements Constants {
     }
 
     public void fillDestAddresses() {
+        if (addressStrings == null)
+            createAddressCollections();
         if (destAddress.getItems().isEmpty()) {
-            ArrayList<Router> routerList = Network.getNodeList();
-            ObservableList<Router> destAddresses = FXCollections.observableArrayList(routerList);
-            destAddress.setItems(createAddressCollection(destAddresses));
+            destAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             destAddress.hide();
             destAddress.show();
@@ -67,31 +71,42 @@ public class SendPacketUI implements Constants {
     public void onSendPacket() {
         String msg = msgBox.getText().trim();
         int msgLength = msg.length();
-        String[] srcAddress = sourceAddress.getSelectionModel().getSelectedItem().split(".");
-        String[] destination = destAddress.getSelectionModel().getSelectedItem().split(".");
+        String[] srcAddress = sourceAddress.getSelectionModel().getSelectedItem().split("\\.");
+        String[] destination = destAddress.getSelectionModel().getSelectedItem().split("\\.");
+        short[] src = stringsToShorts(srcAddress);
+        short[] dest = stringsToShorts(destination);
         IPHeader ipHeader = null;
-        TCPHeader tcpHeader = null;
 
-        //ipHeader = new IPHeader(msgLength, ,
-        //        stringsToBytes(destination), TCP_PROTOCOL);
-        tcpHeader = new TCPHeader(0,0,0,0, DEFAULT_WIN_SIZE);
+        try {
+            ipHeader = new IPHeader(msgLength, src,
+                    dest, TCP_PROTOCOL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TCPHeader tcpHeader = new TCPHeader(0,0,0,0, DEFAULT_WIN_SIZE);
 
         TCPPacket packet = new TCPPacket(tcpHeader, msg.getBytes());
-
+        IPPacket ipPacket = new IPPacket(ipHeader, packet);
+        Network.sendPacket(dest, src, ipPacket);
     }
 
-    private ObservableList<String> createAddressCollection(List<Router> routerList) {
-        ObservableList<String> addresses = FXCollections.observableArrayList();
-        for (Router router : routerList)
-            addresses.add(router.getAddress().toString());
-        return addresses;
-    }
-
-    public byte[] stringsToBytes(String[] strings) {
-        byte[] bytes = new byte[strings.length];
-        for (int i = 0; i < strings.length; i++) {
-            bytes[i] = Byte.decode(strings[i]);
+    private void createAddressCollections() {
+        List<Router> routerList = Network.getNodeList();
+        addressStrings = FXCollections.observableArrayList();
+        listOfAddresses = new short[ADDRESS_LENGTH][routerList.size()];
+        int count = 0;
+        for (Router router : routerList) {
+            String addressString = Arrays.toString(router.getAddress()).replace(", ", ".");
+            addressStrings.add(addressString.substring(1, addressString.length()-1));
+            listOfAddresses[count] = router.getAddress();
         }
-        return bytes;
+    }
+
+    public short[] stringsToShorts(String[] strings) {
+        short[] numbers = new short[strings.length];
+        for (int i = 0; i < strings.length; i++) {
+            numbers[i] = Short.parseShort(strings[i]);
+        }
+        return numbers;
     }
 }

@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class TCPPacket extends Packet{
+public class TCPPacket implements Packet{
     private TCPHeader header;
     private byte[] data;
 
@@ -50,7 +50,6 @@ public class TCPPacket extends Packet{
         return data;
     }
 
-    @Override
     public int length() {
         return header.length() + data.length;
     }
@@ -71,7 +70,6 @@ public class TCPPacket extends Packet{
         return null ;
     }
 
-    @Override
     public Packet copy() {
         return new TCPPacket(this);
     }

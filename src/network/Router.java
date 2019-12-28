@@ -2,8 +2,9 @@ package network;
 
 import java.io.IOException;
 import java.util.*;
+import static network.Constants.Node.*;
 
-public class Router implements Comparator<Router>, Constants, Runnable {
+public class Router implements Comparator<Router>, Runnable {
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private short[] address;
@@ -27,20 +28,23 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
-        areaId = Network.getArea(this);
-        //System.out.println(address.getHostAddress());
+        try {
+            areaId = Network.getArea(this);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         thread = new Thread(this);
         thread.start();
     }
 
     @Override
     public void run() {
-        Simulator.scheduleTaskPeriodically(new TimerTask() {
+        /*Simulator.scheduleTaskPeriodically(new TimerTask() {
             @Override
             public void run() {
                 sendHelloPackets();
             }
-        }, 0, HELLO_INTERVAL);
+        }, 0, HELLO_INTERVAL);*/
         while (true) {
             synchronized (queue) {
                 while (queue.isEmpty() && active) {
@@ -79,19 +83,21 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         if (packet instanceof OSPFPacket) {
             handleOSPFPacket((OSPFPacket) packet);
         } else if (packet instanceof IPPacket){
-
+            handleIPPacket((IPPacket) packet);
         }
     }
 
     private void handleOSPFPacket(OSPFPacket packet) {
         // Om paketets AreaId ej överenstämmer med routerns areaid ska packetet ej bearbetas
         if (packet.OSPFHeader.getAreaID() == areaId){
-            /*switch (packet.OSPFHeader.getType()){
-                case OSPFPacketType.Hello.getValue():
-                    break;
-
-            }*/
+            System.out.println("Packet arrived");
         }
+    }
+
+    private void handleIPPacket(IPPacket packet) {
+        IPHeader ipHeader = IPPacket.getIpHeader(packet);
+        if (Arrays.equals(ipHeader.destinationAdress, address))
+            System.out.println("Packet arrived from " + Arrays.toString(ipHeader.sourceAdress));
     }
 
     private void forwardPacket(Packet packet) {
@@ -136,4 +142,7 @@ public class Router implements Comparator<Router>, Constants, Runnable {
         this.areaId = areaId;
     }
 
+    public void setAddress(short[] address) {
+        this.address = address;
+    }
 }

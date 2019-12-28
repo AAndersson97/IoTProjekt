@@ -2,8 +2,10 @@ package network;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import static network.Constants.GUI.*;
+import static network.Constants.AreaBoundaries.*;
 
-public class Network implements Constants {
+public class Network {
     private static int numOfNodes;
     private static int numOfAreas;
     private static WifiChannel wifiChannel;
@@ -43,20 +45,13 @@ public class Network implements Constants {
      * Returnerar ett områdes id till en nod baserad på nodens position
      * @param router En nod i nätverket som saknar område
      */
-    public static int getArea(Router router) {
+    public static int getArea(Router router) throws Exception {
         LocationCreator.Location location = router.getLocation();
         int x = location.getX(), y = location.getY(), areaId = 0;
-        if (x >= 0 && x < WINDOW_WIDTH/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            areaId = 2;
-        else if (x >= 0 && x < WINDOW_WIDTH/3 && y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            areaId = 1;
-        else if (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3 && y >= 0 && y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            areaId = 3;
-        //else if (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3 && y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-        else if (x >= (2*WINDOW_WIDTH)/3 && y >= 0 && y <= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            areaId = 4;
-        else if (x >= (2*WINDOW_WIDTH)/3 && y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2)
-            areaId = 5;
+        if ((areaId = area1or2.apply(x,y)) == -1)
+            if ((areaId = area3or0.apply(x,y)) == -1)
+                if ((areaId = area4or5.apply(x,y)) == -1)
+                    throw new Exception("Location out of bounds");
         areas.get(areaId).addNode(router);
         wifiChannel.addObserver(router);
         return areaId;

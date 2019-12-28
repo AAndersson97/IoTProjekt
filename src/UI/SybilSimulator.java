@@ -14,8 +14,11 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import network.*;
+import static network.Constants.GUI.*;
 
-public class SybilSimulator extends Application implements Constants {
+import java.util.Arrays;
+
+public class SybilSimulator extends Application {
     @FXML
     AnchorPane anchorPane;
     @FXML
@@ -34,7 +37,7 @@ public class SybilSimulator extends Application implements Constants {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
-        stage.setTitle(Constants.WINDOW_TITLE);
+        stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         Debug.registerKeyEvents(stage.getScene(), instance);
         instance = null;
@@ -50,7 +53,7 @@ public class SybilSimulator extends Application implements Constants {
         Router createdRouter = new Router();
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdRouter.getLocation().getX(), createdRouter.getLocation().getY());
-        createNode.setDisable(Network.getNumOfNodes() >= MAX_NODES);
+        createNode.setDisable(Network.getNumOfNodes() >= Constants.Node.MAX_NODES);
         //Label nodeLabel = new Label(createdNode.addressToString());
         //anchorPane.getChildren().add(nodeLabel);
         //nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
@@ -71,7 +74,7 @@ public class SybilSimulator extends Application implements Constants {
         Router createdARouter = new Router();
         anchorPane.getChildren().add((displayedANode));
         displayedANode.relocate(createdARouter.getLocation().getX(), createdARouter.getLocation().getY());
-        Label nodeLabel = new Label(createdARouter.getAddress().getHostAddress());
+        Label nodeLabel = new Label(Arrays.toString(createdARouter.getAddress()).trim());
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdARouter.getLocation().getX()-15, createdARouter.getLocation().getY()+20);
         Label nodeLabel2 = new Label("Attacknod");

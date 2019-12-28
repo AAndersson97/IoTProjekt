@@ -1,9 +1,6 @@
 package network;
 
-import java.util.ArrayDeque;
-import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -12,7 +9,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Simulator {
     private static Thread worker;
     private static final ArrayDeque<Runnable> queue;
-    private static Timer timer;
+    private static final ArrayList<Timer> timers;
     private volatile static boolean shutdown;
 
     static  {
@@ -20,7 +17,7 @@ public class Simulator {
         worker = new Thread(Simulator::run);
         shutdown = false;
         worker.start();
-        timer = new Timer();
+        timers = new ArrayList<>();
     }
 
     public static void scheduleTask(Runnable task) {
@@ -31,13 +28,16 @@ public class Simulator {
     }
 
     public static void scheduleTaskPeriodically(TimerTask task, long delay, long period) {
+        Timer timer = new Timer();
+        timers.add(timer);
         timer.scheduleAtFixedRate(task, delay, period);
     }
 
     public static void shutdown() {
         synchronized (queue) {
             shutdown = true;
-            timer.cancel();
+            for (Timer timer : timers)
+                timer.cancel();
             queue.notifyAll();
         }
     }

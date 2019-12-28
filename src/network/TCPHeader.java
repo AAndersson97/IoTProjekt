@@ -4,7 +4,7 @@ import utilities.Checksum;
 
 import java.util.Arrays;
 
-public class TCPHeader extends Header implements Constants {
+public class TCPHeader extends Header {
     private static final int HEADER_SIZE = 20;
     private int sourcePort;
     private int destinationPort;
