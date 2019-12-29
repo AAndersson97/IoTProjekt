@@ -50,9 +50,9 @@ public class SybilSimulator extends Application {
 
     public void onCreateNode() {
         Circle displayedNode = create();
-        Router createdRouter = new Router();
+        Node createdNode = new Node();
         anchorPane.getChildren().add(displayedNode);
-        displayedNode.relocate(createdRouter.getLocation().getX(), createdRouter.getLocation().getY());
+        displayedNode.relocate(createdNode.getLocation().getX(), createdNode.getLocation().getY());
         createNode.setDisable(Network.getNumOfNodes() >= Constants.Node.MAX_NODES);
         //Label nodeLabel = new Label(createdNode.addressToString());
         //anchorPane.getChildren().add(nodeLabel);
@@ -71,15 +71,15 @@ public class SybilSimulator extends Application {
     public void onCreateAttackNode(ActionEvent actionEvent) {
         Circle displayedANode = create();
         displayedANode.setFill(Color.web("#e84723"));
-        Router createdARouter = new Router();
+        Node createdANode = new Node();
         anchorPane.getChildren().add((displayedANode));
-        displayedANode.relocate(createdARouter.getLocation().getX(), createdARouter.getLocation().getY());
-        Label nodeLabel = new Label(Arrays.toString(createdARouter.getAddress()).trim());
+        displayedANode.relocate(createdANode.getLocation().getX(), createdANode.getLocation().getY());
+        Label nodeLabel = new Label(Arrays.toString(createdANode.getAddress()).trim());
         anchorPane.getChildren().add(nodeLabel);
-        nodeLabel.relocate(createdARouter.getLocation().getX()-15, createdARouter.getLocation().getY()+20);
+        nodeLabel.relocate(createdANode.getLocation().getX()-15, createdANode.getLocation().getY()+20);
         Label nodeLabel2 = new Label("Attacknod");
         anchorPane.getChildren().add(nodeLabel2);
-        nodeLabel2.relocate(createdARouter.getLocation().getX()-20, createdARouter.getLocation().getY()-20);
+        nodeLabel2.relocate(createdANode.getLocation().getX()-20, createdANode.getLocation().getY()-20);
     }
 
     public Circle create() {

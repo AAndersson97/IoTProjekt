@@ -1,6 +1,6 @@
 package network;
 
-public class SybilNode extends Router
+public class SybilNode extends Node
 {
 
 }

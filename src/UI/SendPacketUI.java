@@ -91,14 +91,14 @@ public class SendPacketUI {
     }
 
     private void createAddressCollections() {
-        List<Router> routerList = Network.getNodeList();
+        List<Node> nodeList = Network.getNodeList();
         addressStrings = FXCollections.observableArrayList();
-        listOfAddresses = new short[ADDRESS_LENGTH][routerList.size()];
+        listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
         int count = 0;
-        for (Router router : routerList) {
-            String addressString = Arrays.toString(router.getAddress()).replace(", ", ".");
+        for (Node node : nodeList) {
+            String addressString = Arrays.toString(node.getAddress()).replace(", ", ".");
             addressStrings.add(addressString.substring(1, addressString.length()-1));
-            listOfAddresses[count] = router.getAddress();
+            listOfAddresses[count] = node.getAddress();
         }
     }
 

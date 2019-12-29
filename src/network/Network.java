@@ -2,7 +2,7 @@ package network;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import static network.Constants.GUI.*;
+
 import static network.Constants.AreaBoundaries.*;
 
 public class Network {
@@ -43,18 +43,18 @@ public class Network {
 
     /**
      * Returnerar ett områdes id till en nod baserad på nodens position
-     * @param router En nod i nätverket som saknar område
+     * @param node En nod i nätverket som saknar område
      */
-    public static int getArea(Router router) throws Exception {
-        LocationCreator.Location location = router.getLocation();
+    public static int getArea(Node node) throws Exception {
+        LocationCreator.Location location = node.getLocation();
         int x = location.getX(), y = location.getY(), areaId = 0;
         if ((areaId = area1or2.apply(x,y)) == -1)
             if ((areaId = area3or0.apply(x,y)) == -1)
                 if ((areaId = area4or5.apply(x,y)) == -1)
                     throw new Exception("Location out of bounds");
-        areas.get(areaId).addNode(router);
-        wifiChannel.addObserver(router);
-        router.assignAreaId(areaId);
+        areas.get(areaId).addNode(node);
+        wifiChannel.addObserver(node);
+        node.assignAreaId(areaId);
         return areaId;
     }
 
@@ -84,12 +84,12 @@ public class Network {
     }
 
     public static void shutdownNetwork() {
-        for (Router router : wifiChannel.getObservers()) {
-            router.turnOff();
+        for (Node node : wifiChannel.getObservers()) {
+            node.turnOff();
         }
     }
 
-    public static ArrayList<Router> getNodeList() {
+    public static ArrayList<Node> getNodeList() {
         return wifiChannel.getObservers();
     }
 

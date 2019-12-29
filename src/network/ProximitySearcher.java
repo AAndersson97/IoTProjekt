@@ -15,8 +15,8 @@ public class ProximitySearcher {
         return instance;
     }
 
-    public ArrayList<Router> findClosestNeighbours(Router n) {
-        ArrayList<Router>neighbours = new ArrayList<>();
+    public ArrayList<Node> findClosestNeighbours(Node n) {
+        ArrayList<Node>neighbours = new ArrayList<>();
         int nx = n.getLocation().getX();
         int ny = n.getLocation().getY();
         /*for(Node node : Area.getNodeList().values()){

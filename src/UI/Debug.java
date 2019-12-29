@@ -64,15 +64,15 @@ public class Debug {
     }
 
     private static void sendPacket() {
-        Router router = Network.getNodeList().get(0);
-        if (router == null)
+        Node node = Network.getNodeList().get(0);
+        if (node == null)
             return;
-        Network.sendPacket(router.getAddress(),router.getAddress(), getEmptyPacket(router));
+        Network.sendPacket(node.getAddress(), node.getAddress(), getEmptyPacket(node));
 }
 
-    private static HelloPacket getEmptyPacket(Router router) {
+    private static HelloPacket getEmptyPacket(Node node) {
         try {
-            network.OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, router.getAreaId(), router.getAddress());
+            network.OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, node.getAreaId(), node.getAddress());
             return new HelloPacket(null, ospfHeader, null, 0);
         } catch (IOException e) {
             e.printStackTrace();

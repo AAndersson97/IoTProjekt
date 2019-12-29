@@ -7,7 +7,7 @@ import static network.Constants.GUI.*;
 import static network.Constants.GUI.CIRCLE_RADIUS;
 import static network.Constants.Node.*;
 
-public class Router implements Comparator<Router>, Runnable {
+public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private short[] address;
@@ -17,7 +17,7 @@ public class Router implements Comparator<Router>, Runnable {
     private int areaId;
     // Sant om routern gränsar mot en eller flera områden
     private boolean isABR;
-    private HashMap<short[], Router> routingTable;
+    private HashMap<short[], Node> routingTable;
 
     public LocationCreator.Location getLocation() {
         return location;
@@ -27,7 +27,7 @@ public class Router implements Comparator<Router>, Runnable {
         queue = new ArrayDeque<>();
     }
 
-    public Router() {
+    public Node() {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
@@ -67,7 +67,7 @@ public class Router implements Comparator<Router>, Runnable {
     }
 
     @Override
-    public int compare(Router o1, Router o2) {
+    public int compare(Node o1, Node o2) {
         return Math.abs((o1.location.getY() - o2.location.getX()) + (o1.location.getY() - o2.location.getY()));
     }
 
@@ -126,23 +126,23 @@ public class Router implements Comparator<Router>, Runnable {
         this.isABR = isABR;
     }
 
-    private static void reallocate(Router router) {
-        int areaId = router.areaId;
+    private static void reallocate(Node node) {
+        int areaId = node.areaId;
         if (areaId == 1 || areaId == 2) {
-            router.location.setX((WINDOW_WIDTH/3) - (CIRCLE_RADIUS + 5));
+            node.location.setX((WINDOW_WIDTH/3) - (CIRCLE_RADIUS + 5));
             if (areaId == 1)
-                router.location.setY(WINDOW_HEIGHT - (CIRCLE_RADIUS * 6));
+                node.location.setY(WINDOW_HEIGHT - (CIRCLE_RADIUS * 6));
             else
-                router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 4);
+                node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 4);
         } else if (areaId == 3) {
-            router.location.setX(WINDOW_WIDTH/2);
-            router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 2);
+            node.location.setX(WINDOW_WIDTH/2);
+            node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 2);
         } else if (areaId == 4 || areaId == 5) {
-            router.location.setX((WINDOW_WIDTH)/3);
+            node.location.setX((WINDOW_WIDTH)/3);
             if (areaId == 4)
-                router.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 - CIRCLE_RADIUS);
+                node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 - CIRCLE_RADIUS);
             else
-                router.location.setY(WINDOW_HEIGHT - CIRCLE_RADIUS*6);
+                node.location.setY(WINDOW_HEIGHT - CIRCLE_RADIUS*6);
         }
     }
     public void turnOff() {

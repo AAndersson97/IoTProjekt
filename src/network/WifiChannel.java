@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private ArrayList<Router> observers;
+    private ArrayList<Node> observers;
 
     {
         observers = new ArrayList<>();
@@ -22,11 +22,11 @@ public class WifiChannel extends Channel {
         }));
     }
 
-    public void addObserver(Router router) {
-        observers.add(router);
+    public void addObserver(Node node) {
+        observers.add(node);
     }
 
-    public ArrayList<Router> getObservers() {
+    public ArrayList<Node> getObservers() {
         return observers;
     }
 
