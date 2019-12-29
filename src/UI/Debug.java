@@ -5,6 +5,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import network.*;
+import network.old.HelloPacket;
+import network.old.OSPFHeader;
+import network.old.OSPFPacketType;
+
 import static network.Constants.GUI.*;
 
 import java.io.IOException;
@@ -72,7 +76,7 @@ public class Debug {
 
     private static HelloPacket getEmptyPacket(Node node) {
         try {
-            network.OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, node.getAreaId(), node.getAddress());
+            OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, node.getAreaId(), node.getAddress());
             return new HelloPacket(null, ospfHeader, null, 0);
         } catch (IOException e) {
             e.printStackTrace();

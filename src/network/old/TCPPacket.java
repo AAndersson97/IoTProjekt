@@ -1,10 +1,10 @@
-package network;
+package network.old;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class TCPPacket implements Packet{
+public class TCPPacket implements Packet {
     private TCPHeader header;
     private byte[] data;
 

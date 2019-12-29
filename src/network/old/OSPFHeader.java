@@ -1,10 +1,10 @@
-package network;
+package network.old;
 
+import network.Header;
 import utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 
 public class OSPFHeader extends Header {
     private static final int HEADER_SIZE = 24;

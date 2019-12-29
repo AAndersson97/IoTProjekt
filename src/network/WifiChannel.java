@@ -1,5 +1,7 @@
 package network;
 
+import network.old.Packet;
+
 import java.util.ArrayList;
 
 /**

@@ -1,15 +1,15 @@
-package network;
+package network.old;
+
+import network.IPHeader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Klassen representerar ett IP Paket. Metoderna är statiska då det skapar onödigt "overhead" om varje paket ska ha sin egna kopia av metoden.
  */
 public class IPPacket implements Packet {
     private IPHeader ipHeader;
-    private TCPPacket TCPPacket;
+    private network.old.TCPPacket TCPPacket;
 
     public IPPacket(IPHeader ipHeader, TCPPacket packet) {
         this.ipHeader = ipHeader;

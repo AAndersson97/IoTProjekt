@@ -1,7 +1,6 @@
 package utilities;
 
-import network.TCPHeader;
-import network.TCPPacket;
+import network.old.TCPPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

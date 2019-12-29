@@ -12,14 +12,16 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import network.*;
+import network.IPHeader;
+import network.old.IPPacket;
+import network.old.TCPHeader;
+import network.old.TCPPacket;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static network.Constants.Node.ADDRESS_LENGTH;
-import static network.Constants.Node.TCP_PROTOCOL;
-import static network.Constants.Node.DEFAULT_WIN_SIZE;
 
 public class SendPacketUI {
     @FXML
@@ -77,7 +79,7 @@ public class SendPacketUI {
         short[] dest = stringsToShorts(destination);
         IPHeader ipHeader = null;
 
-        try {
+        /*try {
             ipHeader = new IPHeader(msgLength, src,
                     dest, TCP_PROTOCOL);
         } catch (IOException e) {
@@ -87,7 +89,7 @@ public class SendPacketUI {
 
         TCPPacket packet = new TCPPacket(tcpHeader, msg.getBytes());
         IPPacket ipPacket = new IPPacket(ipHeader, packet);
-        Network.sendPacket(dest, src, ipPacket);
+        Network.sendPacket(dest, src, ipPacket);*/
     }
 
     private void createAddressCollections() {

@@ -1,5 +1,6 @@
-package network;
+package network.old;
 
+import network.Header;
 import utilities.Checksum;
 
 import java.util.Arrays;
