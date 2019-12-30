@@ -1,23 +1,17 @@
 package network;
 
+import network.old.Area;
 import network.old.Packet;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static network.Constants.AreaBoundaries.*;
-
 public class Network {
     private static int numOfNodes;
-    private static int numOfAreas;
     private static WifiChannel wifiChannel;
-    private static ArrayList<Area> areas;
 
     static {
-        numOfAreas = numOfNodes = 0;
-        areas = new ArrayList<>();
         wifiChannel = new WifiChannel();
-        createAreas();
     }
     private Network() {
     }
@@ -28,42 +22,6 @@ public class Network {
 
     public static int getNumOfNodes() {
         return numOfNodes;
-    }
-
-    private static void createNewArea() {
-        short[] firstAddress = new short[4];
-        firstAddress[0] = (short)(numOfAreas == 0? 0 : 100 + ((numOfAreas+1)*10));
-        firstAddress[1] = firstAddress[2] = firstAddress[3] = 0;
-        areas.add(new Area(numOfAreas++,firstAddress, 24));
-    }
-
-    private static void createAreas() {
-        while(numOfAreas < 6) {
-            createNewArea();
-        }
-    }
-
-    /**
-     * Returnerar ett områdes id till en nod baserad på nodens position
-     * @param node En nod i nätverket som saknar område
-     */
-    public static int getArea(Node node) throws Exception {
-        LocationCreator.Location location = node.getLocation();
-        int x = location.getX(), y = location.getY(), areaId = 0;
-        if ((areaId = area1or2.apply(x,y)) == -1)
-            if ((areaId = area3or0.apply(x,y)) == -1)
-                if ((areaId = area4or5.apply(x,y)) == -1)
-                    throw new Exception("Location out of bounds");
-        areas.get(areaId).addNode(node);
-        wifiChannel.addObserver(node);
-        node.assignAreaId(areaId);
-        return areaId;
-    }
-
-    public static Area getArea(int id) {
-        if (id < 0 || id >= areas.size())
-            throw new IllegalArgumentException("Area id is out of bounds, min: 0 max: " + (areas.size()-1));
-        return areas.get(id);
     }
 
     /**

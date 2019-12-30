@@ -2,11 +2,7 @@ package network;
 
 import network.old.*;
 
-import java.io.IOException;
 import java.util.*;
-
-import static network.Constants.GUI.*;
-import static network.Constants.GUI.CIRCLE_RADIUS;
 import static network.Constants.Node.*;
 
 public class Node implements Comparator<Node>, Runnable {
@@ -15,29 +11,20 @@ public class Node implements Comparator<Node>, Runnable {
     private short[] address;
     private LocationCreator.Location location;
     private boolean active;
-    private final static ArrayDeque<Runnable> queue;
-    private int areaId;
-    // Sant om routern gränsar mot en eller flera områden
-    private boolean isABR;
+    private final Packet[] buffer;
+    private int readPtr, writePtr;
+    private volatile int packetsTP; // packets to process
     private HashMap<short[], Node> routingTable;
 
     public LocationCreator.Location getLocation() {
         return location;
     }
 
-    static {
-        queue = new ArrayDeque<>();
-    }
-
     public Node() {
+        buffer = new Packet[1024];
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
-        try {
-            areaId = Network.getArea(this);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
         thread = new Thread(this);
         thread.start();
     }
@@ -51,10 +38,10 @@ public class Node implements Comparator<Node>, Runnable {
             }
         }, 0, HELLO_INTERVAL);*/
         while (true) {
-            synchronized (queue) {
-                while (queue.isEmpty() && active) {
+            synchronized (buffer) {
+                while (packetsTP == 0 && active) {
                     try {
-                        queue.wait();
+                        buffer.wait();
                     } catch (InterruptedException e) {
                         System.out.println(e.getMessage());
                     }
@@ -62,8 +49,10 @@ public class Node implements Comparator<Node>, Runnable {
                 if (!active) {
                     break;
                 }
-                else
-                    queue.removeFirst().run();
+                else {
+                    packetsTP--;
+                    handlePacket(buffer[readPtr++ % BUFFER_SIZE]);
+                }
             }
         }
     }
@@ -78,9 +67,8 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     public void receivePacket(Packet packet) {
-        synchronized (queue) {
-            queue.addLast(() -> handlePacket(packet));
-            queue.notifyAll();
+        synchronized (buffer) {
+            buffer[writePtr++ % BUFFER_SIZE] = packet;
         }
     }
 
@@ -110,50 +98,16 @@ public class Node implements Comparator<Node>, Runnable {
     private void sendHelloPackets() {
     }
 
-    public void setIsABR(boolean isABR) {
-        this.isABR = isABR;
-    }
-
-    private static void reallocate(Node node) {
-        int areaId = node.areaId;
-        if (areaId == 1 || areaId == 2) {
-            node.location.setX((WINDOW_WIDTH/3) - (CIRCLE_RADIUS + 5));
-            if (areaId == 1)
-                node.location.setY(WINDOW_HEIGHT - (CIRCLE_RADIUS * 6));
-            else
-                node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 4);
-        } else if (areaId == 3) {
-            node.location.setX(WINDOW_WIDTH/2);
-            node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS * 2) / 2);
-        } else if (areaId == 4 || areaId == 5) {
-            node.location.setX((WINDOW_WIDTH)/3);
-            if (areaId == 4)
-                node.location.setY((WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 - CIRCLE_RADIUS);
-            else
-                node.location.setY(WINDOW_HEIGHT - CIRCLE_RADIUS*6);
-        }
-    }
     public void turnOff() {
         active = false;
-        synchronized (queue) {
-            queue.notifyAll();
+        synchronized (buffer) {
+            buffer.notifyAll();
         }
     }
 
     public boolean isActive() {
         return thread.isAlive();
     }
-
-    public int getAreaId() {
-        return areaId;
-    }
-
-    public void assignAreaId(int areaId) {
-        this.areaId = areaId;
-        if (isABR)
-            reallocate(this);
-    }
-
     public void setAddress(short[] address) {
         this.address = address;
     }

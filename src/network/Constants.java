@@ -26,6 +26,7 @@ public final class Constants {
         public static final int DEFAULT_WIN_SIZE = 65535; // antalet bytes, win size talar om för avsändaren hur mycket data kan skickas per gång
         public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
         public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;
+        public static final int BUFFER_SIZE = 1024;
     }
     public static final class Protocol {
         public static final int SCALING_FACTOR = 1/16; // 0.0625 sekunder
@@ -33,9 +34,7 @@ public final class Constants {
         public static final int REFRESH_INTERVAL = 2;
         public static final int TC_INTERVAL = 5;
     }
-    public static final class AreaBoundaries {
-        public static final BiFunction<Integer, Integer, Integer> area1or2 = (x, y) -> x >= 0 && x < WINDOW_WIDTH/3 ? (y >= (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2 ? 1 : 2 ) : -1;
-        public static final BiFunction<Integer, Integer, Integer> area4or5 = (x,y) -> x >= (2*WINDOW_WIDTH)/3 ? (y > (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2? 5: 4) : -1;
-        public static final BiFunction<Integer, Integer, Integer> area3or0 = (x,y) -> (x >= WINDOW_WIDTH/3 && x < (2*WINDOW_WIDTH)/3)? (y < (WINDOW_HEIGHT - CIRCLE_RADIUS*2)/2? 3 : 0) : -1;
+    public static final class Network {
+        public static final int PACKET_LOSS = 1;
     }
 }

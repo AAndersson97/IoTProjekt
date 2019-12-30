@@ -1,9 +1,11 @@
-package network;
+package network.old;
 
-import network.old.Packet;
+import network.Channel;
+import network.Simulator;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 import static network.Constants.Network.PACKET_LOSS;
 
 /**
@@ -32,7 +34,7 @@ public class WifiChannel extends Channel {
         return (new Random().nextInt(100/PACKET_LOSS)==0);
     }
 
-    public void addObserver(Node node) {
+    public void addObserver(network.old.Node node) {
         observers.add(node);
     }
 

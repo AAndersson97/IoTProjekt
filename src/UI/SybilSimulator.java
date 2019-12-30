@@ -28,8 +28,6 @@ public class SybilSimulator extends Application {
     @FXML
     Button sybilAttack;
 
-    static SybilSimulator instance;
-
     public static void main(String[] args){
         launch(args);
     }
@@ -39,13 +37,7 @@ public class SybilSimulator extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
-        Debug.registerKeyEvents(stage.getScene(), instance);
-        instance = null;
         stage.show();
-    }
-
-    public SybilSimulator() {
-        instance = this;
     }
 
     public void onCreateNode() {

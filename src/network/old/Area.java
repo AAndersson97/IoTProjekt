@@ -1,10 +1,12 @@
-package network;
+package network.old;
+
+import network.Network;
 
 import java.util.HashMap;
 
 public class Area {
     private final int num;
-    private final AddressGenerator addressGenerator;
+    //private final AddressGenerator addressGenerator;
     private short[] ABR;
     private HashMap<short[], Node> nodeList;
     /**
@@ -16,7 +18,7 @@ public class Area {
     Area(int num, short[] firstAddress, int subnetMask) {
         nodeList = new HashMap<>();
         this.num = num;
-        addressGenerator = new AddressGenerator(firstAddress, subnetMask);
+        //addressGenerator = new AddressGenerator(firstAddress, subnetMask);
     }
 
     public void addNode(Node node) {
@@ -25,7 +27,7 @@ public class Area {
             ABR = node.getAddress();
         }
         nodeList.put(node.getAddress(), node);
-        node.setAddress(addressGenerator.generateAddress());
+        //node.setAddress(addressGenerator.generateAddress());
         Network.newNodeAdded();
     }
 
