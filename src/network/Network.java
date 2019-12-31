@@ -49,6 +49,11 @@ public class Network {
         }
     }
 
+    public static void registerNode(Node node) {
+        wifiChannel.addObserver(node);
+        numOfNodes++;
+    }
+
     public static ArrayList<Node> getNodeList() {
         return wifiChannel.getObservers();
     }

@@ -37,18 +37,30 @@ public class SybilSimulator extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
+        stage.setResizable(false);
         stage.show();
     }
 
     public void onCreateNode() {
-        Circle displayedNode = create();
         Node createdNode = new Node();
+        /* int circleRadius = 50;
+        Circle circle = new Circle();
+        circle.setFill(Color.web("#ffffff",0.5));
+        circle.setRadius(circleRadius);
+        circle.setStroke(Color.web("#000000",0.5));
+        circle.relocate(createdNode.getLocation().getX() - (circleRadius-10), createdNode.getLocation().getY() - (circleRadius-10));
+        anchorPane.getChildren().add(circle); */
+
+        Circle displayedNode = createNodeCircle();
         anchorPane.getChildren().add(displayedNode);
         displayedNode.relocate(createdNode.getLocation().getX(), createdNode.getLocation().getY());
         createNode.setDisable(Network.getNumOfNodes() >= Constants.Node.MAX_NODES);
         //Label nodeLabel = new Label(createdNode.addressToString());
         //anchorPane.getChildren().add(nodeLabel);
         //nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
+
+
+
     }
 
     public void onStartSybilAttack(ActionEvent actionEvent) {
@@ -61,7 +73,7 @@ public class SybilSimulator extends Application {
     }
 
     public void onCreateAttackNode(ActionEvent actionEvent) {
-        Circle displayedANode = create();
+        Circle displayedANode = createNodeCircle();
         displayedANode.setFill(Color.web("#e84723"));
         Node createdANode = new Node();
         anchorPane.getChildren().add((displayedANode));
@@ -74,7 +86,7 @@ public class SybilSimulator extends Application {
         nodeLabel2.relocate(createdANode.getLocation().getX()-20, createdANode.getLocation().getY()-20);
     }
 
-    public Circle create() {
+    public Circle createNodeCircle() {
         Circle circle = new Circle();
         circle.setFill(Color.web("#7ac5cd"));
         circle.setRadius(10);

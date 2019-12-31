@@ -3,7 +3,7 @@ package network;
 import network.old.*;
 
 import java.util.*;
-import static network.Constants.Node.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
@@ -11,9 +11,7 @@ public class Node implements Comparator<Node>, Runnable {
     private short[] address;
     private LocationCreator.Location location;
     private boolean active;
-    private final Packet[] buffer;
-    private int readPtr, writePtr;
-    private volatile int packetsTP; // packets to process
+    private final ConcurrentLinkedQueue<Packet> buffer;
     private HashMap<short[], Node> routingTable;
 
     public LocationCreator.Location getLocation() {
@@ -21,12 +19,13 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     public Node() {
-        buffer = new Packet[1024];
+        buffer = new ConcurrentLinkedQueue<>();
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
         thread = new Thread(this);
         thread.start();
+        Network.registerNode(this);
     }
 
     @Override
@@ -37,23 +36,21 @@ public class Node implements Comparator<Node>, Runnable {
                 sendHelloPackets();
             }
         }, 0, HELLO_INTERVAL);*/
-        while (true) {
-            synchronized (buffer) {
-                while (packetsTP == 0 && active) {
+        while (active) {
+                while (buffer.isEmpty() && active) {
                     try {
-                        buffer.wait();
+                        synchronized (buffer) {
+                            buffer.wait();
+                        }
                     } catch (InterruptedException e) {
                         System.out.println(e.getMessage());
                     }
                 }
                 if (!active) {
                     break;
+                } else {
+                    handlePacket(buffer.poll());
                 }
-                else {
-                    packetsTP--;
-                    handlePacket(buffer[readPtr++ % BUFFER_SIZE]);
-                }
-            }
         }
     }
 
@@ -68,7 +65,8 @@ public class Node implements Comparator<Node>, Runnable {
 
     public void receivePacket(Packet packet) {
         synchronized (buffer) {
-            buffer[writePtr++ % BUFFER_SIZE] = packet;
+            buffer.add(packet);
+            buffer.notifyAll();
         }
     }
 

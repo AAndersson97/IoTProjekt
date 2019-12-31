@@ -30,9 +30,6 @@ public class Debug {
                     displayAreas();
                     areaActive ^= true;
                     break;
-                case S:
-                    sendPacket();
-                    break;
 
             }
         });
@@ -67,21 +64,4 @@ public class Debug {
         rectangles = new Rectangle[]{rectangle, rectangle2, rectangle3, rectangle4, rectangle5, rectangle6};
     }
 
-    private static void sendPacket() {
-        Node node = Network.getNodeList().get(0);
-        if (node == null)
-            return;
-        Network.sendPacket(node.getAddress(), node.getAddress(), getEmptyPacket(node));
-}
-
-    private static HelloPacket getEmptyPacket(Node node) {
-        try {
-            OSPFHeader ospfHeader = new OSPFHeader(OSPFPacketType.Hello, 0, node.getAreaId(), node.getAddress());
-            return new HelloPacket(null, ospfHeader, null, 0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 }
