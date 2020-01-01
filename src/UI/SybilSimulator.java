@@ -59,7 +59,7 @@ public class SybilSimulator extends Application {
 
     }
 
-    public void onStartSybilAttack(ActionEvent actionEvent) {
+    public void onStartSybilAttack() {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         for (SybilNode node : createdNode.getSybilNodes())
