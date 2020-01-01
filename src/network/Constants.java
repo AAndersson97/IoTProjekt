@@ -27,6 +27,7 @@ public final class Constants {
         public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
         public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;
         public static final int BUFFER_SIZE = 1024;
+        public static final int NUM_OF_SYBIL = 3;
     }
     public static final class Protocol {
         public static final int SCALING_FACTOR = 1/16; // 0.0625 sekunder

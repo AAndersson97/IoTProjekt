@@ -2,12 +2,19 @@ package network;
 
 public class AttackNode extends Node {
 
-    AttackNode(int numOfSybil) {
+    private SybilNode[] sybilNodes;
+
+    public AttackNode(int numOfSybil) {
+        sybilNodes = new SybilNode[Constants.Node.NUM_OF_SYBIL];
         createSybilNodes(numOfSybil);
     }
 
     public void createSybilNodes(int num) {
         while (num-- > 0)
-            new SybilNode(this);
+            sybilNodes[num] = new SybilNode(this);
+    }
+
+    public SybilNode[] getSybilNodes() {
+        return sybilNodes;
     }
 }
