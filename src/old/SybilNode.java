@@ -1,4 +1,8 @@
-package network;
+package old;
+
+import network.AttackNode;
+import network.Node;
+import network.Packet;
 
 public class SybilNode extends Node {
 

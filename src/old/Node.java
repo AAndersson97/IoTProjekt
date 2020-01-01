@@ -1,10 +1,10 @@
-package network.old;
+package old;
 
 import network.IPHeader;
+import network.Location;
 import network.LocationCreator;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -14,7 +14,7 @@ public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private short[] address;
-    private LocationCreator.Location location;
+    private Location location;
     private boolean active;
     private final static ArrayDeque<Runnable> queue;
     private int areaId;
@@ -22,7 +22,7 @@ public class Node implements Comparator<Node>, Runnable {
     private boolean isABR;
     private HashMap<short[], Node> routingTable;
 
-    public LocationCreator.Location getLocation() {
+    public Location getLocation() {
         return location;
     }
 

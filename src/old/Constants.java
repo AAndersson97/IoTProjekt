@@ -1,10 +1,4 @@
-package network;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import static network.Constants.GUI.*;
+package old;
 
 public final class Constants {
     public static final boolean LOGGING = true;

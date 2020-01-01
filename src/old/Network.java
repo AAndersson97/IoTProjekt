@@ -1,6 +1,7 @@
-package network.old;
+package old;
 
-import network.LocationCreator;
+import network.Location;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -45,7 +46,7 @@ public class Network {
      * @param node En nod i nätverket som saknar område
      */
     public static int getArea(Node node) throws Exception {
-        LocationCreator.Location location = node.getLocation();
+        Location location = node.getLocation();
         int x = location.getX(), y = location.getY(), areaId = 0;
         /*if ((areaId = area1or2.apply(x,y)) == -1)
             if ((areaId = area3or0.apply(x,y)) == -1)

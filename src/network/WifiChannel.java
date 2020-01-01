@@ -1,8 +1,7 @@
 package network;
 
-import network.old.Packet;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import static network.Constants.Network.PACKET_LOSS;
 
@@ -18,14 +17,19 @@ public class WifiChannel extends Channel {
         observers = new ArrayList<>();
     }
 
-    public void send(Packet packet, short[] address) {
+    public void send(Packet packet, short[] destination, Node sender) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> observers.forEach(node -> {
                 if (simulateLoss());
-                else if (!address.equals(node.getAddress()))
+                else if(!isWithinTransmissionArea(sender, node));
+                else if (!Arrays.equals(destination, node.getAddress()))
                     node.receivePacket(packet);
         }));
+    }
+
+    public boolean isWithinTransmissionArea(Node sender, Node receiver) {
+        return Transmission.isInsideTransmissionArea(sender.getTransmissionRadius(), sender.getLocation(), receiver.getLocation());
     }
 
     private boolean simulateLoss() {

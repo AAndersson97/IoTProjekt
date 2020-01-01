@@ -28,6 +28,9 @@ public class SybilSimulator extends Application {
     @FXML
     Button sybilAttack;
 
+    // TA BORT
+    static SybilSimulator instance;
+
     public static void main(String[] args){
         launch(args);
     }
@@ -38,28 +41,24 @@ public class SybilSimulator extends Application {
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.setResizable(false);
+        Debug.registerKeyEvents(stage.getScene(), instance);
         stage.show();
+    }
+
+    SybilSimulator() {
+        instance = this;
     }
 
     public void onCreateNode() {
         Node createdNode = new Node();
-        /* int circleRadius = 50;
-        Circle circle = new Circle();
-        circle.setFill(Color.web("#ffffff",0.5));
-        circle.setRadius(circleRadius);
-        circle.setStroke(Color.web("#000000",0.5));
-        circle.relocate(createdNode.getLocation().getX() - (circleRadius-10), createdNode.getLocation().getY() - (circleRadius-10));
-        anchorPane.getChildren().add(circle); */
 
         Circle displayedNode = createNodeCircle();
         anchorPane.getChildren().add(displayedNode);
-        displayedNode.relocate(createdNode.getLocation().getX(), createdNode.getLocation().getY());
+        displayedNode.relocate(createdNode.getLocation().getX() - CIRCLE_RADIUS, createdNode.getLocation().getY() - CIRCLE_RADIUS);
         createNode.setDisable(Network.getNumOfNodes() >= Constants.Node.MAX_NODES);
         //Label nodeLabel = new Label(createdNode.addressToString());
         //anchorPane.getChildren().add(nodeLabel);
         //nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
-
-
 
     }
 
@@ -89,7 +88,7 @@ public class SybilSimulator extends Application {
     public Circle createNodeCircle() {
         Circle circle = new Circle();
         circle.setFill(Color.web("#7ac5cd"));
-        circle.setRadius(10);
+        circle.setRadius(CIRCLE_RADIUS);
         circle.setStroke(Color.BLACK);
         return circle;
     }

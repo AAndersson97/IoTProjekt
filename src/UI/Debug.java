@@ -3,15 +3,12 @@ package UI;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import network.*;
-import network.old.HelloPacket;
-import network.old.OSPFHeader;
-import network.old.OSPFPacketType;
-
 import static network.Constants.GUI.*;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Klass innehållandes metoder enbart för att felsöka programmet
@@ -19,20 +16,43 @@ import java.io.IOException;
 public class Debug {
 
     private static Rectangle[] rectangles;
+    private static Circle[] circles;
     private static boolean areaActive = false;
+    private static boolean showTA = false;
     private static Pane pane;
     public static void registerKeyEvents(Scene scene, SybilSimulator sybilSimulator) {
-        createRectangles();
         pane = sybilSimulator.anchorPane;
         scene.setOnKeyPressed((key) -> {
             switch (key.getCode()) {
-                case A:
-                    displayAreas();
-                    areaActive ^= true;
+                case T:
+                    showTA ^= true;
+                    displayTransmissionAreas();
                     break;
 
             }
         });
+    }
+
+    private static void displayTransmissionAreas() {
+        if (showTA) {
+            pane.getChildren().addAll(circles);
+        } else {
+            pane.getChildren().removeAll(circles);
+        }
+    }
+
+    private static void createTACircles() {
+        ArrayList<Node> nodes = Network.getNodeList();
+        circles = new Circle[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            Circle circle = new Circle();
+            int circleRadius = nodes.get(i).getTransmissionRadius();
+            circle.setFill(Color.web("#ffffff", 0.5));
+            circle.setRadius(circleRadius);
+            circle.setStroke(Color.web("#000000", 0.5));
+            circle.relocate(nodes.get(i).getLocation().getX() - (circleRadius - 10), nodes.get(i).getLocation().getY() - (circleRadius - 10));
+            circles[i] = circle;
+        }
     }
 
     private static void displayAreas() {

@@ -1,4 +1,4 @@
-package network.old;
+package old;
 
 import network.IPHeader;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public class IPPacket implements Packet {
     private IPHeader ipHeader;
-    private network.old.TCPPacket TCPPacket;
+    private old.TCPPacket TCPPacket;
 
     public IPPacket(IPHeader ipHeader, TCPPacket packet) {
         this.ipHeader = ipHeader;

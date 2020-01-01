@@ -1,7 +1,5 @@
 package utilities;
 
-import network.old.TCPPacket;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -74,33 +72,6 @@ public class Checksum {
         sum = (~sum&0xFFFF);
 
         return sum;
-    }
-
-    // Returnera den oäkta header:n för att kalkylera kontrollsumma
-    public static byte[] getChecksumData(TCPPacket packet, byte[] srcAddress, byte[] dstAddress) {
-        byte[] reserved  = new byte[]{ (byte) 0 };
-        byte[] protocol  = new byte[]{ (byte) TCP_PROTOCOL};
-
-        short tcpSegmentLength = (short) packet.getLength();
-        ByteBuffer b = ByteBuffer.allocate(2);
-        b.putShort(tcpSegmentLength);
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
-            out.write(srcAddress);
-            out.write(dstAddress);
-            out.write(reserved) ;
-            out.write(protocol);
-            out.write(b.array());
-            out.write(packet.toByteArray()) ;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return out.toByteArray();
-    }
-
-    public static boolean verifyTCPPacket(TCPPacket packet, byte[] srcAddress, byte[] dstAddress) {
-        return 0 == calculate(getChecksumData(packet, srcAddress, dstAddress));
     }
 
 }

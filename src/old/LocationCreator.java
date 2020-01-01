@@ -1,16 +1,18 @@
-package network;
+package old;
+
+import network.Location;
 
 import java.util.ArrayList;
 
 import static network.Constants.GUI.*;
 
 public class LocationCreator {
-    private static LocationCreator instance ;
+    private static network.LocationCreator instance ;
     private static ArrayList<Location> locations;
 
     static {
         locations = new ArrayList<>();
-        instance = new LocationCreator();
+        instance = new network.LocationCreator();
     }
 
     private LocationCreator() {
@@ -39,7 +41,7 @@ public class LocationCreator {
         return location;
     }
 
-    public static LocationCreator getInstance() {
+    public static network.LocationCreator getInstance() {
         return instance;
     }
 

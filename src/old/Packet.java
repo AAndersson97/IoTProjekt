@@ -1,4 +1,4 @@
-package network.old;
+package old;
 
 public interface Packet {
 }

@@ -1,4 +1,7 @@
-package network;
+package old;
+
+import network.Node;
+import network.SybilNode;
 
 public class AttackNode extends Node {
 

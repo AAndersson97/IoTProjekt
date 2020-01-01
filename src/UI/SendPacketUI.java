@@ -6,18 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import network.*;
 import network.IPHeader;
-import network.old.IPPacket;
-import network.old.TCPHeader;
-import network.old.TCPPacket;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,6 +64,10 @@ public class SendPacketUI {
     }
 
     public void onSendPacket() {
+        if (emptyTextField()) {
+            new Alert(Alert.AlertType.ERROR, "A sender and a receiver must be specified", ButtonType.OK).show();
+            return;
+        }
         String msg = msgBox.getText().trim();
         int msgLength = msg.length();
         String[] srcAddress = sourceAddress.getSelectionModel().getSelectedItem().split("\\.");
@@ -78,18 +75,13 @@ public class SendPacketUI {
         short[] src = stringsToShorts(srcAddress);
         short[] dest = stringsToShorts(destination);
         IPHeader ipHeader = null;
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Packet sent!", ButtonType.OK);
+        alert.setHeaderText("Shipment of packet");
+        alert.show();
+    }
 
-        /*try {
-            ipHeader = new IPHeader(msgLength, src,
-                    dest, TCP_PROTOCOL);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        TCPHeader tcpHeader = new TCPHeader(0,0,0,0, DEFAULT_WIN_SIZE);
-
-        TCPPacket packet = new TCPPacket(tcpHeader, msg.getBytes());
-        IPPacket ipPacket = new IPPacket(ipHeader, packet);
-        Network.sendPacket(dest, src, ipPacket);*/
+    private boolean emptyTextField() {
+        return sourceAddress.getSelectionModel().getSelectedIndex() == -1 || destAddress.getSelectionModel().getSelectedIndex() == -1;
     }
 
     private void createAddressCollections() {

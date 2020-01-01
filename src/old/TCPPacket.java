@@ -1,4 +1,4 @@
-package network.old;
+package old;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

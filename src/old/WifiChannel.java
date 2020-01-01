@@ -1,4 +1,4 @@
-package network.old;
+package old;
 
 import network.Channel;
 import network.Simulator;
@@ -34,7 +34,7 @@ public class WifiChannel extends Channel {
         return (new Random().nextInt(100/PACKET_LOSS)==0);
     }
 
-    public void addObserver(network.old.Node node) {
+    public void addObserver(old.Node node) {
         observers.add(node);
     }
 

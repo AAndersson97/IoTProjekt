@@ -1,7 +1,5 @@
 package network;
 
-import network.old.*;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -9,12 +7,13 @@ public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     // Routerns adress är dess identifikation (Router Id)
     private short[] address;
-    private LocationCreator.Location location;
+    private Location location;
     private boolean active;
+    private Transmission transmission;
     private final ConcurrentLinkedQueue<Packet> buffer;
     private HashMap<short[], Node> routingTable;
 
-    public LocationCreator.Location getLocation() {
+    public Location getLocation() {
         return location;
     }
 
@@ -23,34 +22,30 @@ public class Node implements Comparator<Node>, Runnable {
         location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
+        address = AddressGenerator.generateAddress();
         thread = new Thread(this);
+        transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
         Network.registerNode(this);
     }
 
     @Override
     public void run() {
-        /*Simulator.scheduleTaskPeriodically(new TimerTask() {
-            @Override
-            public void run() {
-                sendHelloPackets();
-            }
-        }, 0, HELLO_INTERVAL);*/
         while (active) {
-                while (buffer.isEmpty() && active) {
-                    try {
-                        synchronized (buffer) {
-                            buffer.wait();
-                        }
-                    } catch (InterruptedException e) {
-                        System.out.println(e.getMessage());
+            while (buffer.isEmpty() && active) {
+                try {
+                    synchronized (buffer) {
+                        buffer.wait();
                     }
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
                 }
-                if (!active) {
-                    break;
-                } else {
-                    handlePacket(buffer.poll());
-                }
+            }
+            if (!active) {
+                break;
+            } else {
+                handlePacket(buffer.poll());
+            }
         }
     }
 
@@ -71,21 +66,9 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void handlePacket(Packet packet) {
-        if (packet instanceof OSPFPacket) {
-            handleOSPFPacket((OSPFPacket) packet);
-        } else if (packet instanceof IPPacket){
-            handleIPPacket((IPPacket) packet);
-        }
     }
 
-    private void handleOSPFPacket(OSPFPacket packet) {
-
-    }
-
-    private void handleIPPacket(IPPacket packet) {
-        IPHeader ipHeader = IPPacket.getIpHeader(packet);
-        if (Arrays.equals(ipHeader.destinationAdress, address))
-            System.out.println("Packet arrived from " + Arrays.toString(ipHeader.sourceAdress));
+    private void handleIPPacket(Packet packet) {
     }
 
     private void forwardPacket(Packet packet) {
@@ -101,6 +84,14 @@ public class Node implements Comparator<Node>, Runnable {
         synchronized (buffer) {
             buffer.notifyAll();
         }
+    }
+
+    public int getTransmissionRadius() {
+        return transmission.transmissionRadius();
+    }
+
+    public Transmission getTransmission() {
+        return transmission;
     }
 
     public boolean isActive() {
