@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -20,6 +21,8 @@ import static network.Constants.Node.NUM_OF_SYBIL;
 import java.util.Arrays;
 
 public class SybilSimulator extends Application {
+    @FXML
+    MenuBar menuDisplay;
     @FXML
     AnchorPane anchorPane;
     @FXML
@@ -53,9 +56,10 @@ public class SybilSimulator extends Application {
     public void onCreateNode() {
         Node createdNode = new Node();
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#7ac5cd")));
-        //Label nodeLabel = new Label(createdNode.addressToString());
-        //anchorPane.getChildren().add(nodeLabel);
-        //nodeLabel.relocate(createdNode.getLocation().getX()-13,createdNode.getLocation().getY()+20);
+        Label nodeLabel = new Label(Arrays.toString(createdNode.getAddress()));
+        anchorPane.getChildren().add(nodeLabel);
+        nodeLabel.relocate(createdNode.getLocation().getX()-30,createdNode.getLocation().getY()+20);
+
 
     }
 
