@@ -42,10 +42,10 @@
       </HBox>
       <MenuBar fx:id="menuDisplay" layoutY="2.0">
         <menus>
-          <Menu mnemonicParsing="false" text="Display">
+          <Menu mnemonicParsing="false" text="View">
             <items>
-              <MenuItem fx:id="TAMenu" mnemonicParsing="false" onAction="#showTAs" text="Display Transmission Area" />
-                  <MenuItem fx:id="TAMenu2" mnemonicParsing="false" onAction="#hideTAs" text="Hide Transmission Area" />
+              <MenuItem fx:id="TAMenu" mnemonicParsing="false" onAction="#showTAs" text="Show Transmission Area" />
+              <MenuItem fx:id="IPMenu" mnemonicParsing="false" onAction="#showIPAddresses" text="Show IP addresses"></MenuItem>
             </items>
           </Menu>
         </menus>

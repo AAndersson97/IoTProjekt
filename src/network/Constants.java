@@ -36,4 +36,6 @@ public final class Constants {
         public static final short[] MULTI_CAST = new short[]{255,0,0,5};
         public static final short[] FIRST_ADDRESS = new short[]{110,0,0,1};
     }
+    public static final class Simulation {
+    }
 }

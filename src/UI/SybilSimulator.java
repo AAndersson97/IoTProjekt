@@ -1,11 +1,6 @@
 package UI;
 
 import javafx.application.Application;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,14 +10,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class SybilSimulator extends Application {
 
@@ -31,7 +24,7 @@ public class SybilSimulator extends Application {
     @FXML
     MenuItem TAMenu;
     @FXML
-    MenuItem TAMenu2;
+    MenuItem IPMenu;
     @FXML
     AnchorPane anchorPane;
     @FXML
@@ -42,13 +35,10 @@ public class SybilSimulator extends Application {
     Button sybilAttack;
 
     private static ArrayList<Circle> taCircles;
-
+    private static boolean TAVisible; // true om överföringsareor är synliga
+    private static boolean IPVisible;
 
     private static ArrayList<Label> addressLabels = new ArrayList<>();
-
-    public static ArrayList<Label> getAddressLabels() {
-        return addressLabels;
-    }
 
     public static void main(String[] args) {
         launch(args);
@@ -66,30 +56,36 @@ public class SybilSimulator extends Application {
 
     public void onCreateNode() {
         Node createdNode = new Node();
-        anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#7ac5cd")));
-        String address = Arrays.toString(createdNode.getAddress()).replace(",", ".");
-        Label nodeLabel = new Label(address.substring(1, address.length()-1));
-        anchorPane.getChildren().add(nodeLabel);
-        nodeLabel.relocate(createdNode.getLocation().getX()-29,createdNode.getLocation().getY()+12);
-        nodeLabel.setVisible(false);
+        Label nodeLabel = createAddresslabel(createdNode);
         addressLabels.add(nodeLabel);
         Circle taCircle = createTACircle(createdNode);
-        anchorPane.getChildren().add(taCircle);
+        anchorPane.getChildren().addAll(createNodeCircle(createdNode, Color.web("#7ac5cd")),taCircle, nodeLabel);
     }
 
     public void onStartSybilAttack() {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
-        Circle aTACircle = createTACircle(createdNode);
-        anchorPane.getChildren().add(aTACircle);
+        Circle tACircle = createTACircle(createdNode);
+        anchorPane.getChildren().add(tACircle);
         for (SybilNode node : createdNode.getSybilNodes()){
-            anchorPane.getChildren().add(createNodeCircle(node, Color.web("#cfc7c0")));
+            addressLabels.add(createAddresslabel(node));
             Circle taCircle = createTACircle(node);
-            anchorPane.getChildren().add(taCircle);
+            anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle);
         }
-
     }
 
+    /**
+     * Skapar ett Label-objekt innehållandes en sträng med nodens IP-address
+     * @param node Noden vars IP-address ska sparas i ett Label-objekt
+     * @return
+     */
+    private Label createAddresslabel(Node node) {
+        String address = Arrays.toString(node.getAddress()).replace(",", ".");
+        Label nodeLabel = new Label(address.substring(1, address.length()-1));
+        nodeLabel.relocate(node.getLocation().getX()-29,node.getLocation().getY()+12);
+        nodeLabel.setVisible(IPVisible);
+        return nodeLabel;
+    }
 
     public Circle createNodeCircle(Node node, Color fill) {
         Circle circle = new Circle();
@@ -105,12 +101,8 @@ public class SybilSimulator extends Application {
         try {
             SendPacketUI sPUI = new SendPacketUI();
             sendPacketBtn.disableProperty().bindBidirectional(sPUI.getIsActive());
-            System.out.println("Open");
             sPUI.showUI();
-            System.out.println("Closed");
-            for(Label nL : addressLabels){
-                nL.setVisible(true);
-            }
+            showIPAddresses();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -120,14 +112,18 @@ public class SybilSimulator extends Application {
      * Visa överföringsområde för varje nod om de är dolda annars dölj områden
      */
     public void showTAs() {
+        TAVisible ^= true;
         for (Circle circle : taCircles)
-            circle.setVisible(true);
-        TAMenu.setText("Show Transmission Areas");
+            circle.setVisible(TAVisible);
+        TAMenu.setText(TAVisible ? "Hide Transmission Areas" : "Show Transmission Areas" );
     }
-    public void hideTAs(){
-        for(Circle circle : taCircles)
-            circle.setVisible(false);
-        TAMenu2.setText("Hide Transmission Areas");
+
+    public void showIPAddresses() {
+        IPVisible ^= true;
+        for(Label nL : addressLabels)
+            nL.setVisible(IPVisible);
+        IPMenu.setText(IPVisible ? "Hide IP addresses" : "Show IP addresses");
+
     }
 
     private static Circle createTACircle(Node node) {
@@ -138,7 +134,7 @@ public class SybilSimulator extends Application {
         circle.setStroke(Color.web("#000000", 0.5));
         circle.relocate(node.getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, node.getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
         circle.setViewOrder(1);
-        circle.setVisible(false);
+        circle.setVisible(TAVisible);
         taCircles.add(circle);
         return circle;
     }
@@ -150,9 +146,7 @@ public class SybilSimulator extends Application {
         super.stop();
     }
 
-    /*public void packetLine(int startX, int startY, int endX, int endY) {
-        Line line = new Line(startX,startY,endX,endY);
-        anchorPane.getChildren().add(line);
-        line.toBack();
-    }*/
+    public static ArrayList<Label> getAddressLabels() {
+        return addressLabels;
+    }
 }
