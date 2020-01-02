@@ -27,7 +27,7 @@ public class AddressGenerator {
         address[1] = addresses[0][1];
         address[2] = addresses[0][2];
         address[3] = (short) (addresses[numOfAddresses-1][3]+1);
-        numOfAddresses++;
+        addresses[numOfAddresses++] = address;
         return address;
     }
 

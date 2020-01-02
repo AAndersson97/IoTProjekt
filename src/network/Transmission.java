@@ -11,13 +11,13 @@ public class Transmission {
 
     private void calculateTA() {
         if (signalStrength == SignalStrength.EXCELLENT)
-            transmissionRadius = 100;
+            transmissionRadius = 200;
         else if (signalStrength == SignalStrength.VERYGOOD)
-            transmissionRadius = 50;
+            transmissionRadius = 100;
         else if (signalStrength == SignalStrength.ACCEPTABLE)
-            transmissionRadius = 25;
+            transmissionRadius = 50;
         else
-            transmissionRadius = 20;
+            transmissionRadius = 25;
     }
 
     public void setSignalStrength(SignalStrength signalStrength) {

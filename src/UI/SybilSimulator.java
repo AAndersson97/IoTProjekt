@@ -125,7 +125,7 @@ public class SybilSimulator extends Application {
             circle.setFill(Color.web("#ffffff", 0.5));
             circle.setRadius(circleRadius);
             circle.setStroke(Color.web("#000000", 0.5));
-            circle.relocate(nodes.get(i).getLocation().getX() - (circleRadius - 10), nodes.get(i).getLocation().getY() - (circleRadius - 10));
+            circle.relocate(nodes.get(i).getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, nodes.get(i).getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
             taCircles[i] = circle;
         }
     }
