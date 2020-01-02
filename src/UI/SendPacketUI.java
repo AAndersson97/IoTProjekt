@@ -2,15 +2,18 @@ package UI;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import network.*;
 import network.IPHeader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +40,18 @@ public class SendPacketUI {
         stage.setX(1092);
         stage.setY(160);
         stage.show();
+        stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
+                new ExitHandler());
 
+    }
+
+    class ExitHandler implements EventHandler<WindowEvent> {
+        public void handle(WindowEvent event) {
+            for(Label nL : SybilSimulator.getAddressLabels()){
+                nL.setVisible(false);
+            }
+
+        }
     }
 
     public void showUI() throws Exception {

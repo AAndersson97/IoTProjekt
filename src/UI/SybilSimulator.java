@@ -1,24 +1,24 @@
 package UI;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class SybilSimulator extends Application {
 
@@ -38,7 +38,13 @@ public class SybilSimulator extends Application {
     Button sybilAttack;
 
     private static ArrayList<Circle> taCircles;
-    private ArrayList<Label> addressLabels = new ArrayList<>();
+
+
+    private static ArrayList<Label> addressLabels = new ArrayList<>();
+
+    public static ArrayList<Label> getAddressLabels() {
+        return addressLabels;
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -64,17 +70,22 @@ public class SybilSimulator extends Application {
         nodeLabel.setVisible(false);
         addressLabels.add(nodeLabel);
         Circle taCircle = createTACircle(createdNode);
-        taCircle.setVisible(false);
-        taCircles.add(taCircle);
         anchorPane.getChildren().add(taCircle);
     }
 
     public void onStartSybilAttack() {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
-        for (SybilNode node : createdNode.getSybilNodes())
+        Circle aTACircle = createTACircle(createdNode);
+        anchorPane.getChildren().add(aTACircle);
+        for (SybilNode node : createdNode.getSybilNodes()){
             anchorPane.getChildren().add(createNodeCircle(node, Color.web("#cfc7c0")));
+            Circle taCircle = createTACircle(node);
+            anchorPane.getChildren().add(taCircle);
+        }
+
     }
+
 
     public Circle createNodeCircle(Node node, Color fill) {
         Circle circle = new Circle();
@@ -88,7 +99,10 @@ public class SybilSimulator extends Application {
 
     public void onSendPacket() {
         try {
-            new SendPacketUI().showUI();
+            System.out.println(sendPacketBtn == null);
+            SendPacketUI sPUI = new SendPacketUI();
+            sPUI.showUI();
+            sendPacketBtn.setDisable(sPUI.);
             for(Label nL : addressLabels){
                 nL.setVisible(true);
             }
@@ -119,6 +133,8 @@ public class SybilSimulator extends Application {
         circle.setStroke(Color.web("#000000", 0.5));
         circle.relocate(node.getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, node.getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
         circle.setViewOrder(1);
+        circle.setVisible(false);
+        taCircles.add(circle);
         return circle;
     }
 
