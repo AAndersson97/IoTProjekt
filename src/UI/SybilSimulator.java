@@ -64,17 +64,22 @@ public class SybilSimulator extends Application {
         nodeLabel.setVisible(false);
         addressLabels.add(nodeLabel);
         Circle taCircle = createTACircle(createdNode);
-        taCircle.setVisible(false);
-        taCircles.add(taCircle);
         anchorPane.getChildren().add(taCircle);
     }
 
     public void onStartSybilAttack() {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
-        for (SybilNode node : createdNode.getSybilNodes())
+        Circle aTACircle = createTACircle(createdNode);
+        anchorPane.getChildren().add(aTACircle);
+        for (SybilNode node : createdNode.getSybilNodes()){
             anchorPane.getChildren().add(createNodeCircle(node, Color.web("#cfc7c0")));
+            Circle taCircle = createTACircle(node);
+            anchorPane.getChildren().add(taCircle);
+        }
+
     }
+
 
     public Circle createNodeCircle(Node node, Color fill) {
         Circle circle = new Circle();
@@ -119,6 +124,8 @@ public class SybilSimulator extends Application {
         circle.setStroke(Color.web("#000000", 0.5));
         circle.relocate(node.getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, node.getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
         circle.setViewOrder(1);
+        circle.setVisible(false);
+        taCircles.add(circle);
         return circle;
     }
 
