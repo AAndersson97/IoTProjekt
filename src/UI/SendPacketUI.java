@@ -34,7 +34,10 @@ public class SendPacketUI {
         }
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
+        stage.setX(1092);
+        stage.setY(160);
         stage.show();
+
     }
 
     public void showUI() throws Exception {
