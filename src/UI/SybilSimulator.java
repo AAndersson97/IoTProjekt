@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SybilSimulator extends Application {
+
     @FXML
     MenuBar menuDisplay;
     @FXML
     MenuItem TAMenu;
+    @FXML
+    MenuItem TAMenu2;
     @FXML
     AnchorPane anchorPane;
     @FXML
@@ -97,10 +100,15 @@ public class SybilSimulator extends Application {
     /**
      * Visa överföringsområde för varje nod om de är dolda annars dölj områden
      */
-    public void displayTAs() {
+    public void showTAs() {
         for (Circle circle : taCircles)
-            circle.setVisible(!circle.isVisible());
-        TAMenu.setText(TAMenu.getText().equals("Display Transmission Areas")? "Hide Transmission Areas": "Display Transmission Areas");
+            circle.setVisible(true);
+        TAMenu.setText("Show Transmission Areas");
+    }
+    public void hideTAs(){
+        for(Circle circle : taCircles)
+            circle.setVisible(false);
+        TAMenu2.setText("Hide Transmission Areas");
     }
 
     private static Circle createTACircle(Node node) {
