@@ -8,6 +8,8 @@ public final class Constants {
         public static final int WINDOW_HEIGHT = 500;
         public static final int CIRCLE_RADIUS = 10;
         public static final int BOTTOM_BAR_HEIGHT = 50;
+        public static final int PACKET_GUI_X = 1092;
+        public static final int PACKET_GUI_Y = 160;
         public static final String WINDOW_TITLE = "Sybil Simulator";
     }
     public static final class Node {

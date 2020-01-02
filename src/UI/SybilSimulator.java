@@ -55,6 +55,8 @@ public class SybilSimulator extends Application {
     }
 
     public void onCreateNode() {
+        TAMenu.setDisable(false);
+        IPMenu.setDisable(false);
         Node createdNode = new Node();
         Label nodeLabel = createAddresslabel(createdNode);
         addressLabels.add(nodeLabel);
@@ -63,6 +65,8 @@ public class SybilSimulator extends Application {
     }
 
     public void onStartSybilAttack() {
+        TAMenu.setDisable(false);
+        IPMenu.setDisable(false);
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
@@ -80,7 +84,7 @@ public class SybilSimulator extends Application {
      * @return
      */
     private Label createAddresslabel(Node node) {
-        String address = Arrays.toString(node.getAddress()).replace(",", ".");
+        String address = Arrays.toString(node.getAddress()).replace(", ", ".");
         Label nodeLabel = new Label(address.substring(1, address.length()-1));
         nodeLabel.relocate(node.getLocation().getX()-29,node.getLocation().getY()+12);
         nodeLabel.setVisible(IPVisible);
@@ -100,8 +104,11 @@ public class SybilSimulator extends Application {
     public void onSendPacket() {
         try {
             SendPacketUI sPUI = new SendPacketUI();
-            sendPacketBtn.disableProperty().bindBidirectional(sPUI.getIsActive());
-            sPUI.showUI();
+            sendPacketBtn.setDisable(true);
+            sPUI.showUI(windowEvent -> {
+                toggleIPAddresses();
+                sendPacketBtn.setDisable(false);
+            });
             showIPAddresses();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -111,19 +118,23 @@ public class SybilSimulator extends Application {
     /**
      * Visa överföringsområde för varje nod om de är dolda annars dölj områden
      */
-    public void showTAs() {
+    public void toggleTAs() {
         TAVisible ^= true;
         for (Circle circle : taCircles)
             circle.setVisible(TAVisible);
         TAMenu.setText(TAVisible ? "Hide Transmission Areas" : "Show Transmission Areas" );
     }
 
-    public void showIPAddresses() {
+    public void toggleIPAddresses() {
         IPVisible ^= true;
         for(Label nL : addressLabels)
             nL.setVisible(IPVisible);
         IPMenu.setText(IPVisible ? "Hide IP addresses" : "Show IP addresses");
+    }
 
+    public void showIPAddresses() {
+        IPVisible = false;
+        toggleIPAddresses();
     }
 
     private static Circle createTACircle(Node node) {
@@ -144,9 +155,5 @@ public class SybilSimulator extends Application {
         Network.shutdownNetwork();
         Simulator.shutdown();
         super.stop();
-    }
-
-    public static ArrayList<Label> getAddressLabels() {
-        return addressLabels;
     }
 }

@@ -1,8 +1,8 @@
 package UI;
 
-import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static network.Constants.Node.ADDRESS_LENGTH;
+import static network.Constants.GUI.PACKET_GUI_Y;
+import static network.Constants.GUI.PACKET_GUI_X;
 
 public class SendPacketUI {
     @FXML
@@ -28,30 +30,27 @@ public class SendPacketUI {
 
     private short[][] listOfAddresses;
     private ObservableList<String> addressStrings;
-    private BooleanProperty isActive;
 
     public void start(Stage stage) throws Exception {
         if (Network.getNumOfNodes() == 0) {
             new Alert(Alert.AlertType.ERROR, "The number of nodes is zero, it is not possible to send packets", ButtonType.OK).show();
             return;
         }
-        isActive.set(true);
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
-        stage.setX(1092);
-        stage.setY(160);
+        stage.setX(PACKET_GUI_X);
+        stage.setY(PACKET_GUI_Y);
         stage.show();
-        stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
-                windowEvent -> {
-                    isActive.set(false);
-                    for(Label nL : SybilSimulator.getAddressLabels())
-                        nL.setVisible(false);
-                });
     }
 
     public void showUI() throws Exception {
         start(new Stage());
+    }
 
+    public void showUI(EventHandler<WindowEvent> winCloseCallBack) throws Exception {
+        Stage stage = new Stage();
+        stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, winCloseCallBack);
+        start(stage);
     }
 
     public void fillSrcAddresses() {
@@ -116,11 +115,5 @@ public class SendPacketUI {
         }
 
         return numbers;
-    }
-
-    public BooleanProperty getIsActive() {
-        if (isActive == null)
-            isActive = new SimpleBooleanProperty();
-        return isActive;
     }
 }
