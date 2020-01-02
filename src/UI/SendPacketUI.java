@@ -39,6 +39,7 @@ public class SendPacketUI {
 
     public void showUI() throws Exception {
         start(new Stage());
+
     }
 
     public void fillSrcAddresses() {

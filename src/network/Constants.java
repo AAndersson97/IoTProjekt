@@ -11,7 +11,7 @@ public final class Constants {
     private Constants() {}
     public static final class GUI {
         public static final int WINDOW_WIDTH = 660;
-        public static final int WINDOW_HEIGHT = 400;
+        public static final int WINDOW_HEIGHT = 500;
         public static final int CIRCLE_RADIUS = 10;
         public static final String WINDOW_TITLE = "Sybil Simulator";
     }

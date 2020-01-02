@@ -18,6 +18,7 @@ import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SybilSimulator extends Application {
@@ -31,6 +32,8 @@ public class SybilSimulator extends Application {
     Button createNode;
     @FXML
     Button sybilAttack;
+
+    ArrayList<Label> addressLabels = new ArrayList<>();
 
     // TA BORT
     static SybilSimulator instance;
@@ -59,7 +62,8 @@ public class SybilSimulator extends Application {
         Label nodeLabel = new Label(Arrays.toString(createdNode.getAddress()));
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdNode.getLocation().getX()-30,createdNode.getLocation().getY()+20);
-
+        nodeLabel.setVisible(false);
+        addressLabels.add(nodeLabel);
 
     }
 
@@ -83,6 +87,9 @@ public class SybilSimulator extends Application {
     public void onSendPacket() {
         try {
             new SendPacketUI().showUI();
+            for (Label aL : addressLabels){
+                aL.setVisible(true);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
