@@ -1,24 +1,24 @@
 package UI;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class SybilSimulator extends Application {
 
@@ -38,7 +38,13 @@ public class SybilSimulator extends Application {
     Button sybilAttack;
 
     private static ArrayList<Circle> taCircles;
-    private ArrayList<Label> addressLabels = new ArrayList<>();
+
+
+    private static ArrayList<Label> addressLabels = new ArrayList<>();
+
+    public static ArrayList<Label> getAddressLabels() {
+        return addressLabels;
+    }
 
     public static void main(String[] args) {
         launch(args);
