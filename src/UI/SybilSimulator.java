@@ -21,12 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SybilSimulator extends Application {
-    @FXML
-    MenuItem TAMenu2;
+
     @FXML
     MenuBar menuDisplay;
     @FXML
     MenuItem TAMenu;
+    @FXML
+    MenuItem TAMenu2;
     @FXML
     AnchorPane anchorPane;
     @FXML
