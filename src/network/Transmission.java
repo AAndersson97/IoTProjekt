@@ -31,7 +31,7 @@ public class Transmission {
      * @return
      */
     public static boolean isInsideTransmissionArea(int transmissionRadius, Location sender, Location receiver) {
-        if (Constants.LOGGING)
+        if (Constants.LOG_ACTIVE)
             System.out.println("isInsideTransmissionArea " +  "Sender x: " + sender.getX() + " Sender y: " + sender.getY() + " Receiver x: " + receiver.getX() + " Receiver y: " + receiver.getY());
         double a = Math.pow(Math.abs(receiver.getX()-sender.getX()), 2);
         double b = Math.pow(Math.abs(receiver.getY()-sender.getX()),2);
@@ -43,7 +43,7 @@ public class Transmission {
     }
 
     public enum SignalStrength {
-        EXCELLENT(-30), VERYGOOD(-67), ACCEPTABLE(-80), WEAK(-80);
+        EXCELLENT(-30), VERYGOOD(-67), ACCEPTABLE(-80), WEAK(-100);
         int value;
         SignalStrength(int value) {
             this.value = value;

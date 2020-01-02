@@ -1,13 +1,7 @@
 package network;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import static network.Constants.GUI.*;
-
 public final class Constants {
-    public static final boolean LOGGING = true;
+    public static final boolean LOG_ACTIVE = true;
     private Constants() {}
     public static final class GUI {
         public static final int WINDOW_WIDTH = 660;

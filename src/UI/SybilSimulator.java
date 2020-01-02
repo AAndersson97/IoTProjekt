@@ -16,6 +16,7 @@ import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import network.*;
 import static network.Constants.GUI.*;
+import static network.Constants.Node.ADDRESS_LENGTH;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
@@ -33,10 +34,11 @@ public class SybilSimulator extends Application {
     @FXML
     Button sybilAttack;
 
-    ArrayList<Label> addressLabels = new ArrayList<>();
-
     // TA BORT
     static SybilSimulator instance;
+
+    private static Circle[] taCircles;
+    private static boolean showTAAreas;
 
     public static void main(String[] args){
         launch(args);
@@ -53,18 +55,16 @@ public class SybilSimulator extends Application {
     }
 
     public SybilSimulator() {
-        if (instance == null) instance = this;
+        instance = this;
     }
 
     public void onCreateNode() {
         Node createdNode = new Node();
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#7ac5cd")));
-        Label nodeLabel = new Label(Arrays.toString(createdNode.getAddress()));
+        String address = Arrays.toString(createdNode.getAddress()).replace(",", ".");
+        Label nodeLabel = new Label(address.substring(1, address.length()-1));
         anchorPane.getChildren().add(nodeLabel);
         nodeLabel.relocate(createdNode.getLocation().getX()-30,createdNode.getLocation().getY()+20);
-        nodeLabel.setVisible(false);
-        addressLabels.add(nodeLabel);
-
     }
 
     public void onStartSybilAttack() {
@@ -87,11 +87,39 @@ public class SybilSimulator extends Application {
     public void onSendPacket() {
         try {
             new SendPacketUI().showUI();
-            for (Label aL : addressLabels){
-                aL.setVisible(true);
-            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Visa överföringsområde för varje nod
+     */
+    public void showTAs() {
+        createTACircles();
+        showTAAreas ^= true;
+        displayTransmissionAreas();
+    }
+
+    private void displayTransmissionAreas() {
+        if (showTAAreas) {
+            anchorPane.getChildren().addAll(taCircles);
+        } else {
+            anchorPane.getChildren().removeAll(taCircles);
+        }
+    }
+
+    private static void createTACircles() {
+        ArrayList<Node> nodes = Network.getNodeList();
+        taCircles = new Circle[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            Circle circle = new Circle();
+            int circleRadius = nodes.get(i).getTransmissionRadius();
+            circle.setFill(Color.web("#ffffff", 0.5));
+            circle.setRadius(circleRadius);
+            circle.setStroke(Color.web("#000000", 0.5));
+            circle.relocate(nodes.get(i).getLocation().getX() - (circleRadius - 10), nodes.get(i).getLocation().getY() - (circleRadius - 10));
+            taCircles[i] = circle;
         }
     }
 
@@ -102,10 +130,9 @@ public class SybilSimulator extends Application {
         super.stop();
     }
 
-    public void packetLine(int startX, int startY, int endX, int endY){
+    /*public void packetLine(int startX, int startY, int endX, int endY) {
         Line line = new Line(startX,startY,endX,endY);
         anchorPane.getChildren().add(line);
         line.toBack();
-
-    }
+    }*/
 }
