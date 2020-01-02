@@ -35,7 +35,6 @@ public class SybilSimulator extends Application {
     Button sybilAttack;
 
     private static ArrayList<Circle> taCircles;
-    private static boolean showTAAreas;
     private ArrayList<Label> addressLabels = new ArrayList<>();
 
     public static void main(String[] args) {
