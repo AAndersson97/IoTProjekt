@@ -22,6 +22,8 @@ import java.util.Arrays;
 
 public class SybilSimulator extends Application {
     @FXML
+    MenuItem TAMenu2;
+    @FXML
     MenuBar menuDisplay;
     @FXML
     MenuItem TAMenu;
@@ -97,10 +99,10 @@ public class SybilSimulator extends Application {
     /**
      * Visa överföringsområde för varje nod om de är dolda annars dölj områden
      */
-    public void displayTAs() {
+    public void showTAs() {
         for (Circle circle : taCircles)
             circle.setVisible(true);
-        TAMenu.setText("Display Transmission Areas");
+        TAMenu.setText("Show Transmission Areas");
     }
     public void hideTAs(){
         for(Circle circle : taCircles)

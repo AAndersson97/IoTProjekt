@@ -44,8 +44,8 @@
         <menus>
           <Menu mnemonicParsing="false" text="Display">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#showTAs" text="Display Transmission Area" />
-                  <MenuItem mnemonicParsing="false" onAction="#hideTAs" text="Hide Transmission Area" />
+              <MenuItem fx:id="TAMenu" mnemonicParsing="false" onAction="#showTAs" text="Display Transmission Area" />
+                  <MenuItem fx:id="TAMenu2" mnemonicParsing="false" onAction="#hideTAs" text="Hide Transmission Area" />
             </items>
           </Menu>
         </menus>
