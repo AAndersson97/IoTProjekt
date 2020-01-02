@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -23,6 +24,8 @@ public class SybilSimulator extends Application {
     @FXML
     MenuBar menuDisplay;
     @FXML
+    MenuItem TAMenu;
+    @FXML
     AnchorPane anchorPane;
     @FXML
     Button sendPacketBtn;
@@ -31,14 +34,11 @@ public class SybilSimulator extends Application {
     @FXML
     Button sybilAttack;
 
-    // TA BORT
-    static SybilSimulator instance;
-
-    private static Circle[] taCircles;
+    private static ArrayList<Circle> taCircles;
     private static boolean showTAAreas;
     private ArrayList<Label> addressLabels = new ArrayList<>();
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         launch(args);
     }
 
@@ -48,12 +48,8 @@ public class SybilSimulator extends Application {
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.setResizable(false);
-        Debug.registerKeyEvents(stage.getScene(), instance);
         stage.show();
-    }
-
-    public SybilSimulator() {
-        instance = this;
+        taCircles = new ArrayList<>();
     }
 
     public void onCreateNode() {
@@ -65,7 +61,10 @@ public class SybilSimulator extends Application {
         nodeLabel.relocate(createdNode.getLocation().getX()-29,createdNode.getLocation().getY()+12);
         nodeLabel.setVisible(false);
         addressLabels.add(nodeLabel);
-
+        Circle taCircle = createTACircle(createdNode);
+        taCircle.setVisible(false);
+        taCircles.add(taCircle);
+        anchorPane.getChildren().add(taCircle);
     }
 
     public void onStartSybilAttack() {
@@ -97,34 +96,23 @@ public class SybilSimulator extends Application {
     }
 
     /**
-     * Visa överföringsområde för varje nod
+     * Visa överföringsområde för varje nod om de är dolda annars dölj områden
      */
-    public void showTAs() {
-        createTACircles();
-        showTAAreas ^= true;
-        displayTransmissionAreas();
+    public void displayTAs() {
+        for (Circle circle : taCircles)
+            circle.setVisible(!circle.isVisible());
+        TAMenu.setText(TAMenu.getText().equals("Display Transmission Areas")? "Hide Transmission Areas": "Display Transmission Areas");
     }
 
-    private void displayTransmissionAreas() {
-        if (showTAAreas) {
-            anchorPane.getChildren().add(taCircles);
-        } else {
-            anchorPane.getChildren().removeAll(taCircles);
-        }
-    }
-
-    private static void createTACircles() {
-        ArrayList<Node> nodes = Network.getNodeList();
-        taCircles = new Circle[nodes.size()];
-        for (int i = 0; i < nodes.size(); i++) {
-            Circle circle = new Circle();
-            int circleRadius = nodes.get(i).getTransmissionRadius();
-            circle.setFill(Color.web("#ffffff", 0.5));
-            circle.setRadius(circleRadius);
-            circle.setStroke(Color.web("#000000", 0.5));
-            circle.relocate(nodes.get(i).getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, nodes.get(i).getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
-            taCircles[i] = circle;
-        }
+    private static Circle createTACircle(Node node) {
+        Circle circle = new Circle();
+        int circleRadius = node.getTransmissionRadius();
+        circle.setFill(Color.web("#ffffff", 0.5));
+        circle.setRadius(circleRadius);
+        circle.setStroke(Color.web("#000000", 0.5));
+        circle.relocate(node.getLocation().getX() - (circleRadius - 10) - CIRCLE_RADIUS, node.getLocation().getY() - (circleRadius - 10) - CIRCLE_RADIUS);
+        circle.setViewOrder(1);
+        return circle;
     }
 
     @Override
