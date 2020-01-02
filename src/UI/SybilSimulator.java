@@ -39,6 +39,7 @@ public class SybilSimulator extends Application {
 
     private static Circle[] taCircles;
     private static boolean showTAAreas;
+    private ArrayList<Label> addressLabels = new ArrayList<>();
 
     public static void main(String[] args){
         launch(args);
@@ -64,7 +65,10 @@ public class SybilSimulator extends Application {
         String address = Arrays.toString(createdNode.getAddress()).replace(",", ".");
         Label nodeLabel = new Label(address.substring(1, address.length()-1));
         anchorPane.getChildren().add(nodeLabel);
-        nodeLabel.relocate(createdNode.getLocation().getX()-30,createdNode.getLocation().getY()+20);
+        nodeLabel.relocate(createdNode.getLocation().getX()-29,createdNode.getLocation().getY()+12);
+        nodeLabel.setVisible(false);
+        addressLabels.add(nodeLabel);
+
     }
 
     public void onStartSybilAttack() {
@@ -87,6 +91,9 @@ public class SybilSimulator extends Application {
     public void onSendPacket() {
         try {
             new SendPacketUI().showUI();
+            for(Label nL : addressLabels){
+                nL.setVisible(true);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
