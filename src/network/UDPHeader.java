@@ -18,6 +18,13 @@ public class UDPHeader {
         checksum = Checksum.generateChecksum(getBytes());
     }
 
+    UDPHeader(UDPHeader header) {
+        senderPort = header.senderPort;
+        destinationPort = header.destinationPort;
+        length = header.length;
+        checksum = header.checksum;
+    }
+
     public byte[] getBytes() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(senderPort);
