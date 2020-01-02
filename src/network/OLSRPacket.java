@@ -12,11 +12,25 @@ public class OLSRPacket {
     private int orginatorAddr;
     private byte timeToLive;
     private byte hopCount; // Måste öka med ett för varje hopp
-    private short msgSeqNum;
+    private static short msgSeqNum;
     private String msg;
 
     public OLSRPacket() {
+        msgSeqNum++;
+    }
 
+    public OLSRPacket(OLSRPacket packet) {
+        this.ipHeader = new IPHeader(packet.ipHeader);
+        //this.udpHeader = new UDPHeader(udpHeader);
+        this.length = packet.length;
+        this.seqNum = packet.seqNum;
+        this.msgType = packet.msgType;
+        this.vTime = packet.vTime;
+        this.msgSize = packet.msgSize;
+        this.orginatorAddr = packet.orginatorAddr;
+        this.timeToLive = packet.timeToLive;
+        this.hopCount = packet.hopCount;
+        this.msg = packet.msg;
     }
 
     private void setVtime() {

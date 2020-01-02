@@ -6,6 +6,7 @@ public class Transmission {
 
     Transmission(SignalStrength strength) {
         signalStrength = strength;
+        calculateTA();
     }
 
     private void calculateTA() {

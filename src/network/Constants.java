@@ -28,6 +28,7 @@ public final class Constants {
         public static final int HELLO_INTERVAL = 2; // 2 sekunder
         public static final int REFRESH_INTERVAL = 2;
         public static final int TC_INTERVAL = 5;
+        public static final int UDP_HEADER_SIZE = 8;
     }
     public static final class Network {
         public static final int PACKET_LOSS = 1;
