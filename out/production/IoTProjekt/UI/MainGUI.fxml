@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="660.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
+   <children>
+      <HBox layoutY="364.0" prefHeight="36.0" prefWidth="660.0" AnchorPane.bottomAnchor="0.0">
+         <children>
+         
+                   <Button fx:id="createNode" onAction="#onCreateNode" stylesheets="@Style.css" text="Create Node">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="20.0" />
+               </HBox.margin>
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="sendPacketBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSendPacket" prefHeight="27.0" prefWidth="115.0" stylesheets="@Style.css" text="Send packet">
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="130.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="sybilAttack" alignment="CENTER" contentDisplay="RIGHT" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" stylesheets="@Style.css" text="Start Sybil Attack" textFill="#c20202">
+               <font>
+                  <Font name="Cambria" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="130.0" right="10.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+      <MenuBar fx:id="menuDisplay" layoutY="2.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Display">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Display Transmission Area" onAction="#showTAs" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </children>
+
+</AnchorPane>

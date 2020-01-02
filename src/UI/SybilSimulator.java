@@ -1,7 +1,6 @@
 package UI;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,11 +11,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import network.*;
 import static network.Constants.GUI.*;
-import static network.Constants.Node.ADDRESS_LENGTH;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
@@ -110,7 +107,7 @@ public class SybilSimulator extends Application {
 
     private void displayTransmissionAreas() {
         if (showTAAreas) {
-            anchorPane.getChildren().addAll(taCircles);
+            anchorPane.getChildren().add(taCircles);
         } else {
             anchorPane.getChildren().removeAll(taCircles);
         }

@@ -1,0 +1,3 @@
+* Paket utan meddelande (vars längd är mindre eller lika med storleken på packethuvudet)
+måste slängas
+* Tider anges i sekunder
