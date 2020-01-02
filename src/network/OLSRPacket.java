@@ -12,13 +12,16 @@ public class OLSRPacket {
     private short vTime; // Hur lång tid mottagande av paket en nod måste anse att informationen i meddelandet är giltig om inte nylig uppdatering till informationen har mottagits
     private short msgSize;
     private final short[] originatorAddr;
-    private byte timeToLive;
-    private byte hopCount; // Måste öka med ett för varje hopp
+    private short timeToLive;
+    private short hopCount; // Måste öka med ett för varje hopp
     private static short msgSeqNum;
     private String msg;
 
-    public OLSRPacket(short[] originator) {
+    public OLSRPacket(short[] originator, String msg) {
         originatorAddr = originator;
+        msgSize = (short) msg.length();
+        timeToLive = 255;
+        this.msg = msg;
         msgSeqNum = (short) (msgSeqNum+1 % Short.MAX_VALUE);
     }
 

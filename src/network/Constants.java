@@ -21,7 +21,6 @@ public final class Constants {
         public static final int DEFAULT_WIN_SIZE = 65535; // antalet bytes, win size talar om för avsändaren hur mycket data kan skickas per gång
         public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
         public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;
-        public static final int BUFFER_SIZE = 1024;
         public static final int NUM_OF_SYBIL = 3;
     }
     public static final class Protocol {
@@ -30,6 +29,7 @@ public final class Constants {
         public static final int REFRESH_INTERVAL = 2;
         public static final int TC_INTERVAL = 5;
         public static final int UDP_HEADER_SIZE = 8;
+        public static final int OLSR_MIN_LENGTH = 16;
     }
     public static final class Network {
         public static final int PACKET_LOSS = 1;

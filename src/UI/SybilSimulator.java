@@ -1,6 +1,10 @@
 package UI;
 
 import javafx.application.Application;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -99,10 +103,11 @@ public class SybilSimulator extends Application {
 
     public void onSendPacket() {
         try {
-            System.out.println(sendPacketBtn == null);
             SendPacketUI sPUI = new SendPacketUI();
+            sendPacketBtn.disableProperty().bindBidirectional(sPUI.getIsActive());
+            System.out.println("Open");
             sPUI.showUI();
-            sendPacketBtn.setDisable(sPUI.);
+            System.out.println("Closed");
             for(Label nL : addressLabels){
                 nL.setVisible(true);
             }

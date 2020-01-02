@@ -1,8 +1,8 @@
 package UI;
 
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,7 +13,6 @@ import javafx.stage.WindowEvent;
 import network.*;
 import network.IPHeader;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,29 +28,25 @@ public class SendPacketUI {
 
     private short[][] listOfAddresses;
     private ObservableList<String> addressStrings;
+    private BooleanProperty isActive;
 
     public void start(Stage stage) throws Exception {
         if (Network.getNumOfNodes() == 0) {
             new Alert(Alert.AlertType.ERROR, "The number of nodes is zero, it is not possible to send packets", ButtonType.OK).show();
             return;
         }
+        isActive.set(true);
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
         stage.setX(1092);
         stage.setY(160);
         stage.show();
         stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
-                new ExitHandler());
-
-    }
-
-    class ExitHandler implements EventHandler<WindowEvent> {
-        public void handle(WindowEvent event) {
-            for(Label nL : SybilSimulator.getAddressLabels()){
-                nL.setVisible(false);
-            }
-
-        }
+                windowEvent -> {
+                    isActive.set(false);
+                    for(Label nL : SybilSimulator.getAddressLabels())
+                        nL.setVisible(false);
+                });
     }
 
     public void showUI() throws Exception {
@@ -119,6 +114,13 @@ public class SendPacketUI {
         for (int i = 0; i < strings.length; i++) {
             numbers[i] = Short.parseShort(strings[i]);
         }
+
         return numbers;
+    }
+
+    public BooleanProperty getIsActive() {
+        if (isActive == null)
+            isActive = new SimpleBooleanProperty();
+        return isActive;
     }
 }
