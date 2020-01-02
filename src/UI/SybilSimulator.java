@@ -99,7 +99,10 @@ public class SybilSimulator extends Application {
 
     public void onSendPacket() {
         try {
-            new SendPacketUI().showUI();
+            System.out.println(sendPacketBtn == null);
+            SendPacketUI sPUI = new SendPacketUI();
+            sPUI.showUI();
+            sendPacketBtn.setDisable(sPUI.);
             for(Label nL : addressLabels){
                 nL.setVisible(true);
             }

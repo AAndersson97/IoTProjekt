@@ -50,6 +50,7 @@ public class SendPacketUI {
             for(Label nL : SybilSimulator.getAddressLabels()){
                 nL.setVisible(false);
             }
+
         }
     }
 
