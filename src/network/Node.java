@@ -5,12 +5,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
-    // Routerns adress är dess identifikation (Router Id)
     private short[] address;
     private Location location;
-    private boolean active;
+    private boolean active; // true om nodens tråd är aktiv
+    private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Transmission transmission;
-    private final ConcurrentLinkedQueue<Packet> buffer;
+    private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private HashMap<short[], Node> routingTable;
 
     public Location getLocation() {

@@ -1,3 +1,57 @@
 * Paket utan meddelande (vars längd är mindre eller lika med storleken på packethuvudet)
 måste slängas
 * Tider anges i sekunder
+
+* Uni-directional links: nod A kan skicka till nod B men nod B kan inte skicka till nod A. Leder till att nod A
+inte kan få "acknowledgment"-paket från nod B (dock krävs ej sådana paket när UDP-protokollet används).
+Att välja en MPR löser problemet med uni-directional links. En MPR, multipoint relay, räknar ut rutt från
+nod A till destinationsnoden och ger informationen till nod A.
+
+OLSR fungerar oberoende av andra protokoll och gör inga antaganden om underliggande länklager (se OSI-modellen)
+
+OLSR använder konceptet om vidarebefodring från protokollet HIPERLAN
+
+OLSR - Optimized Link State Routing Protocol
+Nod - en MANET som implementerar OLSR-protokollet
+MANET - mobile Ad Hoc Network, ett decentraliserat nätverk som kommunicerar trådlöst och där noder kan förflyttas
+OLSR-gränssnitt - en nätverksenhet som deltar i ett MANET som kör OLSR-protokollet. En nod kan ha flera
+OLSR-gränsnitt och varje gränssnitt tilldelas en unik IP-address (i detta fall används enbart ett gränssnitt)
+Icke-OLSR-gränssnitt - gränssnitt som kör andra protokoll än OLSR, kan vara trådad eller trådlös.
+Routinginformation från dessa gränssnitt kan i vissa fall injiceras i OLSR-nätverket.
+Main address - huvudsakliga IP-adressen en nod anger som avsändare när paket skickas. I detta fall har varje
+nod enbart en IP-adress och denna är den huvudsakliga adressen.
+Grannod - nod X är granne till nod Y om nod Y kan nå nod X, alltså att det existerar en länk mellan OLSR-gränssnittet
+på nod X och OLSR-gränsnittet på nod Y
+
+Strikt 2-hoppgranne - en 2-hoppgranne (en nod som kan nås av en grannod) som inte är noden själv eller en granne
+till noden, och är en granne till en granne, med villighet skiljt från WILL_NEVER, av noden.
+
+MPR (multipoint relay) - en nod som väljs av dess 1-hoppgranne, nod X, att vidarebefodra alla broadcast-meddelanden
+som den mottar från X givet att meddelandet inte är en dubblett och att TTL-fältet är större än 1.
+
+MPR selector - en nod som har valt dess 1-hoppgranne till MPR kallas MPR selector.
+
+Länk - två olika noder vars OLSR-gränssnitt kan upprätta en direktkontakt.
+Symmetrisk länk - en verifierad dubbelriktad länk mellan två OLSR-gränssnitt
+Asymmetrisk - en länk mellan två OLSR-gränssnitt som enbart verifierats i en riktining
+Symmetrisk 1-hoppskvarter - mängden av noder som har minst en symmetrisk länk till nod X
+Symmetriskt 2-hoppskvarter - mängden av noder, exklusive nod X, som har en symmetrisk länk till en nod i
+nod Xs symmetriska 1-hoppskvarter och med villighet skiljt från WILL_NEVER.
+
+Varje nod använder dess lokala informatin för att dirigera paket. OLSR använder hopp-för-hopp-routing.
+
+Rutter för kända destinationer sparas. Protokollet är proaktivt, d.v.s rutterna mellan noder är kända i förhand.
+
+Alla MPR-noder måste deklarera länkar till alla MPR selector-noder.
+
+Kontrollmeddelanden skickas periodvis och kan skickas oftare om snabb reaktion till ändringar i topologin
+är nödvändigt.
+
+Paketförluster är oundvikliga men acceptabla, OLSR kräver ej fullständigt tillförlitliga pakettransporter.
+
+Alla existerande IP-stack kan användas som den är utan ändringar, OLSR-protokollet styr enbart hanteringen
+av routingtabeller.
+
+En nod kan välja flera av sina grannar till att bli en MPR-nod. MPR-noderna ingår i mängden av MPR-noder.
+Noder som är granne till nod X men ingår ej i mängden av MPR-noder vidarebefodrar ej broadcast meddelanden från
+nod X.
