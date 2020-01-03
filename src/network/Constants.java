@@ -32,6 +32,7 @@ public final class Constants {
         public static final int TC_INTERVAL = 5;
         public static final int UDP_HEADER_SIZE = 8;
         public static final int OLSR_MIN_LENGTH = 16;
+        public static final int OLSR_PORT = 698; 
     }
     public static final class Network {
         public static final int PACKET_LOSS = 1;

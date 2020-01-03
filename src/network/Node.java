@@ -7,6 +7,7 @@ public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     private short[] address;
     private Location location;
+    private int seqNum; // gränsnittets sekvensnummer
     private boolean active; // true om nodens tråd är aktiv
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Transmission transmission;
@@ -77,6 +78,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void sendHelloPackets() {
+        incrementSeqNum();
     }
 
     public void turnOff() {
@@ -99,5 +101,8 @@ public class Node implements Comparator<Node>, Runnable {
     }
     public void setAddress(short[] address) {
         this.address = address;
+    }
+    public void incrementSeqNum() {
+       seqNum = (short) (seqNum+1 % Short.MAX_VALUE);
     }
 }

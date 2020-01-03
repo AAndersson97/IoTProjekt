@@ -17,12 +17,13 @@ public class OLSRPacket {
     private static short msgSeqNum;
     private String msg;
 
-    public OLSRPacket(short[] originator, String msg) {
+    public OLSRPacket(short[] originator, short seqNum,String msg) {
         originatorAddr = originator;
         msgSize = (short) msg.length();
         timeToLive = 255;
         this.msg = msg;
-        msgSeqNum = (short) (msgSeqNum+1 % Short.MAX_VALUE);
+        this.seqNum = seqNum;
+        setVtime(this);
     }
 
     public OLSRPacket(OLSRPacket packet) {
@@ -39,17 +40,17 @@ public class OLSRPacket {
         this.msg = packet.msg;
     }
 
-    private void setVtime() {
-        int a = vTime & 0b11110000; // fyra högsta bitarna i Vtime-fältet
-        int b = vTime & 0b00001111;; // fyra lägsta bitarna i Vtime-fältet
-        vTime = (short) (SCALING_FACTOR * (1+a/16)*Math.pow(2,b));
+    private static void setVtime(OLSRPacket packet) {
+        int a = packet.vTime & 0b11110000; // fyra högsta bitarna i Vtime-fältet
+        int b = packet.vTime & 0b00001111;; // fyra lägsta bitarna i Vtime-fältet
+        packet.vTime = (short) (SCALING_FACTOR * (1+a/16)*Math.pow(2,b));
     }
 
-    public boolean canRetransmit() {
-        if (timeToLive <= 1)
+    public static boolean canRetransmit(OLSRPacket packet) {
+        if (packet.timeToLive <= 1 || packet.msg.isBlank())
             return false;
-        timeToLive--;
-        hopCount++;
+        packet.timeToLive--;
+        packet.hopCount++;
         return true;
     }
 }
