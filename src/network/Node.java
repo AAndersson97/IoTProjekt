@@ -8,11 +8,12 @@ public class Node implements Comparator<Node>, Runnable {
     private short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer
+    private HashMap<short[], DuplicateTuple> duplicateSet;
     private boolean active; // true om nodens tråd är aktiv
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Transmission transmission;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
-    private HashMap<short[], Node> routingTable;
+    private ArrayList<short[]> routingTable;
 
     public Location getLocation() {
         return location;
@@ -21,12 +22,13 @@ public class Node implements Comparator<Node>, Runnable {
     public Node() {
         buffer = new ConcurrentLinkedQueue<>();
         location = LocationCreator.getInstance().getLocation();
-        routingTable = new HashMap<>();
+        routingTable = new ArrayList<>();
         active = true;
         address = AddressGenerator.generateAddress();
         thread = new Thread(this);
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
+        duplicateSet = new HashMap<>();
         Network.registerNode(this);
     }
 
@@ -67,16 +69,60 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void handlePacket(OLSRPacket packet) {
+        if (OLSRPacket.canBeProcessed(packet)) {
+            DuplicateTuple tuple;
+            if ((tuple = duplicateSet.get(packet.originatorAddr)) != null) {
+                // Om nedanstående villkor är sanna har paketet redan bearbetats förut eller att noden implementerar meddelandetypen, då måste bearbetning ske
+                if (Arrays.equals(tuple.d_addr, packet.originatorAddr) && tuple.d_seq_num == packet.seqNum)
+                        dropPacket(packet);
+                else {
+                    if (!Arrays.equals(tuple.d_iface, packet.ipHeader.destinationAdress) && !tuple.d_retransmitted) {
+                        if (doImplementMsgType())
+                            processAccordingToMsgType(packet);
+                        else
+                            forwardOLSRPacket(packet);
+                    }
+                    else
+                        processOLSRPacket(packet);
+                }
+            }
+        } else
+            dropPacket(packet);
+
     }
 
 
-    private void forwardPacket(OLSRPacket packet) {
-
-        System.out.println("Forward packet");
-    }
-
-    private void sendHelloPackets() {
+    private void forwardOLSRPacket(OLSRPacket packet) {
+        if (Constants.LOG_ACTIVE)
+            System.out.println("Forward packet: " + packet.toString());
+        if (doImplementMsgType())
+            processAccordingToMsgType(packet);
+        // Avsändarens adress måste finnas i denna nods routingtabell, alltså är 1-hoppsgranne till denna nod
         incrementSeqNum();
+        if (routingTable.contains(packet.originatorAddr)) {
+        }
+
+    }
+
+    private void processOLSRPacket(OLSRPacket packet) {
+        if (Constants.LOG_ACTIVE)
+            System.out.println("Process packet: " + packet.toString());
+        incrementSeqNum();
+
+    }
+
+    private boolean doImplementMsgType() {
+        // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
+        return false;
+    }
+
+    private void processAccordingToMsgType(OLSRPacket packet) {
+
+    }
+
+    private void dropPacket(OLSRPacket packet) {
+        if (Constants.LOG_ACTIVE)
+            System.out.println("Packet dropped: " + packet.toString());
     }
 
     public void turnOff() {

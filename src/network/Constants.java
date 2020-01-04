@@ -40,7 +40,8 @@ public final class Constants {
         public static final int UDP_HEADER_SIZE = 8;
         public static final int OLSR_MIN_LENGTH = 16;
         public static final int OLSR_PORT = 698;
-
+        public static final int OLSR_HEADER_SIZE = 16;
+        public static final int DEFAULT_TTL = 255;
         public enum LinkTypes {
             UNSPEC_LINK(0), ASYM_LINK(1), SYM_LINK(2), LOST_LINK(3);
             int value;

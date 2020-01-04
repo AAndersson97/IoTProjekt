@@ -33,4 +33,12 @@ public class UDPHeader {
         return out.toByteArray();
     }
 
+    @Override
+    public String toString() {
+        return "UDPHeader{" +
+                "senderPort=" + senderPort +
+                ", destinationPort=" + destinationPort +
+                ", length=" + length +
+                '}';
+    }
 }

@@ -97,4 +97,11 @@ kontrollmeddelande lagrat i en nod beror på avståndet till avsändaren.
 
 Paket i OLSR kommuniceras vid UDP-protokollet. Port 698 används av OLSR-protokollet.
 
+Uppehovsnoden är noden som skapade paketet som skickas över nätverket. Avsändarnoden är noden som tar emot
+paket och väljer att skicka vidare paketet. Uppehovsnodens adress finns i OLSRpaketet, avsändarens adress finns
+i IP-headern.
+
+Noder kan skicka och ta emot från/på olika gränssnitt, varje gränssnitt har sin egna adress. I detta program
+används ett gränssnitt.
+
 

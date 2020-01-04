@@ -142,4 +142,15 @@ public class IPHeader extends Header {
     public Header copy() {
         return new IPHeader(this);
     }
+
+    @Override
+    public String toString() {
+        return "IPHeader{" +
+                "version=" + version +
+                ", totalLength=" + totalLength +
+                ", protocol=" + protocol +
+                ", sourceAdress=" + Arrays.toString(sourceAdress) +
+                ", destinationAdress=" + Arrays.toString(destinationAdress) +
+                '}';
+    }
 }
