@@ -1,5 +1,7 @@
 package network;
 
+import java.util.LinkedList;
+
 public final class Constants {
     public static final boolean LOG_ACTIVE = true;
     private Constants() {}
@@ -30,9 +32,43 @@ public final class Constants {
         public static final int HELLO_INTERVAL = 2; // 2 sekunder
         public static final int REFRESH_INTERVAL = 2;
         public static final int TC_INTERVAL = 5;
+        public static final int NEIGHB_HOLD_TIME = 6;
+        public static final int TOP_HOLD_TIME = 15;
+        public static final int DUP_HOLD_TIME = 30;
+        public static final int MID_HOLD_TIME = 15;
+        public static final int HNA_HOLD_TIME = 15;
         public static final int UDP_HEADER_SIZE = 8;
         public static final int OLSR_MIN_LENGTH = 16;
-        public static final int OLSR_PORT = 698; 
+        public static final int OLSR_PORT = 698;
+
+        public enum LinkTypes {
+            UNSPEC_LINK(0), ASYM_LINK(1), SYM_LINK(2), LOST_LINK(3);
+            int value;
+            LinkTypes(int value) {
+                this.value = value;
+            }
+        }
+        public enum NeighborTypes {
+            NOT_NEIGH(0), SYM_NEIGH(1), MPR_NEIGH(2);
+            int value;
+            NeighborTypes(int value) {
+                this.value = value;
+            }
+        }
+
+        /** Betecknar hur villig en nod är att vidarebefodra traffik för andra noder.
+         *  WILL_NEBER indikerar en nod som inte vill hantera traffik för andra noder, oftast p.g.a resursbrist.
+         *  WILL_ALWAYS indikerar att en nod alltid ska väljas för att vidarebefodra traffik, ofast p.g.a resursöverflöd.
+         *  En nod kan dynamiskt ändra villighet när förutsättningarna att vidarebefodra traffik ändras.
+         */
+        public enum Willingness {
+            WILL_NEVER(0), WILL_LOW(1), WILL_DEFAULT(3), WILL_HIGH(6);
+            int value;
+            Willingness(int value) {
+                this.value = value;
+            }
+        }
+
     }
     public static final class Network {
         public static final int PACKET_LOSS = 1;

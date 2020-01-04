@@ -8,7 +8,7 @@ public class OLSRPacket {
     private UDPHeader udpHeader;
     private short length;
     private short seqNum;
-    private byte msgType;
+    private short msgType;
     private short vTime; // Hur lång tid mottagande av paket en nod måste anse att informationen i meddelandet är giltig om inte nylig uppdatering till informationen har mottagits
     private short msgSize;
     private final short[] originatorAddr;
@@ -17,7 +17,8 @@ public class OLSRPacket {
     private static short msgSeqNum;
     private String msg;
 
-    public OLSRPacket(short[] originator, short seqNum,String msg) {
+    public OLSRPacket(MessageType type ,short[] originator, short seqNum,String msg) {
+        msgType = (short) type.value;
         originatorAddr = originator;
         msgSize = (short) msg.length();
         timeToLive = 255;
@@ -52,5 +53,13 @@ public class OLSRPacket {
         packet.timeToLive--;
         packet.hopCount++;
         return true;
+    }
+
+    public enum MessageType {
+        HELLO_MESSAGE(1), TC_MESSAGE(2), MID_MESSAGE(3), HNA_MESSAGE(4);
+        int value;
+        MessageType(int value) {
+            this.value = value;
+        }
     }
 }
