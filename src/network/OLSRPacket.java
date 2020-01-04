@@ -1,5 +1,4 @@
 package network;
-import java.util.HashMap;
 
 import static network.Constants.Protocol.SCALING_FACTOR;
 

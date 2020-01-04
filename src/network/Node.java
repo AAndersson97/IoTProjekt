@@ -11,7 +11,7 @@ public class Node implements Comparator<Node>, Runnable {
     private boolean active; // true om nodens tråd är aktiv
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Transmission transmission;
-    private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
+    private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private HashMap<short[], Node> routingTable;
 
     public Location getLocation() {
@@ -59,20 +59,18 @@ public class Node implements Comparator<Node>, Runnable {
         return address;
     }
 
-    public void receivePacket(Packet packet) {
+    public void receivePacket(OLSRPacket packet) {
         synchronized (buffer) {
             buffer.add(packet);
             buffer.notifyAll();
         }
     }
 
-    private void handlePacket(Packet packet) {
+    private void handlePacket(OLSRPacket packet) {
     }
 
-    private void handleIPPacket(Packet packet) {
-    }
 
-    private void forwardPacket(Packet packet) {
+    private void forwardPacket(OLSRPacket packet) {
 
         System.out.println("Forward packet");
     }

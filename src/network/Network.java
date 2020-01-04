@@ -28,7 +28,7 @@ public class Network {
      * @param packet Paketet som ska skickas
      * @throws IOException Om paketsändningen misslyckades kastas ett IOException
      */
-    public static void sendPacket(short[] remote, Node sender, Packet packet) {
+    public static void sendPacket(short[] remote, Node sender, OLSRPacket packet) {
         if (remote == null || sender == null)
             throw new IllegalArgumentException("Source address neither remote address must not be null");
         wifiChannel.send(packet, remote, sender);
