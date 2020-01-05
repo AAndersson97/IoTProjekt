@@ -16,7 +16,7 @@ public class Node implements Comparator<Node>, Runnable {
     private boolean active; // true om nodens tråd är aktiv
     private Willingness willingness;
     private final HashMap<short[], NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
-    private final ArrayList<short[]> mprSet; // lista över grannar som valts som MPR-nod
+    private short[][] mprSet; // lista över grannar som valts som MPR-nod
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private final ArrayList<TwoHopTuple> twoHopNeighborSet;
     private final HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
@@ -45,7 +45,6 @@ public class Node implements Comparator<Node>, Runnable {
         mprSelectorSet = new HashMap<>();
         topologySet = new ArrayList<>();
         linkSet = new HashMap<>();
-        mprSet = new ArrayList<>();
         willingness = Willingness.WILL_DEFAULT;
         Network.registerNode(this);
     }
@@ -187,7 +186,7 @@ public class Node implements Comparator<Node>, Runnable {
             linkType = LinkCode.LinkTypes.ASYM_LINK;
         else
             linkType = LinkCode.LinkTypes.LOST_LINK;
-        if (mprSet.contains(tuple.l_neighbor_iface_addr))
+        if (mprSetContains(tuple.l_neighbor_iface_addr))
             neighborType = LinkCode.NeighborTypes.MPR_NEIGH;
         else if ((neighborTuple = neighborSet.get(tuple.l_neighbor_iface_addr)) != null) {
             if (neighborTuple.status == NeighborTuple.N_status.SYM)
@@ -195,6 +194,14 @@ public class Node implements Comparator<Node>, Runnable {
             else
                 neighborType = LinkCode.NeighborTypes.NOT_NEIGH;
         }
+    }
+
+    private boolean mprSetContains(short[] address) {
+        for (short[] mpr: mprSet)
+            if (Arrays.equals(address, mpr))
+                return true;
+
+        return false;
     }
 
     /**
@@ -286,6 +293,7 @@ public class Node implements Comparator<Node>, Runnable {
             neighborTuple.n_willingness = message.willingness;
         changeNeighborStatus(linkTuple, neighborTuple);
         removeLinkTupleTimer(linkTuple);
+        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
     }
 
     private void removeLinkTupleTimer(LinkTuple tuple) {

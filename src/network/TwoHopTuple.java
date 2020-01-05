@@ -7,7 +7,7 @@ import java.util.Arrays;
  */
 public class TwoHopTuple {
     public final short[] n_neighbor_main_addr; // huvudadressen till en granne
-    public final short[] n_2hop_addr; // huvudadressen till en 2-hopsgranne med en symmetrisk länk till n_neighbor_main_addre
+    public final short[] n_2hop_addr; // huvudadressen till en 2-hopsgranne med en symmetrisk länk till n_neighbor_main_addr
     public final float n_time; // specificerar tiden då tupeln går ut och ska tas bort
 
     public TwoHopTuple(short[] n_neighbor_main_addr, short[] n_2hop_addr, float vTime) {
