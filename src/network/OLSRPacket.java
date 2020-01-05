@@ -1,82 +1,64 @@
 package network;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import static network.Constants.Protocol.SCALING_FACTOR;
-import static network.Constants.Protocol.OLSR_HEADER_SIZE;
-import static network.Constants.Protocol.DEFAULT_TTL;
+import static network.Constants.Protocol.*;
 
 public class OLSRPacket {
     public final IPHeader ipHeader;
     public final UDPHeader udpHeader;
-    public final int length;
-    public final int seqNum;
-    public final int msgType;
-    public final int msgSize;
-    public final short[] originatorAddr;
-    public final String msg;
-    private int vTime; // Hur lång tid mottagande av paket en nod måste anse att informationen i meddelandet är giltig om inte nylig uppdatering till informationen har mottagits
-    private int timeToLive;
-    private int hopCount; // Måste öka med ett för varje hopp
-    private static int msgSeqNum;
+    public final OLSRHeader olsrHeader;
+    public final ArrayList<OLSRMessage> messages;
 
-    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, MessageType type, short[] originator, short seqNum, String msg) {
+    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<OLSRMessage> messages) {
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
-        msgType = type.value;
-        originatorAddr = originator;
-        msgSize = msg.length();
-        timeToLive = DEFAULT_TTL;
-        length = OLSR_HEADER_SIZE + msg.length();
-        this.msg = msg;
-        this.seqNum = seqNum;
-        setVtime(this);
+        this.olsrHeader = olsrHeader;
+        this.messages = messages;
     }
 
     public OLSRPacket(OLSRPacket packet) {
         this.ipHeader = new IPHeader(packet.ipHeader);
         this.udpHeader = new UDPHeader(packet.udpHeader);
-        this.length = packet.length;
-        this.seqNum = packet.seqNum;
-        this.msgType = packet.msgType;
-        this.vTime = packet.vTime;
-        this.msgSize = packet.msgSize;
-        this.originatorAddr = packet.originatorAddr;
-        this.timeToLive = packet.timeToLive;
-        this.hopCount = packet.hopCount;
-        this.msg = packet.msg;
-    }
-
-    private static void setVtime(OLSRPacket packet) {
-        int a = packet.vTime & 0b11110000; // fyra högsta bitarna i Vtime-fältet
-        int b = packet.vTime & 0b00001111;; // fyra lägsta bitarna i Vtime-fältet
-        packet.vTime = (int) (SCALING_FACTOR * (1+a/16) * Math.pow(2,b));
+        this.olsrHeader = packet.olsrHeader;
+        this.messages = packet.messages;
     }
 
     public static boolean canRetransmit(OLSRPacket packet) {
-        if (packet.timeToLive <= 1 || packet.msg.isBlank())
+        if (packet.messages == null || packet.messages.isEmpty())
             return false;
-        packet.timeToLive--;
-        packet.hopCount++;
+        Iterator<OLSRMessage> iterator = packet.messages.iterator();
+        while (iterator.hasNext()) {
+            OLSRMessage msg = iterator.next();
+            if (msg.getTTL() <= 0)
+                iterator.remove();
+            msg.decrementTTL();
+            msg.incrementHopCount();
+        }
         return true;
     }
 
     /**
-     * Paket utan meddelande, paket där ursprungsadressen är samma som destinationsadressen eller paket
+     * Paket utan meddelande, paket där ursprungsadressen är samma som destinationsadressen eller meddelanden
      * där TTL-fältet är 1 eller mindre ska kastas.
-     * @param packet
+     * @param
      * @return
      */
-    public static boolean canBeProcessed(OLSRPacket packet) {
-        return !(packet.msg.isBlank() || packet.timeToLive <= 0 || Arrays.equals(packet.originatorAddr, packet.ipHeader.destinationAddress));
+    public static boolean canBeProcessed(OLSRMessage message, short[] receiver) {
+        return  !(message.getTTL() <= 0 || Arrays.equals(message.originatorAddr, receiver));
     }
 
-    public enum MessageType {
-        HELLO_MESSAGE(1), TC_MESSAGE(2), MID_MESSAGE(3);
-        int value;
-        MessageType(int value) {
-            this.value = value;
-        }
+    public OLSRPacket copy() {
+        IPHeader ipHeader = new IPHeader(this.ipHeader);
+        UDPHeader udpHeader = new UDPHeader(this.udpHeader);
+        OLSRHeader olsrHeader = new OLSRHeader(this.olsrHeader);
+        ArrayList<OLSRMessage> messages = new ArrayList<>();
+        for (OLSRMessage message : this.messages)
+            messages.add(message.copy());
+        return new OLSRPacket(ipHeader, udpHeader, olsrHeader, messages);
     }
 
     @Override
@@ -84,15 +66,7 @@ public class OLSRPacket {
         return "OLSRPacket{" +
                 "ipHeader=" + ipHeader.toString() +
                 ", udpHeader=" + udpHeader.toString() +
-                ", length=" + length +
-                ", seqNum=" + seqNum +
-                ", msgType=" + msgType +
-                ", msgSize=" + msgSize +
-                ", originatorAddr=" + Arrays.toString(originatorAddr) +
-                ", msg='" + msg + '\'' +
-                ", vTime=" + vTime +
-                ", timeToLive=" + timeToLive +
-                ", hopCount=" + hopCount +
-                '}';
+                ", length=" + messages.size() +
+                ", seqNum=" + olsrHeader.packetSeqNum + "}";
     }
 }

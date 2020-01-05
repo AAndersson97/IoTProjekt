@@ -6,9 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class IPHeader extends Header {
-    private byte version;
-    private byte headerLength;
+public final class IPHeader implements Header {
+    private static byte version = (byte) 4;
     private short typeOfService;
     private int totalLength;
     private int id;
@@ -23,7 +22,6 @@ public class IPHeader extends Header {
 
     {
         version = 4;
-        headerLength = 5;
         flags = 2;
         timeToLive = 64;
     }
@@ -37,10 +35,13 @@ public class IPHeader extends Header {
         offset = header.offset;
         id = header.id;
         checksum = header.checksum;
+        timeToLive = header.timeToLive;
+        flags = header.flags;
+        typeOfService = header.typeOfService;
     }
 
-    public IPHeader(int length, short[] sourceAddress, short[] destinationAddress, short protocol) throws IOException {
-        this.totalLength = headerLength + length;
+    public IPHeader(int dataLength, short[] sourceAddress, short[] destinationAddress, short protocol) throws IOException {
+        this.totalLength = calculateHeaderLength(this) + dataLength;
         this.protocol = protocol;
         this.sourceAddress = sourceAddress;
         this.destinationAddress = destinationAddress;
@@ -50,7 +51,6 @@ public class IPHeader extends Header {
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(version);
-        out.write(headerLength);
         out.write(typeOfService);
         out.write(id);
         out.write(totalLength);
@@ -80,10 +80,6 @@ public class IPHeader extends Header {
 
     public byte getVersion() {
         return version;
-    }
-
-    public byte getHeaderLength() {
-        return headerLength;
     }
 
     public short getTypeOfService() {
@@ -127,7 +123,7 @@ public class IPHeader extends Header {
     }
 
     public int getLength() {
-        return totalLength - headerLength;
+        return totalLength;
     }
 
     public boolean isFragmentOn() {
@@ -144,6 +140,10 @@ public class IPHeader extends Header {
     @Override
     public Header copy() {
         return new IPHeader(this);
+    }
+
+    public static int calculateHeaderLength(IPHeader header) {
+        return Short.SIZE * 4 + Integer.SIZE * 3 + Byte.SIZE + (header.sourceAddress.length * Short.SIZE) * 2 + (header.options == null ? 0 : header.options.length * Short.SIZE);
     }
 
     @Override

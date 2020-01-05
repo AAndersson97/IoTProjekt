@@ -13,7 +13,10 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
-    private ArrayList<NeighborTuple> neighborTuples;
+    private Willingness willingness;
+    private HashMap<short[], NeighborTuple> neighborSet;
+    private ArrayList<short[]> mprSet; // lista över grannar som valts som MPR-nod
+    private HashMap<short[], LinkTuple> linkSet;
     private ArrayList<TwoHopTuple> twoHopNeighborSet;
     private HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private ArrayList<TopologyTuple> topologySet;
@@ -37,10 +40,13 @@ public class Node implements Comparator<Node>, Runnable {
         thread.start();
         duplicateSets = new HashMap<>();
         timers = new Timer[NUM_ACTIVE_MSG_TYPES];
-        neighborTuples = new ArrayList<>();
+        neighborSet = new HashMap<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new HashMap<>();
         topologySet = new ArrayList<>();
+        linkSet = new HashMap<>();
+        mprSet = new ArrayList<>();
+        willingness = Willingness.WILL_DEFAULT;
         Network.registerNode(this);
     }
 
@@ -81,43 +87,42 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void handlePacket(OLSRPacket packet) {
-        if (OLSRPacket.canBeProcessed(packet)) {
-            HashMap<Integer, DuplicateTuple> duplicateSet;
-            // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
-            if ((duplicateSet = duplicateSets.get(packet.originatorAddr)) != null) {
-                DuplicateTuple tuple;
-                // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
-                if ((tuple = duplicateSet.get(seqNum)) != null) {
-                    // om nedanstående villkor är sant ska paketet förberedas för vidaresändning
-                    if (!Arrays.equals(tuple.d_iface, address))
-                        prepareForwardingOLSR(packet);
-                    // Paketet ska varken bearbetas eller skickas vidare
-                    else {
-                        updateDuplicateSet(packet);
-                        dropPacket(packet);
+        for (OLSRMessage message : packet.messages) {
+            if (OLSRPacket.canBeProcessed(message, address)) {
+                HashMap<Integer, DuplicateTuple> duplicateSet;
+                // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
+                if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
+                    DuplicateTuple tuple;
+                    // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
+                    if ((tuple = duplicateSet.get(seqNum)) != null) {
+                        // om nedanstående villkor är sant ska paketet förberedas för vidaresändning
+                        if (!Arrays.equals(tuple.d_iface, address))
+                            prepareForwardingOLSR(packet);
+                            // Paketet ska varken bearbetas eller skickas vidare
+                        else {
+                            //updateDuplicateSet(packet);
+                            dropPacket(packet);
+                        }
+                    } else {
+                        processOLSRPacket(packet);
                     }
-                } else {
-                    processOLSRPacket(packet);
-                }
 
-                // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
-                if (!routingTable.contains(packet.ipHeader.sourceAddress))
-                    dropPacket(packet);
-                else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
-                    prepareForwardingOLSR(packet);
-                }
-                else
-                    processOLSRPacket(packet);
+                    // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
+                    if (!routingTable.contains(packet.ipHeader.sourceAddress))
+                        dropPacket(packet);
+                    else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
+                        prepareForwardingOLSR(packet);
+                    } else
+                        processOLSRPacket(packet);
 
-            }
-            else if (doImplementMsgType())
-                processAccordingToMsgType(packet);
+                } else if (doImplementMsgType())
+                    processAccordingToMsgType(packet);
+            } else
+                dropPacket(packet);
         }
-        else
-            dropPacket(packet);
     }
 
-    private void updateDuplicateSet(OLSRPacket packet) {
+    /*private void updateDuplicateSet(OLSRPacket packet) {
         DuplicateTuple tuple = duplicateSets.get(packet.originatorAddr).get(packet.seqNum);
         tuple.d_time = System.currentTimeMillis()/1000 + DUP_HOLD_TIME;
         tuple.d_iface = address;
@@ -130,8 +135,51 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
         }, DUP_HOLD_TIME);
+    }*/
+
+    private void sendHelloPacket() {
+        LinkCode.LinkTypes linkType = null;
+        LinkCode.NeighborTypes neighborType = null;
+        ArrayList<HelloMessage> messages = new ArrayList<>();
+        int seqNum = 0;
+        ArrayList<short[]> linkNeighbors = new ArrayList<>(); // grannar som har en länk till denna nod, info som används för att senare hitta grannar utan länk till denna nod
+        for (LinkTuple tuple : linkSet.values()) {
+            setLinkandNeighborType(linkType, neighborType, tuple);
+            LinkCode linkCode = new LinkCode(linkType, neighborType);
+            linkNeighbors.add(tuple.l_neighbor_iface_addr);
+            messages.add(new HelloMessage(address, seqNum++, willingness, linkCode, tuple.l_neighbor_iface_addr));
+        }
+        if (linkNeighbors.size() != neighborSet.values().size()) {
+            for (NeighborTuple tuple : neighborSet.values()) {
+                if (!linkSet.containsKey(tuple.n_neighbor_main_addr)) {
+                    neighborType = tuple.status == NeighborTuple.N_status.SYM ? LinkCode.NeighborTypes.SYM_NEIGH : LinkCode.NeighborTypes.NOT_NEIGH;
+                    LinkCode linkCode = new LinkCode(LinkCode.LinkTypes.UNSPEC_LINK, neighborType);
+                }
+            }
+        }
+        //IPHeader ipHeader = new IPHeader(messages.size() *, );
+
+
     }
 
+    private void setLinkandNeighborType(LinkCode.LinkTypes linkType, LinkCode.NeighborTypes neighborType, LinkTuple tuple) {
+        long timeNow = System.currentTimeMillis();
+        NeighborTuple neighborTuple;
+        if (tuple.l_sym_time >= timeNow)
+            linkType = LinkCode.LinkTypes.SYM_LINK;
+        else if (tuple.l_asym_time >= timeNow)
+            linkType = LinkCode.LinkTypes.ASYM_LINK;
+        else
+            linkType = LinkCode.LinkTypes.LOST_LINK;
+        if (mprSet.contains(tuple.l_neighbor_iface_addr))
+            neighborType = LinkCode.NeighborTypes.MPR_NEIGH;
+        else if ((neighborTuple = neighborSet.get(tuple.l_neighbor_iface_addr)) != null) {
+            if (neighborTuple.status == NeighborTuple.N_status.SYM)
+                neighborType = LinkCode.NeighborTypes.SYM_NEIGH;
+            else
+                neighborType = LinkCode.NeighborTypes.NOT_NEIGH;
+        }
+    }
 
     /**
      * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras

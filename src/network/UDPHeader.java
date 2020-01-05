@@ -5,7 +5,7 @@ import utilities.Checksum;
 import java.io.ByteArrayOutputStream;
 import static network.Constants.Protocol.UDP_HEADER_SIZE;
 
-public class UDPHeader {
+public final class UDPHeader {
     private short senderPort;
     private short destinationPort;
     private short length;

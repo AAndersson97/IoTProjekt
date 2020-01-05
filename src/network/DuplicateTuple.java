@@ -14,6 +14,6 @@ public class DuplicateTuple {
     DuplicateTuple(short[] d_addr, short d_seq_num) {
         this.d_addr = d_addr;
         this.d_seq_num = d_seq_num;
-        d_time = System.currentTimeMillis()/ 1000 + DUP_HOLD_TIME;
+        d_time = System.currentTimeMillis() + DUP_HOLD_TIME;
     }
 }

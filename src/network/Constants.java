@@ -28,37 +28,24 @@ public final class Constants {
         public static final int NUM_OF_SYBIL = 3;
     }
     public static final class Protocol {
-        public static final int SCALING_FACTOR = 1/16; // 0.0625 sekunder
-        public static final int HELLO_INTERVAL = 2; // 2 sekunder
-        public static final int REFRESH_INTERVAL = 2;
-        public static final int TC_INTERVAL = 5;
-        public static final int NEIGHB_HOLD_TIME = 6;
-        public static final int TOP_HOLD_TIME = 15;
-        public static final int DUP_HOLD_TIME = 30;
-        public static final int MID_HOLD_TIME = 15;
-        public static final int HNA_HOLD_TIME = 15;
-        public static final int UDP_HEADER_SIZE = 8;
+        public static final float SCALING_FACTOR = (float) (1/16.0); // 0.0625 sekunder
+        public static final int HELLO_INTERVAL = 2000; // 2000 millisekunder
+        public static final int REFRESH_INTERVAL = 2000;
+        public static final int TC_INTERVAL = 5000;
+        public static final int NEIGHB_HOLD_TIME = 6000;
+        public static final int TOP_HOLD_TIME = 15000;
+        public static final int DUP_HOLD_TIME = 30000;
+        public static final int MID_HOLD_TIME = 15000;
+        public static final int HNA_HOLD_TIME = 15000;
+        public static final int UDP_HEADER_SIZE = Short.SIZE * 3 + Integer.SIZE;
         public static final int OLSR_MIN_LENGTH = 16;
         public static final int OLSR_PORT = 698;
+        public static final int OLSR_HEADER_SIZE = Integer.SIZE * 2;
         public static final int NUM_ACTIVE_MSG_TYPES = 3;
-        public static final int OLSR_HEADER_SIZE = 16;
+        public static final int UDfP_HEADER_SIZE = 16;
         public static final int DEFAULT_TTL = 255;
         public static final double MAX_JITTER = HELLO_INTERVAL/4.0; // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering
         public static final long MAX_JITTER_MS = (long) ((HELLO_INTERVAL/4.0) * 1000);
-        public enum LinkTypes {
-            UNSPEC_LINK(0), ASYM_LINK(1), SYM_LINK(2), LOST_LINK(3);
-            int value;
-            LinkTypes(int value) {
-                this.value = value;
-            }
-        }
-        public enum NeighborTypes {
-            NOT_NEIGH(0), SYM_NEIGH(1), MPR_NEIGH(2);
-            int value;
-            NeighborTypes(int value) {
-                this.value = value;
-            }
-        }
 
         /** Betecknar hur villig en nod är att vidarebefodra traffik för andra noder.
          *  WILL_NEBER indikerar en nod som inte vill hantera traffik för andra noder, oftast p.g.a resursbrist.

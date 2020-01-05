@@ -111,4 +111,10 @@ MID-meddelande - skickas ut i nätverket för att deklarara närvaron av flertal
 Jitter används för att förhindra att flera noder samtidigt skickar ut meddelande i nätverket, vilket kan orsaka en
 kollision och att meddelanden inte kommer fram.
 
+Hello-meddelanden baseras på informationen lagrad i den lokala "Link set", "Neighbor set" och "MPR set" från den lokala "link information base"
 
+Ett Hello-meddelande innehåller en lista över länkar på gränssnittet och en lista över hela kvarteret med en associerad granntyp (neighbor type).
+
+vTime-fältet sätts till värdet av nodens NEIGHB_HOLD_TIME parameter. hTime-fältet sätts till värdet av nodens HELLO_INTERVAL parameter.
+
+Hello-meddelanden vidarebefordras aldrig.
