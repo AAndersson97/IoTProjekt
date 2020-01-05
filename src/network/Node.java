@@ -2,14 +2,16 @@ package network;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import static network.Constants.Protocol.DUP_HOLD_TIME;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     private short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer
-    private HashMap<short[], DuplicateTuple> duplicateSet;
+    private HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
+    private HashMap<short[], Node> MPRSelectors; // Samling innehållandes noder som valt denna nod att vara en MPR-nod
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Transmission transmission;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
@@ -28,7 +30,8 @@ public class Node implements Comparator<Node>, Runnable {
         thread = new Thread(this);
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
-        duplicateSet = new HashMap<>();
+        duplicateSets = new HashMap<>();
+        MPRSelectors = new HashMap<>();
         Network.registerNode(this);
     }
 
@@ -70,37 +73,66 @@ public class Node implements Comparator<Node>, Runnable {
 
     private void handlePacket(OLSRPacket packet) {
         if (OLSRPacket.canBeProcessed(packet)) {
-            DuplicateTuple tuple;
-            if ((tuple = duplicateSet.get(packet.originatorAddr)) != null) {
-                // Om nedanstående villkor är sanna har paketet redan bearbetats förut eller att noden implementerar meddelandetypen, då måste bearbetning ske
-                if (Arrays.equals(tuple.d_addr, packet.originatorAddr) && tuple.d_seq_num == packet.seqNum)
+            HashMap<Integer, DuplicateTuple> duplicateSet;
+            // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
+            if ((duplicateSet = duplicateSets.get(packet.originatorAddr)) != null) {
+                DuplicateTuple tuple;
+                // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
+                if ((tuple = duplicateSet.get(seqNum)) != null) {
+                    // om nedanstående villkor är sant ska paketet förberedas för vidaresändning
+                    if (!Arrays.equals(tuple.d_iface, address))
+                        prepareForwardingOLSR(packet);
+                    // Paketet ska varken bearbetas eller skickas vidare
+                    else {
+                        updateDuplicateSet(packet);
                         dropPacket(packet);
-                else {
-                    if (!Arrays.equals(tuple.d_iface, packet.ipHeader.destinationAdress) && !tuple.d_retransmitted) {
-                        if (doImplementMsgType())
-                            processAccordingToMsgType(packet);
-                        else
-                            forwardOLSRPacket(packet);
                     }
-                    else
-                        processOLSRPacket(packet);
+                } else {
+                    processOLSRPacket(packet);
                 }
-            }
-        } else
-            dropPacket(packet);
 
+                // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
+                if (!routingTable.contains(packet.ipHeader.sourceAddress))
+                    dropPacket(packet);
+                else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
+                    prepareForwardingOLSR(packet);
+                }
+                else
+                    processOLSRPacket(packet);
+
+            }
+            else if (doImplementMsgType())
+                processAccordingToMsgType(packet);
+        }
+        else
+            dropPacket(packet);
+    }
+
+    private void updateDuplicateSet(OLSRPacket packet) {
+        DuplicateTuple tuple = duplicateSets.get(packet.originatorAddr).get(packet.seqNum);
+        tuple.d_time = System.currentTimeMillis()/1000 + DUP_HOLD_TIME;
+        tuple.d_iface = address;
+        tuple.d_retransmitted = true;
     }
 
 
-    private void forwardOLSRPacket(OLSRPacket packet) {
+    /**
+     * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras
+     * @param packet Packet som ska vidarebefodras
+     */
+    private void prepareForwardingOLSR(OLSRPacket packet) {
+        if (doImplementMsgType())
+            forwardAccordingToMsgType(packet);
+        // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
+        if (MPRSelectors.containsKey(packet.ipHeader.sourceAddress))
+            doForwardOLSRPacket(packet);
+    }
+
+    private void doForwardOLSRPacket(OLSRPacket packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
-        if (doImplementMsgType())
-            processAccordingToMsgType(packet);
-        // Avsändarens adress måste finnas i denna nods routingtabell, alltså är 1-hoppsgranne till denna nod
         incrementSeqNum();
-        if (routingTable.contains(packet.originatorAddr)) {
-        }
+
 
     }
 
@@ -117,6 +149,10 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void processAccordingToMsgType(OLSRPacket packet) {
+
+    }
+
+    private void forwardAccordingToMsgType(OLSRPacket packet) {
 
     }
 

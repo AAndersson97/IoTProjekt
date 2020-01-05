@@ -68,7 +68,7 @@ public class OLSRPacket {
      * @return
      */
     public static boolean canBeProcessed(OLSRPacket packet) {
-        return !(packet.msg.isBlank() || packet.timeToLive <= 0 || Arrays.equals(packet.originatorAddr, packet.ipHeader.destinationAdress));
+        return !(packet.msg.isBlank() || packet.timeToLive <= 0 || Arrays.equals(packet.originatorAddr, packet.ipHeader.destinationAddress));
     }
 
     public enum MessageType {

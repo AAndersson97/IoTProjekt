@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class IPHeader extends Header {
-    private static final int HEADER_SIZE = 20;
     private byte version;
     private byte headerLength;
     private short typeOfService;
@@ -18,8 +17,8 @@ public class IPHeader extends Header {
     private short timeToLive;
     private short protocol;
     private int checksum;
-    short[] sourceAdress;
-    short[] destinationAdress;
+    short[] sourceAddress;
+    short[] destinationAddress;
     byte[] options;
 
     {
@@ -29,8 +28,8 @@ public class IPHeader extends Header {
         timeToLive = 64;
     }
     public IPHeader(IPHeader header) {
-        sourceAdress = Arrays.copyOf(header.sourceAdress, header.sourceAdress.length);
-        destinationAdress = Arrays.copyOf(header.destinationAdress, header.sourceAdress.length);
+        sourceAddress = Arrays.copyOf(header.sourceAddress, header.sourceAddress.length);
+        destinationAddress = Arrays.copyOf(header.destinationAddress, header.sourceAddress.length);
         if (header.getOptions() != null)
             options = Arrays.copyOf(header.options, header.options.length);
         totalLength = header.getTotalLength();
@@ -40,11 +39,11 @@ public class IPHeader extends Header {
         checksum = header.checksum;
     }
 
-    public IPHeader(int length, short[] sourceAdress, short[] destinationAdress, short protocol) throws IOException {
+    public IPHeader(int length, short[] sourceAddress, short[] destinationAddress, short protocol) throws IOException {
         this.totalLength = headerLength + length;
         this.protocol = protocol;
-        this.sourceAdress = sourceAdress;
-        this.destinationAdress = destinationAdress;
+        this.sourceAddress = sourceAddress;
+        this.destinationAddress = destinationAddress;
         checksum = Checksum.generateChecksum(toByteArray());
     }
 
@@ -61,9 +60,9 @@ public class IPHeader extends Header {
         out.write(timeToLive);
         out.write(protocol);
         out.write(checksum);
-        for (short num : sourceAdress)
+        for (short num : sourceAddress)
             out.write(num);
-        for (short num : destinationAdress)
+        for (short num : destinationAddress)
             out.write(num);
         if (options != null)
             out.write(options);
@@ -119,12 +118,12 @@ public class IPHeader extends Header {
         return checksum;
     }
 
-    public short[] getSourceAdress() {
-        return sourceAdress;
+    public short[] getSourceAddress() {
+        return sourceAddress;
     }
 
-    public short[] getDestinationAdress() {
-        return destinationAdress;
+    public short[] getDestinationAddress() {
+        return destinationAddress;
     }
 
     public int getLength() {
@@ -138,6 +137,10 @@ public class IPHeader extends Header {
         return ((flags&1) == 1);
     }
 
+    public void setSourceAddress(short[] sourceAddress) {
+        this.sourceAddress = sourceAddress;
+    }
+
     @Override
     public Header copy() {
         return new IPHeader(this);
@@ -149,8 +152,8 @@ public class IPHeader extends Header {
                 "version=" + version +
                 ", totalLength=" + totalLength +
                 ", protocol=" + protocol +
-                ", sourceAdress=" + Arrays.toString(sourceAdress) +
-                ", destinationAdress=" + Arrays.toString(destinationAdress) +
+                ", sourceAdress=" + Arrays.toString(sourceAddress) +
+                ", destinationAdress=" + Arrays.toString(destinationAddress) +
                 '}';
     }
 }
