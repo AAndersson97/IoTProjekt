@@ -72,7 +72,7 @@ public class OLSRPacket {
     }
 
     public enum MessageType {
-        HELLO_MESSAGE(1), TC_MESSAGE(2), MID_MESSAGE(3), HNA_MESSAGE(4);
+        HELLO_MESSAGE(1), TC_MESSAGE(2), MID_MESSAGE(3);
         int value;
         MessageType(int value) {
             this.value = value;

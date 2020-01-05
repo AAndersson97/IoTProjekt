@@ -40,8 +40,11 @@ public final class Constants {
         public static final int UDP_HEADER_SIZE = 8;
         public static final int OLSR_MIN_LENGTH = 16;
         public static final int OLSR_PORT = 698;
+        public static final int NUM_ACTIVE_MSG_TYPES = 3;
         public static final int OLSR_HEADER_SIZE = 16;
         public static final int DEFAULT_TTL = 255;
+        public static final double MAX_JITTER = HELLO_INTERVAL/4.0; // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering
+        public static final long MAX_JITTER_MS = (long) ((HELLO_INTERVAL/4.0) * 1000);
         public enum LinkTypes {
             UNSPEC_LINK(0), ASYM_LINK(1), SYM_LINK(2), LOST_LINK(3);
             int value;
@@ -63,7 +66,7 @@ public final class Constants {
          *  En nod kan dynamiskt ändra villighet när förutsättningarna att vidarebefodra traffik ändras.
          */
         public enum Willingness {
-            WILL_NEVER(0), WILL_LOW(1), WILL_DEFAULT(3), WILL_HIGH(6);
+            WILL_NEVER(0), WILL_LOW(1), WILL_DEFAULT(3), WILL_HIGH(6), WILL_ALWAYS(7);
             int value;
             Willingness(int value) {
                 this.value = value;

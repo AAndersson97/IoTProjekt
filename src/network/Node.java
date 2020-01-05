@@ -2,18 +2,23 @@ package network;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import static network.Constants.Protocol.DUP_HOLD_TIME;
+
+import static network.Constants.Protocol.*;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     private short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer
-    private HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
+    private final HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
-    private HashMap<short[], Node> MPRSelectors; // Samling innehållandes noder som valt denna nod att vara en MPR-nod
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
+    private ArrayList<NeighborTuple> neighborTuples;
+    private ArrayList<TwoHopTuple> twoHopNeighborSet;
+    private HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
+    private ArrayList<TopologyTuple> topologySet;
     private Transmission transmission;
+    private Timer[] timers;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private ArrayList<short[]> routingTable;
 
@@ -31,7 +36,11 @@ public class Node implements Comparator<Node>, Runnable {
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
         duplicateSets = new HashMap<>();
-        MPRSelectors = new HashMap<>();
+        timers = new Timer[NUM_ACTIVE_MSG_TYPES];
+        neighborTuples = new ArrayList<>();
+        twoHopNeighborSet = new ArrayList<>();
+        mprSelectorSet = new HashMap<>();
+        topologySet = new ArrayList<>();
         Network.registerNode(this);
     }
 
@@ -113,6 +122,14 @@ public class Node implements Comparator<Node>, Runnable {
         tuple.d_time = System.currentTimeMillis()/1000 + DUP_HOLD_TIME;
         tuple.d_iface = address;
         tuple.d_retransmitted = true;
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                synchronized (duplicateSets) {
+                    duplicateSets.get(packet.originatorAddr).remove(packet.seqNum);
+                }
+            }
+        }, DUP_HOLD_TIME);
     }
 
 
@@ -124,13 +141,18 @@ public class Node implements Comparator<Node>, Runnable {
         if (doImplementMsgType())
             forwardAccordingToMsgType(packet);
         // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
-        if (MPRSelectors.containsKey(packet.ipHeader.sourceAddress))
+        if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
             doForwardOLSRPacket(packet);
     }
 
     private void doForwardOLSRPacket(OLSRPacket packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
+        try {
+            Thread.sleep(calculateJitter());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         incrementSeqNum();
 
 
@@ -153,7 +175,10 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void forwardAccordingToMsgType(OLSRPacket packet) {
+    }
 
+    private long calculateJitter() {
+        return (long)(Math.random() * MAX_JITTER_MS);
     }
 
     private void dropPacket(OLSRPacket packet) {

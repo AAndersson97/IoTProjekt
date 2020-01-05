@@ -104,4 +104,11 @@ i IP-headern.
 Noder kan skicka och ta emot från/på olika gränssnitt, varje gränssnitt har sin egna adress. I detta program
 används ett gränssnitt.
 
+HELLO-meddelande - skickas ut i nätverket för att hitta grannar, hitta länkar och signalera MPR
+TC-meddelande - skickas ut i nätverket för att deklarera nätverkets topologi (advertisement of link states)
+MID-meddelande - skickas ut i nätverket för att deklarara närvaron av flertalet gränssnitt på en nod
+
+Jitter används för att förhindra att flera noder samtidigt skickar ut meddelande i nätverket, vilket kan orsaka en
+kollision och att meddelanden inte kommer fram.
+
 
