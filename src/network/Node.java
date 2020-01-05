@@ -13,18 +13,17 @@ public class Node implements Comparator<Node>, Runnable {
     private int seqNum; // gränsnittets sekvensnummer
     private final HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
-    private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Willingness willingness;
-    private HashMap<short[], NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
-    private ArrayList<short[]> mprSet; // lista över grannar som valts som MPR-nod
+    private final HashMap<short[], NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
+    private final ArrayList<short[]> mprSet; // lista över grannar som valts som MPR-nod
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
-    private ArrayList<TwoHopTuple> twoHopNeighborSet;
-    private HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
-    private ArrayList<TopologyTuple> topologySet;
-    private Transmission transmission;
+    private final ArrayList<TwoHopTuple> twoHopNeighborSet;
+    private final HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
+    private final ArrayList<TopologyTuple> topologySet;
+    private final Transmission transmission;
     private final ArrayList<Timer> timers;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
-    private ArrayList<short[]> routingTable;
+    private final ArrayList<short[]> routingTable;
 
     public Location getLocation() {
         return location;
@@ -280,11 +279,17 @@ public class Node implements Comparator<Node>, Runnable {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                synchronized (linkSet) {
-                    linkSet.remove(tuple.l_neighbor_iface_addr);
-                }
-                synchronized (neighborSet) {
-                    neighborSet.remove(tuple.l_neighbor_iface_addr);
+                long timeNow = System.currentTimeMillis();
+                // fältet l_time kan ha uppdateras mellan tiden då detta TimerTask-objektet skapades och när metoden run() anropas
+                if (tuple.l_time > timeNow)
+                    timer.schedule(this, (long) tuple.l_time - timeNow);
+                else {
+                    synchronized (linkSet) {
+                        linkSet.remove(tuple.l_neighbor_iface_addr);
+                    }
+                    synchronized (neighborSet) {
+                        neighborSet.remove(tuple.l_neighbor_iface_addr);
+                    }
                 }
             }
         }, (long) tuple.l_time - timeNow);

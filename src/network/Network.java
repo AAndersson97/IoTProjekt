@@ -25,7 +25,6 @@ public class Network {
      *
      * @param sender Avsändaren
      * @param packet Paketet som ska skickas
-     * @throws IOException Om paketsändningen misslyckades kastas ett IOException
      */
     public static void sendPacket(Node sender, OLSRPacket packet) {
         if (sender == null || packet == null)
