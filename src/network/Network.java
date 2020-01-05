@@ -24,14 +24,13 @@ public class Network {
     /**
      *
      * @param sender Avsändaren
-     * @param remote Mottagarens IP-address
      * @param packet Paketet som ska skickas
      * @throws IOException Om paketsändningen misslyckades kastas ett IOException
      */
-    public static void sendPacket(short[] remote, Node sender, OLSRPacket packet) {
-        if (remote == null || sender == null)
-            throw new IllegalArgumentException("Source address neither remote address must not be null");
-        wifiChannel.send(packet, remote, sender);
+    public static void sendPacket(Node sender, OLSRPacket packet) {
+        if (sender == null || packet == null)
+            throw new IllegalArgumentException("Source address neither packet must be null");
+        wifiChannel.send(sender, packet);
     }
 
     public static void shutdownNetwork() {

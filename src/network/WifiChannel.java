@@ -17,12 +17,12 @@ public class WifiChannel extends Channel {
         observers = new ArrayList<>();
     }
 
-    public void send(OLSRPacket packet, short[] destination, Node sender) {
+    public void send(Node sender, OLSRPacket packet) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> observers.forEach(node -> {
                 if (simulateLoss() || !isWithinTransmissionArea(sender, node) || !OLSRPacket.canRetransmit(packet));
-                else if (!Arrays.equals(destination, node.getAddress()))
+                else if (!Arrays.equals(sender.getAddress(), node.getAddress()))
                     node.receivePacket(packet);
         }));
     }

@@ -118,3 +118,6 @@ Ett Hello-meddelande innehåller en lista över länkar på gränssnittet och en
 vTime-fältet sätts till värdet av nodens NEIGHB_HOLD_TIME parameter. hTime-fältet sätts till värdet av nodens HELLO_INTERVAL parameter.
 
 Hello-meddelanden vidarebefordras aldrig.
+
+När en länktuppel tas bort ska även associerad granntuppel (neighbor tuple) tas bort så att varje granntuppel har
+minst en associerad länktuppel.

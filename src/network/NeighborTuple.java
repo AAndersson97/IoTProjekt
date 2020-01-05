@@ -3,7 +3,7 @@ import static network.Constants.Protocol.Willingness;
 
 public class NeighborTuple {
     public final short[] n_neighbor_main_addr;
-    public final N_status status;
+    public N_status status;
     public final Willingness n_willingness;
 
     NeighborTuple(short[] neighbor, N_status status, Willingness willingness) {

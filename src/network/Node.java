@@ -3,6 +3,7 @@ package network;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static network.Constants.Network.BROADCAST;
 import static network.Constants.Protocol.*;
 
 public class Node implements Comparator<Node>, Runnable {
@@ -14,14 +15,14 @@ public class Node implements Comparator<Node>, Runnable {
     private boolean active; // true om nodens tråd är aktiv
     private boolean isMPR; // true om noden är en multipoint relay vars uppgift är att vidarebefodra kontrolltraffik
     private Willingness willingness;
-    private HashMap<short[], NeighborTuple> neighborSet;
+    private HashMap<short[], NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
     private ArrayList<short[]> mprSet; // lista över grannar som valts som MPR-nod
-    private HashMap<short[], LinkTuple> linkSet;
+    private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private ArrayList<TwoHopTuple> twoHopNeighborSet;
     private HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private ArrayList<TopologyTuple> topologySet;
     private Transmission transmission;
-    private Timer[] timers;
+    private final ArrayList<Timer> timers;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private ArrayList<short[]> routingTable;
 
@@ -39,7 +40,7 @@ public class Node implements Comparator<Node>, Runnable {
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
         duplicateSets = new HashMap<>();
-        timers = new Timer[NUM_ACTIVE_MSG_TYPES];
+        timers = new ArrayList<>();
         neighborSet = new HashMap<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new HashMap<>();
@@ -53,6 +54,9 @@ public class Node implements Comparator<Node>, Runnable {
     @Override
     public void run() {
         while (active) {
+            Timer timer = new Timer();
+            timers.add(timer);
+            timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
             while (buffer.isEmpty() && active) {
                 try {
                     synchronized (buffer) {
@@ -68,6 +72,15 @@ public class Node implements Comparator<Node>, Runnable {
                 handlePacket(buffer.poll());
             }
         }
+    }
+
+    private TimerTask sendHelloMsgTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                sendHelloPacket();
+            }
+        };
     }
 
     @Override
@@ -86,9 +99,11 @@ public class Node implements Comparator<Node>, Runnable {
         }
     }
 
-    private void handlePacket(OLSRPacket packet) {
+    private <T extends OLSRMessage> void handlePacket(OLSRPacket<T> packet) {
         for (OLSRMessage message : packet.messages) {
             if (OLSRPacket.canBeProcessed(message, address)) {
+                if (doImplementMsgType())
+                    processAccordingToMsgType(packet);
                 HashMap<Integer, DuplicateTuple> duplicateSet;
                 // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
                 if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
@@ -122,8 +137,8 @@ public class Node implements Comparator<Node>, Runnable {
         }
     }
 
-    /*private void updateDuplicateSet(OLSRPacket packet) {
-        DuplicateTuple tuple = duplicateSets.get(packet.originatorAddr).get(packet.seqNum);
+    private void updateDuplicateSet(OLSRMessage message) {
+        DuplicateTuple tuple = duplicateSets.get(message.originatorAddr).get(message.msgSeqNum);
         tuple.d_time = System.currentTimeMillis()/1000 + DUP_HOLD_TIME;
         tuple.d_iface = address;
         tuple.d_retransmitted = true;
@@ -131,11 +146,11 @@ public class Node implements Comparator<Node>, Runnable {
             @Override
             public void run() {
                 synchronized (duplicateSets) {
-                    duplicateSets.get(packet.originatorAddr).remove(packet.seqNum);
+                    duplicateSets.get(message.originatorAddr).remove(message.msgSeqNum);
                 }
             }
         }, DUP_HOLD_TIME);
-    }*/
+    }
 
     private void sendHelloPacket() {
         LinkCode.LinkTypes linkType = null;
@@ -154,12 +169,16 @@ public class Node implements Comparator<Node>, Runnable {
                 if (!linkSet.containsKey(tuple.n_neighbor_main_addr)) {
                     neighborType = tuple.status == NeighborTuple.N_status.SYM ? LinkCode.NeighborTypes.SYM_NEIGH : LinkCode.NeighborTypes.NOT_NEIGH;
                     LinkCode linkCode = new LinkCode(LinkCode.LinkTypes.UNSPEC_LINK, neighborType);
+                    messages.add(new HelloMessage(address, seqNum++, willingness, linkCode, tuple.n_neighbor_main_addr));
                 }
             }
         }
-        //IPHeader ipHeader = new IPHeader(messages.size() *, );
-
-
+        IPHeader ipHeader = new IPHeader(messages.size() * HelloMessage.length(), address, BROADCAST, UDP_PROTOCOL_NUM);
+        UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
+        OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
+        OLSRPacket olsrPacket = new OLSRPacket(ipHeader, udpHeader, olsrHeader, messages);
+        incrementSeqNum();
+        Network.sendPacket(this, olsrPacket);
     }
 
     private void setLinkandNeighborType(LinkCode.LinkTypes linkType, LinkCode.NeighborTypes neighborType, LinkTuple tuple) {
@@ -214,14 +233,73 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private boolean doImplementMsgType() {
-        // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
-        return false;
+        return true;
     }
 
-    private void processAccordingToMsgType(OLSRPacket packet) {
+    private <T extends OLSRMessage> void processAccordingToMsgType(OLSRPacket<T> packet) {
+        for (OLSRMessage message : packet.messages) {
+            switch (message.msgType) {
+                case HELLO_MESSAGE:
+                    processHelloMessage((HelloMessage) message);
+                    break;
+            }
+        }
 
     }
 
+    private void processHelloMessage(HelloMessage message) {
+        LinkTuple linkTuple;
+        long timeNow = System.currentTimeMillis();
+        if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
+            linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime, message.vTime);
+            linkSet.put(message.originatorAddr, linkTuple);
+        }
+        linkTuple.l_asym_time = timeNow + message.vTime;
+        // true om denna nods adress finns med i meddelandet
+        if (Arrays.equals(message.neighborIfaceAdr, address)) {
+            if (message.linkCode.linkType == LinkCode.LinkTypes.LOST_LINK)
+                linkTuple.l_sym_time = timeNow - 1; // tiden har löpt ut
+            else if (message.linkCode.linkType == LinkCode.LinkTypes.ASYM_LINK || message.linkCode.linkType == LinkCode.LinkTypes.SYM_LINK) {
+                linkTuple.l_sym_time = timeNow + message.vTime;
+                linkTuple.l_time = linkTuple.l_sym_time + NEIGHB_HOLD_TIME;
+            }
+        }
+        // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
+        // detta tillåter grannar att upptäcka länkbräckage.
+        linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
+        NeighborTuple neighborTuple;
+        if ((neighborTuple = neighborSet.get(linkTuple.l_neighbor_iface_addr)) == null)
+            neighborTuple = new NeighborTuple(linkTuple.l_neighbor_iface_addr, NeighborTuple.N_status.NOT_SYM, willingness);
+        changeNeighborStatus(linkTuple, neighborTuple);
+        addRemoveLinkTupleTimer(linkTuple);
+    }
+
+    private void addRemoveLinkTupleTimer(LinkTuple tuple) {
+        Timer timer = new Timer();
+        long timeNow = System.currentTimeMillis();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                synchronized (linkSet) {
+                    linkSet.remove(tuple.l_neighbor_iface_addr);
+                }
+                synchronized (neighborSet) {
+                    neighborSet.remove(tuple.l_neighbor_iface_addr);
+                }
+            }
+        }, (long) tuple.l_time - timeNow);
+        timers.add(timer);
+    }
+
+    private void changeNeighborStatus(LinkTuple tuple, NeighborTuple neighborTuple) {
+        NeighborTuple.N_status n_status = NeighborTuple.N_status.NOT_SYM;
+        long timeNow = System.currentTimeMillis();
+        if (tuple.l_sym_time >= timeNow)
+            n_status = NeighborTuple.N_status.SYM;
+        neighborTuple.status = n_status;
+    }
+
+    // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
     private void forwardAccordingToMsgType(OLSRPacket packet) {
     }
 
@@ -236,6 +314,10 @@ public class Node implements Comparator<Node>, Runnable {
 
     public void turnOff() {
         active = false;
+        synchronized (timers) {
+            for (Timer timer : timers)
+                timer.cancel();
+        }
         synchronized (buffer) {
             buffer.notifyAll();
         }

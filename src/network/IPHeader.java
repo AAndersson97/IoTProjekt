@@ -14,7 +14,7 @@ public final class IPHeader implements Header {
     private byte flags;
     private short offset;
     private short timeToLive;
-    private short protocol;
+    private int protocol;
     private int checksum;
     short[] sourceAddress;
     short[] destinationAddress;
@@ -40,7 +40,7 @@ public final class IPHeader implements Header {
         typeOfService = header.typeOfService;
     }
 
-    public IPHeader(int dataLength, short[] sourceAddress, short[] destinationAddress, short protocol) throws IOException {
+    public IPHeader(int dataLength, short[] sourceAddress, short[] destinationAddress, int protocol) {
         this.totalLength = calculateHeaderLength(this) + dataLength;
         this.protocol = protocol;
         this.sourceAddress = sourceAddress;
@@ -48,7 +48,7 @@ public final class IPHeader implements Header {
         checksum = Checksum.generateChecksum(toByteArray());
     }
 
-    public byte[] toByteArray() throws IOException {
+    public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(version);
         out.write(typeOfService);
@@ -59,13 +59,13 @@ public final class IPHeader implements Header {
         out.write(offset);
         out.write(timeToLive);
         out.write(protocol);
-        out.write(checksum);
         for (short num : sourceAddress)
             out.write(num);
         for (short num : destinationAddress)
             out.write(num);
         if (options != null)
-            out.write(options);
+            for (byte option : options)
+                out.write(option);
 
         return out.toByteArray();
     }
@@ -106,7 +106,7 @@ public final class IPHeader implements Header {
         return timeToLive;
     }
 
-    public short getProtocol() {
+    public int getProtocol() {
         return protocol;
     }
 

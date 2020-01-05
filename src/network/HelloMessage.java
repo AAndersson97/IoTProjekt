@@ -2,9 +2,7 @@ package network;
 
 import java.util.ArrayList;
 
-import static network.Constants.Protocol.NEIGHB_HOLD_TIME;
-import static network.Constants.Protocol.Willingness;
-import static network.Constants.Protocol.SCALING_FACTOR;
+import static network.Constants.Protocol.*;
 
 public class HelloMessage extends OLSRMessage {
     public final short reserved;
@@ -41,7 +39,9 @@ public class HelloMessage extends OLSRMessage {
     }
 
 
-
+    public static int length() {
+        return Short.SIZE + Integer.SIZE * 3 + Float.SIZE + ADDRESS_LENGTH * Short.SIZE;
+    }
 
     @Override
     OLSRMessage copy() {

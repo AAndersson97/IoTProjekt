@@ -3,17 +3,14 @@ package network;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 
-import static network.Constants.Protocol.*;
-
-public class OLSRPacket {
+public class OLSRPacket<T extends OLSRMessage> {
     public final IPHeader ipHeader;
     public final UDPHeader udpHeader;
     public final OLSRHeader olsrHeader;
-    public final ArrayList<OLSRMessage> messages;
+    public final ArrayList<T> messages;
 
-    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<OLSRMessage> messages) {
+    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<T> messages) {
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
         this.olsrHeader = olsrHeader;

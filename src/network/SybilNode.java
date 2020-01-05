@@ -9,10 +9,5 @@ public class SybilNode extends Node {
         master = node;
     }
 
-    @Override
-    public void receivePacket(Packet packet) {
-        master.receivePacket(packet);
-    }
-
 
 }
