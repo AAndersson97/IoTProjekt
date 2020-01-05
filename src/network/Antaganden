@@ -117,7 +117,13 @@ Ett Hello-meddelande innehåller en lista över länkar på gränssnittet och en
 
 vTime-fältet sätts till värdet av nodens NEIGHB_HOLD_TIME parameter. hTime-fältet sätts till värdet av nodens HELLO_INTERVAL parameter.
 
-Hello-meddelanden vidarebefordras aldrig.
+Hello-meddelanden vidarebefordras aldrig och placeras ej i duplicate set.
 
 När en länktuppel tas bort ska även associerad granntuppel (neighbor tuple) tas bort så att varje granntuppel har
 minst en associerad länktuppel.
+
+Omkalkylering av MPR-noder sker när ändringar upptäcks i symmetriska 1-hoppskvarteret eller i symmetriskt strikt 2-hoppskvarteret.
+
+Varje strikt 2-hoppsgranne ska kunna nås av minst en MPR-nod och samtidigt hålla mängden av MPR-noden till ett minimum.
+
+MPR-mängden kan i vissa fall bestå enbart av hela mängden av symmetriska grannar. Vanligt i nya nätverk.

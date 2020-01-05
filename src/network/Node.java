@@ -8,6 +8,7 @@ import static network.Constants.Protocol.*;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
+    private final Timer timer;
     private short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer
@@ -21,7 +22,6 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final ArrayList<TopologyTuple> topologySet;
     private final Transmission transmission;
-    private final ArrayList<Timer> timers;
     private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private final ArrayList<short[]> routingTable;
 
@@ -39,7 +39,7 @@ public class Node implements Comparator<Node>, Runnable {
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         thread.start();
         duplicateSets = new HashMap<>();
-        timers = new ArrayList<>();
+        timer = new Timer();
         neighborSet = new HashMap<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new HashMap<>();
@@ -53,8 +53,6 @@ public class Node implements Comparator<Node>, Runnable {
     @Override
     public void run() {
         while (active) {
-            Timer timer = new Timer();
-            timers.add(timer);
             timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
             while (buffer.isEmpty() && active) {
                 try {
@@ -252,7 +250,22 @@ public class Node implements Comparator<Node>, Runnable {
         if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
             linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime, message.vTime);
             linkSet.put(message.originatorAddr, linkTuple);
+        } else {
+            // sant om avsändaren är en symmetrisk granne
+            if (linkTuple.l_sym_time >= timeNow) {
+                LinkCode.NeighborTypes neighborType = message.linkCode.neighborType;
+                if (neighborType == LinkCode.NeighborTypes.SYM_NEIGH || neighborType == LinkCode.NeighborTypes.MPR_NEIGH) {
+                    // en nod är inte sin egen 2-hoppsgranne vilket är fallet om nedanstående inte är sant
+                    if (!Arrays.equals(address, message.originatorAddr)) {
+                        TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, message.neighborIfaceAdr ,message.vTime);
+                        twoHopNeighborSet.add(twoHopTuple);
+                        removeTwoHopTimer(twoHopTuple);
+                        updateTwoHopSet(message);
+                    }
+                }
+            }
         }
+        timeNow = System.currentTimeMillis();
         linkTuple.l_asym_time = timeNow + message.vTime;
         // true om denna nods adress finns med i meddelandet
         if (Arrays.equals(message.neighborIfaceAdr, address)) {
@@ -269,12 +282,13 @@ public class Node implements Comparator<Node>, Runnable {
         NeighborTuple neighborTuple;
         if ((neighborTuple = neighborSet.get(linkTuple.l_neighbor_iface_addr)) == null)
             neighborTuple = new NeighborTuple(linkTuple.l_neighbor_iface_addr, NeighborTuple.N_status.NOT_SYM, willingness);
+        else
+            neighborTuple.n_willingness = message.willingness;
         changeNeighborStatus(linkTuple, neighborTuple);
-        addRemoveLinkTupleTimer(linkTuple);
+        removeLinkTupleTimer(linkTuple);
     }
 
-    private void addRemoveLinkTupleTimer(LinkTuple tuple) {
-        Timer timer = new Timer();
+    private void removeLinkTupleTimer(LinkTuple tuple) {
         long timeNow = System.currentTimeMillis();
         timer.schedule(new TimerTask() {
             @Override
@@ -293,7 +307,29 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
         }, (long) tuple.l_time - timeNow);
-        timers.add(timer);
+    }
+
+    private void removeTwoHopTimer(TwoHopTuple tuple) {
+        long timeNow = System.currentTimeMillis();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                // fältet l_time kan ha uppdateras mellan tiden då detta TimerTask-objektet skapades och när metoden run() anropas
+                if (tuple.n_time > timeNow)
+                    timer.schedule(this, (long) tuple.n_time - timeNow);
+                else {
+                    synchronized (twoHopNeighborSet) {
+                        twoHopNeighborSet.remove(tuple);
+                    }
+                }
+            }
+        }, (long) tuple.n_time - timeNow);
+    }
+
+    private void updateTwoHopSet(HelloMessage message) {
+        twoHopNeighborSet.removeIf(tuple -> Arrays.equals(tuple.n_neighbor_main_addr, message.originatorAddr)
+                && Arrays.equals(tuple.n_2hop_addr, message.neighborIfaceAdr));
     }
 
     private void changeNeighborStatus(LinkTuple tuple, NeighborTuple neighborTuple) {
@@ -319,10 +355,7 @@ public class Node implements Comparator<Node>, Runnable {
 
     public void turnOff() {
         active = false;
-        synchronized (timers) {
-            for (Timer timer : timers)
-                timer.cancel();
-        }
+        timer.cancel();
         synchronized (buffer) {
             buffer.notifyAll();
         }
