@@ -188,7 +188,7 @@ public class SybilSimulator extends Application {
 
     }
 
-    public void animateDroppedPath(Node node){
+    public static void animateDroppedPath(Node node){
         Circle newCircle = new Circle(2, Color.RED);
         Line newLine = new Line();
         newLine.setStartX(node.getLocation().getX());
