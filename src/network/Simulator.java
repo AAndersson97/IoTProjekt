@@ -27,10 +27,10 @@ public class Simulator {
         }
     }
 
-    public static void scheduleTaskPeriodically(TimerTask task, long delay, long period) {
+    public static void scheduleFutureTask(TimerTask task, long delay) {
         Timer timer = new Timer();
         timers.add(timer);
-        timer.scheduleAtFixedRate(task, delay, period);
+        timer.schedule(task, delay);
     }
 
     public static void shutdown() {

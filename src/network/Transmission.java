@@ -28,7 +28,7 @@ public class Transmission {
     /**
      * @param transmissionRadius Radien på cirkeln som definierar överföringsområdets omfattning
      * @param sender Sändarens plats i x- och y-koordinat
-     * @param receiver Mottagarens plats i x- och y-koordinat
+     * @param receiver Mottagarens plats i x- och y-koordinater
      * @return
      */
     public static boolean isInsideTransmissionArea(int transmissionRadius, Location sender, Location receiver) {

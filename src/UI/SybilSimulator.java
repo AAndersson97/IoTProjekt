@@ -23,6 +23,7 @@ import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.TimerTask;
 
 public class SybilSimulator extends Application {
 
@@ -189,6 +190,12 @@ public class SybilSimulator extends Application {
                 transition.setPath(newLine);
                 transition.setCycleCount(1);
                 transition.play();
+                Simulator.scheduleFutureTask(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> root.getChildren().remove(newCircle));
+                    }
+                }, packetTransportDelay);
             });
         });
 
