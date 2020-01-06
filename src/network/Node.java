@@ -21,7 +21,7 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private final ArrayList<TwoHopTuple> twoHopNeighborSet;
     private final HashMap<short[], MPRSelectorTupple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
-    private final ArrayList<TopologyTuple> topologySet;
+    private final HashMap<short[], TopologyTuple> topologySet;
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<OLSRPacket<OLSRMessage>> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private final ArrayList<short[]> routingTable;
@@ -43,7 +43,7 @@ public class Node implements Comparator<Node>, Runnable {
         neighborSet = new HashMap<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new HashMap<>();
-        topologySet = new ArrayList<>();
+        topologySet = new HashMap<>();
         linkSet = new HashMap<>();
         willingness = Willingness.WILL_DEFAULT;
         Network.registerNode(this);
@@ -114,20 +114,14 @@ public class Node implements Comparator<Node>, Runnable {
                             //updateDuplicateSet(packet);
                             dropPacket(packet);
                         }
-                    } else {
-                        processOLSRPacket(packet);
                     }
-
                     // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
                     if (!routingTable.contains(packet.ipHeader.sourceAddress))
                         dropPacket(packet);
                     else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
                         prepareForwardingOLSR(packet);
-                    } else
-                        processOLSRPacket(packet);
-
-                } else if (doImplementMsgType())
-                    processAccordingToMsgType(packet);
+                    }
+                }
             } else
                 dropPacket(packet);
         }
@@ -197,7 +191,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private boolean mprSetContains(short[] address) {
-        for (short[] mpr: mprSet)
+        for (short[] mpr : mprSet)
             if (Arrays.equals(address, mpr))
                 return true;
 
@@ -209,14 +203,12 @@ public class Node implements Comparator<Node>, Runnable {
      * @param packet Packet som ska vidarebefodras
      */
     private <T extends OLSRMessage>void prepareForwardingOLSR(OLSRPacket<T> packet) {
-        if (doImplementMsgType())
-            forwardAccordingToMsgType(packet);
         // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
         if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
             doForwardOLSRPacket(packet);
     }
 
-    private <T extends OLSRMessage>void doForwardOLSRPacket(OLSRPacket<T> packet) {
+    private <T extends OLSRMessage> void doForwardOLSRPacket(OLSRPacket<T> packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
@@ -225,19 +217,6 @@ public class Node implements Comparator<Node>, Runnable {
             System.out.println(e.getMessage());
         }
         incrementSeqNum();
-
-
-    }
-
-    private void processOLSRPacket(OLSRPacket packet) {
-        if (Constants.LOG_ACTIVE)
-            System.out.println("Process packet: " + packet.toString());
-        incrementSeqNum();
-
-    }
-
-    private boolean doImplementMsgType() {
-        return true;
     }
 
     private <T extends OLSRMessage> void processAccordingToMsgType(OLSRPacket<T> packet) {
@@ -246,9 +225,26 @@ public class Node implements Comparator<Node>, Runnable {
                 case HELLO_MESSAGE:
                     processHelloMessage((HelloMessage) message);
                     break;
+                case TC_MESSAGE:
+                    if (neighborSet.get(packet.ipHeader.sourceAddress) == null) {
+                        dropPacket(packet);
+                        break;
+                    }
+                    processTCMessage((TCMessage) message);
+                    break;
             }
         }
 
+    }
+
+    private void processTCMessage(TCMessage message) {
+        long timeNow = System.currentTimeMillis();
+        if (message.vTime >= timeNow) {
+            TopologyTuple topologyTuple;
+            if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
+
+            }
+        }
     }
 
     private void processHelloMessage(HelloMessage message) {
@@ -409,6 +405,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
+    // HELLO-paket vidarbefodras ej, TC-meddelande vidarbefodras av MPR-noder enligt standardalgoritm
     private void forwardAccordingToMsgType(OLSRPacket packet) {
     }
 
