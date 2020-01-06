@@ -30,8 +30,6 @@ public class SybilSimulator extends Application {
     @FXML
     MenuItem IPMenu;
     @FXML
-    MenuItem aniMenu;
-    @FXML
     AnchorPane anchorPane;
     @FXML
     Button sendPacketBtn;
@@ -163,8 +161,8 @@ public class SybilSimulator extends Application {
         super.stop();
     }
     public void animatePath(){
-        Circle newCircle = new Circle(2, Color.BLUE);
         PacketLocator.registerListener((start, end)-> {
+            Circle newCircle = new Circle(2, Color.BLUE);
             anchorPane.getChildren().add(newCircle);
             Line newLine = new Line();
             newLine.setStartX(start.getX());
@@ -173,7 +171,7 @@ public class SybilSimulator extends Application {
             newLine.setEndY(end.getY());
             PathTransition transition = new PathTransition();
             transition.setNode(newCircle);
-            transition.setDuration(Duration.millis(2500));
+            transition.setDuration(Duration.millis(2000));
             transition.setPath(newLine);
             transition.setCycleCount(1);
             transition.play();

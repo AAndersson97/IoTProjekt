@@ -6,7 +6,7 @@ import java.util.Random;
 import static network.Constants.Network.PACKET_LOSS;
 
 /**
- * Klassen representerar ett trådlöst nätverkskanal där router på nätverket tar emot paket
+ * Klassen representerar en trådlöst nätverkskanal där router på nätverket tar emot paket
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
