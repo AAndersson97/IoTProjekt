@@ -312,6 +312,10 @@ public class Node implements Comparator<Node>, Runnable {
         mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
     }
 
+    public void updateRoutingTable() {
+
+    }
+
     private void detectNeighborLoss(LinkTuple tuple) {
         long timeNow = System.currentTimeMillis();
         timer.schedule(new TimerTask() {
