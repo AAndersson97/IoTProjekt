@@ -36,7 +36,6 @@ public final class Constants {
         public static final int TOP_HOLD_TIME = 15000;
         public static final int DUP_HOLD_TIME = 30000;
         public static final int MID_HOLD_TIME = 15000;
-        public static final int HNA_HOLD_TIME = 15000;
         public static final int UDP_HEADER_SIZE = Short.SIZE * 3 + Integer.SIZE;
         public static final int UDP_PROTOCOL_NUM = 17;
         public static final int OLSR_MIN_LENGTH = 16;
