@@ -176,7 +176,7 @@ public class SybilSimulator extends Application {
             newLine.setEndY(end.getY());
             PathTransition transition = new PathTransition();
             transition.setNode(newCircle);
-            transition.setDuration(Duration.millis(2000));
+            transition.setDuration(Duration.millis(packetTransportDelay));
             transition.setPath(newLine);
             transition.setCycleCount(1);
             transition.play();
@@ -206,6 +206,7 @@ public class SybilSimulator extends Application {
         fadeTransition.play();
     }
     public void sliderDragged(){
-        System.out.println((int)slider.getValue());
+        packetTransportDelay = ((int)slider.getValue())*10;
+
     }
 }
