@@ -8,7 +8,11 @@ public class PacketLocator {
 
     private static LocationListener locationListener;
     private static PacketDroppedListener packetDroppedListener;
+    private static Timer timer;
 
+    static {
+        timer = new Timer();
+    }
     public synchronized static void reportPacketDropped(Node node) {
         packetDroppedListener.packetDropped(node);
     }
@@ -18,12 +22,13 @@ public class PacketLocator {
         Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
         if (start != null && end != null) {
             Location finalStart = start, finalEnd = end;
-            new Timer().schedule(new TimerTask() {
+            /*timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     locationListener.reportedTransport(finalStart, finalEnd);
                 }
-            }, SybilSimulator.packetTransportDelay);
+            }, 1000);*/
+            locationListener.reportedTransport(finalStart, finalEnd);
         }
         else
             if (Constants.LOG_ACTIVE) {

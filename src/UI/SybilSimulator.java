@@ -45,7 +45,7 @@ public class SybilSimulator extends Application {
     private static ArrayList<Circle> taCircles;
     private static boolean TAVisible; // true om överföringsareor är synliga
     private static boolean IPVisible;
-    public static int packetTransportDelay;
+    public static int packetTransportDelay = 2000;
 
     private static ArrayList<Label> addressLabels = new ArrayList<>();
 

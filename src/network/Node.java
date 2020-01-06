@@ -100,6 +100,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private <T extends OLSRMessage> void handlePacket(OLSRPacket<T> packet) {
+        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
         for (OLSRMessage message : packet.messages) {
             if (OLSRPacket.canBeProcessed(message, address)) {
                 processAccordingToMsgType(packet);
@@ -223,7 +224,6 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private <T extends OLSRMessage> void processAccordingToMsgType(OLSRPacket<T> packet) {
-        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
         for (OLSRMessage message : packet.messages) {
             switch (message.msgType) {
                 case HELLO_MESSAGE:

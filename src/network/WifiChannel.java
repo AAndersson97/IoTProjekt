@@ -21,9 +21,10 @@ public class WifiChannel extends Channel {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> observers.forEach((address,node) -> {
-                if (simulateLoss());
-                else if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node))
+            if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
+                if (!simulateLoss())
                     node.receivePacket(packet);
+            }
         }));
     }
 
