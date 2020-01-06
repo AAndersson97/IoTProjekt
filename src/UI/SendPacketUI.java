@@ -2,6 +2,7 @@ package UI;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +35,7 @@ public class SendPacketUI {
     public void start(Stage stage) throws Exception {
         if (Network.getNumOfNodes() == 0) {
             new Alert(Alert.AlertType.ERROR, "The number of nodes is zero, it is not possible to send packets", ButtonType.OK).show();
+            Event.fireEvent(stage, new WindowEvent(stage,WindowEvent.WINDOW_CLOSE_REQUEST));
             return;
         }
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));

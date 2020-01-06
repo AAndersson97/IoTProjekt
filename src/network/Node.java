@@ -220,7 +220,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private <T extends OLSRMessage> void processAccordingToMsgType(OLSRPacket<T> packet) {
-        //PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
+        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
         for (OLSRMessage message : packet.messages) {
             switch (message.msgType) {
                 case HELLO_MESSAGE:
@@ -242,8 +242,22 @@ public class Node implements Comparator<Node>, Runnable {
         long timeNow = System.currentTimeMillis();
         if (message.vTime >= timeNow) {
             TopologyTuple topologyTuple;
-            if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
-
+            if ((topologyTuple = topologySet.get(message.originatorAddr)) != null
+                    && topologyTuple.t_seq < message.ANSN) {
+                // Tar bort tuppel som innehåller äldre information än informationen i meddelandet
+                synchronized (topologySet) {
+                    topologySet.remove(topologyTuple.t_last_addr);
+                }
+            }
+            for (short[] neighbor : message.advertisedNMA) {
+                if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
+                    if (Arrays.equals(topologyTuple.t_last_addr, message.originatorAddr)) {
+                        topologyTuple.t_time = System.currentTimeMillis() + message.vTime;
+                    }
+                } else {
+                    timeNow = System.currentTimeMillis();
+                   // topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN, timeNow + message.vTime);
+                }
             }
         }
     }
@@ -262,9 +276,9 @@ public class Node implements Comparator<Node>, Runnable {
                 if (neighborType == LinkCode.NeighborTypes.SYM_NEIGH || neighborType == LinkCode.NeighborTypes.MPR_NEIGH) {
                     // en nod är inte sin egen 2-hoppsgranne vilket är fallet om nedanstående inte är sant
                     if (!Arrays.equals(address, message.originatorAddr)) {
-                        TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, message.neighborIfaceAdr ,message.vTime);
-                        twoHopNeighborSet.add(twoHopTuple);
-                        removeTwoHopTimer(twoHopTuple);
+                        //TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, message.neighborIfaceAdr ,message.vTime);
+                        //twoHopNeighborSet.add(twoHopTuple);
+                        //removeTwoHopTimer(twoHopTuple);
                         updateTwoHopSet(message);
                     }
                 }
