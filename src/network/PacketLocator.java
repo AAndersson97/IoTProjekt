@@ -1,11 +1,11 @@
 package network;
 
+import UI.SybilSimulator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static network.Constants.GUI.PACKET_TRANSPORT_DELAY;
 
 public class PacketLocator {
 
@@ -28,7 +28,7 @@ public class PacketLocator {
                 public void run() {
                     locationListener.reportedTransport(finalStart, finalEnd);
                 }
-            }, PACKET_TRANSPORT_DELAY);
+            }, SybilSimulator.packetTransportDelay);
         }
         else
             if (Constants.LOG_ACTIVE) {
