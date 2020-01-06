@@ -2,6 +2,7 @@ package network;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Predicate;
 
 import static network.Constants.Network.BROADCAST;
 import static network.Constants.Protocol.*;
@@ -24,7 +25,7 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], TopologyTuple> topologySet;
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<OLSRPacket<OLSRMessage>> buffer; // tillfällig lagring av paket som inte än har bearbetas
-    private final ArrayList<short[]> routingTable; // Nyckel: destination, värde: RoutingTuple
+    private final HashMap<short[], RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
 
     public Location getLocation() {
         return location;
@@ -33,7 +34,7 @@ public class Node implements Comparator<Node>, Runnable {
     public Node() {
         buffer = new ConcurrentLinkedQueue<>();
         location = LocationCreator.getInstance().getLocation();
-        routingTable = new ArrayList<>();
+        routingTable = new HashMap<>();
         active = true;
         address = AddressGenerator.generateAddress();
         thread = new Thread(this);
@@ -116,7 +117,7 @@ public class Node implements Comparator<Node>, Runnable {
                         }
                     }
                     // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
-                    if (!routingTable.contains(packet.ipHeader.sourceAddress))
+                    if (!routingTable.containsKey(packet.ipHeader.sourceAddress))
                         dropPacket(packet);
                     else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
                         prepareForwardingOLSR(packet);
@@ -255,7 +256,6 @@ public class Node implements Comparator<Node>, Runnable {
                         topologyTuple.renewTupple();
                     }
                 } else {
-                    timeNow = System.currentTimeMillis();
                     topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN);
                     topologySet.put(topologyTuple.t_last_addr,topologyTuple);
                 }
@@ -313,7 +313,69 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     public void updateRoutingTable() {
+        routingTable.clear();
+        for (NeighborTuple tuple : neighborSet.values()) {
+            if (tuple.status == NeighborTuple.N_status.SYM) {
+                LinkTuple linkTuple;
+                if ((linkTuple = findLinkTuple(tuple)) != null && linkTuple.l_time >= System.currentTimeMillis()) {
+                    RoutingTuple routingTuple;
+                    if (routingTable.containsKey(tuple.n_neighbor_main_addr)) {
+                        routingTuple = new RoutingTuple(linkTuple.l_neighbor_iface_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
+                    } else {
+                        routingTuple = new RoutingTuple(tuple.n_neighbor_main_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
+                    }
+                    routingTable.put(routingTuple.r_dest_addr, routingTuple);
+                }
+            }
+        }
+        for (TwoHopTuple tuple : twoHopNeighborSet) {
+            if (!Arrays.equals(address, tuple.n_2hop_addr) && !neighborSet.containsKey(tuple.n_2hop_addr)) {
+                RoutingTuple neighbor = findExistingRouteTuple(tuple);
+                RoutingTuple routingTuple = new RoutingTuple(tuple.n_2hop_addr, neighbor.r_next_addr, 2, neighbor.r_iface_addr);
+                routingTable.put(routingTuple.r_dest_addr, routingTuple);
+            }
+        }
+        for (int h = 2, count = 0;;h++, count = 0) {
+            for (TopologyTuple topologyTuple : topologySet.values()) {
+                RoutingTuple tuple = null;
+                if ((routingTable.get(topologyTuple.t_dest_addr) == null) ||
+                        (Arrays.equals(topologyTuple.t_last_addr, tuple.r_dest_addr) && tuple.r_dist == h)) {
+                    RoutingTuple existing = findExistingRouteTuple(topologyTuple);
+                    if (existing != null) {
+                        RoutingTuple routingTuple = new RoutingTuple(topologyTuple.t_dest_addr, existing.r_next_addr, h + 1, existing.r_iface_addr);
+                        routingTable.put(routingTuple.r_dest_addr, routingTuple);
+                        count++;
+                    }
+                }
+            }
+            // om nedanstående är sant finns inga fler grannar som ligger det antal hop som är specificerat i variabeln h
+            if (count == 0)
+                break;
+        }
+    }
 
+    public RoutingTuple findExistingRouteTuple(TopologyTuple topologyTuple) {
+        for (RoutingTuple routingTuple : routingTable.values())
+            if (Arrays.equals(routingTuple.r_dest_addr, topologyTuple.t_last_addr))
+                return routingTuple;
+
+        return null;
+    }
+    public RoutingTuple findExistingRouteTuple(TwoHopTuple twoHopTuple) {
+        for (RoutingTuple routingTuple : routingTable.values())
+            if (Arrays.equals(routingTuple.r_dest_addr, twoHopTuple.n_2hop_addr))
+                return routingTuple;
+
+        return null;
+    }
+
+    private LinkTuple findLinkTuple(NeighborTuple neighborTuple) {
+        for (LinkTuple tuple : linkSet.values()) {
+            if (Arrays.equals(tuple.l_neighbor_iface_addr, neighborTuple.n_neighbor_main_addr)) {
+                return tuple;
+            }
+        }
+        return null;
     }
 
     private void detectNeighborLoss(LinkTuple tuple) {
