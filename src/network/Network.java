@@ -2,6 +2,7 @@ package network;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Network {
     private static int numOfNodes;
@@ -33,7 +34,7 @@ public class Network {
     }
 
     public static void shutdownNetwork() {
-        for (Node node : wifiChannel.getObservers()) {
+        for (Node node : wifiChannel.getObservers().values()) {
             node.turnOff();
         }
     }
@@ -43,7 +44,7 @@ public class Network {
         numOfNodes++;
     }
 
-    public static ArrayList<Node> getNodeList() {
+    public static HashMap<short[], Node> getNodeList() {
         return wifiChannel.getObservers();
     }
 

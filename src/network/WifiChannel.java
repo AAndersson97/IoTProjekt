@@ -2,6 +2,7 @@ package network;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import static network.Constants.Network.PACKET_LOSS;
 
@@ -10,16 +11,16 @@ import static network.Constants.Network.PACKET_LOSS;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private ArrayList<Node> observers;
+    private HashMap<short[],Node> observers;
 
     {
-        observers = new ArrayList<>();
+        observers = new HashMap<>();
     }
 
     public void send(Node sender, OLSRPacket packet) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
-        Simulator.scheduleTask(() -> observers.forEach(node -> {
+        Simulator.scheduleTask(() -> observers.forEach((address,node) -> {
                 if (simulateLoss());
                 else if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node))
                     node.receivePacket(packet);
@@ -35,10 +36,10 @@ public class WifiChannel extends Channel {
     }
 
     public void addObserver(Node node) {
-        observers.add(node);
+        observers.put(node.getAddress(),node);
     }
 
-    public ArrayList<Node> getObservers() {
+    public HashMap<short[], Node> getObservers() {
         return observers;
     }
 
