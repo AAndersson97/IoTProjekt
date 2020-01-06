@@ -44,8 +44,9 @@
         <menus>
           <Menu mnemonicParsing="false" text="View">
             <items>
-              <MenuItem fx:id="TAMenu" mnemonicParsing="false" disable="true" onAction="#toggleTAs" text="Show Transmission Area" />
-              <MenuItem fx:id="IPMenu" mnemonicParsing="false" disable="true" onAction="#toggleIPAddresses" text="Show IP addresses"></MenuItem>
+              <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
+              <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
+                  <MenuItem fx:id="aniMenu" mnemonicParsing="false" onAction="#animatePath" text="Animate" />
             </items>
           </Menu>
         </menus>

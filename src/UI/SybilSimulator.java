@@ -1,5 +1,6 @@
 package UI;
 
+import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,7 +10,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.NUM_OF_SYBIL;
@@ -19,12 +22,15 @@ import java.util.Arrays;
 
 public class SybilSimulator extends Application {
 
+
     @FXML
     MenuBar menuDisplay;
     @FXML
     MenuItem TAMenu;
     @FXML
     MenuItem IPMenu;
+    @FXML
+    MenuItem aniMenu;
     @FXML
     AnchorPane anchorPane;
     @FXML
@@ -155,5 +161,23 @@ public class SybilSimulator extends Application {
         Network.shutdownNetwork();
         Simulator.shutdown();
         super.stop();
+    }
+    public void animatePath(){
+        Circle newCircle = new Circle(2, Color.BLUE);
+        PacketLocator.registerListener((start, end)-> {
+            anchorPane.getChildren().add(newCircle);
+            Line newLine = new Line();
+            newLine.setStartX(start.getX());
+            newLine.setStartY(start.getY());
+            newLine.setEndX(end.getX());
+            newLine.setEndY(end.getY());
+            PathTransition transition = new PathTransition();
+            transition.setNode(newCircle);
+            transition.setDuration(Duration.millis(2500));
+            transition.setPath(newLine);
+            transition.setCycleCount(1);
+            transition.play();
+        });
+
     }
 }
