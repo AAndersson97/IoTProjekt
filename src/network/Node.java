@@ -11,7 +11,8 @@ public class Node implements Comparator<Node>, Runnable {
     private final Timer timer;
     private short[] address;
     private Location location;
-    private int seqNum; // gränsnittets sekvensnummer
+    private int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
+    private int ANSN; // ett sekvensnummer som ökar med 1 varje gång mängden av grannar i "neighborSet" uppdateras.
     private final HashMap<short[], HashMap<Integer, DuplicateTuple>> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
     private Willingness willingness;
