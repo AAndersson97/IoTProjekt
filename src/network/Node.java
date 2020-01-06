@@ -1,5 +1,7 @@
 package network;
 
+import UI.SybilSimulator;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
@@ -498,6 +500,8 @@ public class Node implements Comparator<Node>, Runnable {
     private void dropPacket(OLSRPacket packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
+        Node node = Network.getNodeList()
+        SybilSimulator.animateDroppedPath(node);
     }
 
     public void turnOff() {
