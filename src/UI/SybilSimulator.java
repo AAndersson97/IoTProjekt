@@ -79,11 +79,15 @@ public class SybilSimulator extends Application {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
-        anchorPane.getChildren().add(tACircle);
+        Label nodeLabel = createAddresslabel(createdNode);
+        anchorPane.getChildren().addAll(tACircle, nodeLabel);
+        addressLabels.add(nodeLabel);
         for (SybilNode node : createdNode.getSybilNodes()){
-            addressLabels.add(createAddresslabel(node));
+            //addressLabels.add(createAddresslabel(node));
             Circle taCircle = createTACircle(node);
-            anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle);
+            nodeLabel = createAddresslabel(node);
+            anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle, nodeLabel);
+            addressLabels.add(nodeLabel);
         }
     }
 
