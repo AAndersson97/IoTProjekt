@@ -81,7 +81,13 @@ public class SybilSimulator extends Application {
     public void onStartSybilAttack() {
         TAMenu.setDisable(false);
         IPMenu.setDisable(false);
-        AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
+        try {
+            showIPAddresses();
+            new SybilAttackUI().showUIAndBlock();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        /*AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
         Label nodeLabel = createAddresslabel(createdNode);
@@ -93,7 +99,7 @@ public class SybilSimulator extends Application {
             nodeLabel = createAddresslabel(node);
             anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle, nodeLabel);
             addressLabels.add(nodeLabel);
-        }
+        }*/
     }
 
     /**

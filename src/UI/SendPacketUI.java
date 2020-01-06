@@ -16,7 +16,6 @@ import network.IPHeader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static network.Constants.Protocol.ADDRESS_LENGTH;
 import static network.Constants.GUI.PACKET_GUI_Y;
@@ -41,6 +40,7 @@ public class SendPacketUI {
         }
         Parent root = FXMLLoader.load(getClass().getResource("PacketGUI.fxml"));
         stage.setScene(new Scene(root));
+        stage.setResizable(false);
         stage.setX(PACKET_GUI_X);
         stage.setY(PACKET_GUI_Y);
         stage.show();
@@ -58,7 +58,7 @@ public class SendPacketUI {
 
     public void fillSrcAddresses() {
         if (addressStrings == null)
-            createAddressCollections();
+            createAddressCollection();
         if (sourceAddress.getItems().isEmpty()) {
             sourceAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
@@ -69,7 +69,7 @@ public class SendPacketUI {
 
     public void fillDestAddresses() {
         if (addressStrings == null)
-            createAddressCollections();
+            createAddressCollection();
         if (destAddress.getItems().isEmpty()) {
             destAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
@@ -99,7 +99,7 @@ public class SendPacketUI {
         return sourceAddress.getSelectionModel().getSelectedIndex() == -1 || destAddress.getSelectionModel().getSelectedIndex() == -1;
     }
 
-    private void createAddressCollections() {
+    private void createAddressCollection() {
         Collection<Node> nodeList = Network.getNodeList().values();
         addressStrings = FXCollections.observableArrayList();
         listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
