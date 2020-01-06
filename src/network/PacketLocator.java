@@ -22,13 +22,12 @@ public class PacketLocator {
         Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
         if (start != null && end != null) {
             Location finalStart = start, finalEnd = end;
-            /*timer.schedule(new TimerTask() {
+            timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     locationListener.reportedTransport(finalStart, finalEnd);
                 }
-            }, 1000);*/
-            locationListener.reportedTransport(finalStart, finalEnd);
+            }, SybilSimulator.packetTransportDelay);
         }
         else
             if (Constants.LOG_ACTIVE) {
@@ -43,6 +42,10 @@ public class PacketLocator {
 
     public static void registerPacketDroppedListener(PacketDroppedListener listener) {
         packetDroppedListener = listener;
+    }
+
+    public static void shutDown() {
+        timer.cancel();
     }
 
     @FunctionalInterface

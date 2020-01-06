@@ -40,6 +40,7 @@ public class Simulator {
                 timer.cancel();
             queue.notifyAll();
         }
+        PacketLocator.shutDown();
     }
 
     public static void run() {

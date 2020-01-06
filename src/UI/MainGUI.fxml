@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="660.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
+<AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="660.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
    <children>
       <HBox layoutY="364.0" prefHeight="36.0" prefWidth="660.0" AnchorPane.bottomAnchor="0.0">
          <children>
@@ -48,14 +42,19 @@
             <items>
               <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
               <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
-                <!-- -->
                   <MenuItem fx:id="animate" mnemonicParsing="false" text="Animate" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <Slider fx:id="slider" layoutX="58.0" layoutY="1.0" max="5000.0" min="2.0" onMouseReleased="#sliderDragged" prefHeight="26.0" prefWidth="199.0" />
-      <TextArea editable="false" layoutX="257.0" layoutY="2.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="104.0" text="Animation Delay" />
+      <Slider fx:id="slider" layoutX="58.0" layoutY="1.0" max="5000.0" min="1500.0" onMouseReleased="#sliderDragged" prefHeight="26.0" prefWidth="199.0" value="3000.0">
+         <padding>
+            <Insets left="10.0" />
+         </padding></Slider>
+      <Label layoutX="257.0" layoutY="2.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="104.0" text="Animation Delay">
+         <padding>
+            <Insets bottom="2.0" left="10.0" />
+         </padding></Label>
    </children>
 
 </AnchorPane>

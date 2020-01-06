@@ -3,6 +3,9 @@ package UI;
 import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -45,9 +48,9 @@ public class SybilSimulator extends Application {
     private static ArrayList<Circle> taCircles;
     private static boolean TAVisible; // true om överföringsareor är synliga
     private static boolean IPVisible;
-    public static int packetTransportDelay = 2000;
-
+    public static int packetTransportDelay = 3000;
     private static ArrayList<Label> addressLabels = new ArrayList<>();
+    private AnchorPane root;
 
     public static void main(String[] args) {
         launch(args);
@@ -55,12 +58,13 @@ public class SybilSimulator extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
+        root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.setResizable(false);
         stage.show();
         taCircles = new ArrayList<>();
+        animatePath();
     }
 
     public void onCreateNode() {
@@ -169,43 +173,49 @@ public class SybilSimulator extends Application {
         Simulator.shutdown();
         super.stop();
     }
-    public void animatePath(){
+    public void animatePath() {
         PacketLocator.registerLocationListener((start, end)-> {
-            Circle newCircle = new Circle(2, Color.BLUE);
-            anchorPane.getChildren().add(newCircle);
-            Line newLine = new Line();
-            newLine.setStartX(start.getX());
-            newLine.setStartY(start.getY());
-            newLine.setEndX(end.getX());
-            newLine.setEndY(end.getY());
-            PathTransition transition = new PathTransition();
-            transition.setNode(newCircle);
-            transition.setDuration(Duration.millis(packetTransportDelay));
-            transition.setPath(newLine);
-            transition.setCycleCount(1);
-            transition.play();
+            Platform.runLater(() -> {
+                Circle newCircle = new Circle(2, Color.BLUE);
+                root.getChildren().add(newCircle);
+                Line newLine = new Line();
+                newLine.setStartX(start.getX());
+                newLine.setStartY(start.getY());
+                newLine.setEndX(end.getX());
+                newLine.setEndY(end.getY());
+                PathTransition transition = new PathTransition();
+                transition.setNode(newCircle);
+                transition.setDuration(Duration.millis(packetTransportDelay));
+                transition.setPath(newLine);
+                transition.setCycleCount(1);
+                transition.play();
+            });
         });
 
     }
 
-    public static void animateDroppedPath(Node node){
-        Circle newCircle = new Circle(2, Color.RED);
-        Line newLine = new Line();
-        newLine.setStartX(node.getLocation().getX());
-        newLine.setStartY(node.getLocation().getY());
-        newLine.setEndX(node.getLocation().getX());
-        newLine.setEndY(node.getLocation().getY()+20);
-        PathTransition transition = new PathTransition();
-        transition.setNode(newCircle);
-        transition.setDuration(Duration.millis(500));
-        transition.setPath(newLine);
-        transition.setCycleCount(1);
-        FadeTransition fadeTransition =
-                new FadeTransition(Duration.millis(1000), newCircle);
-        fadeTransition.setFromValue(1.0f);
-        fadeTransition.setToValue(0.0f);
-        transition.play();
-        fadeTransition.play();
+    public static void animateDroppedPath() {
+        PacketLocator.registerPacketDroppedListener((node) -> {
+            Platform.runLater(() -> {
+                Circle newCircle = new Circle(2, Color.RED);
+                Line newLine = new Line();
+                newLine.setStartX(node.getLocation().getX());
+                newLine.setStartY(node.getLocation().getY());
+                newLine.setEndX(node.getLocation().getX());
+                newLine.setEndY(node.getLocation().getY()+20);
+                PathTransition transition = new PathTransition();
+                transition.setNode(newCircle);
+                transition.setDuration(Duration.millis(500));
+                transition.setPath(newLine);
+                transition.setCycleCount(1);
+                FadeTransition fadeTransition =
+                        new FadeTransition(Duration.millis(1000), newCircle);
+                fadeTransition.setFromValue(1.0f);
+                fadeTransition.setToValue(0.0f);
+                transition.play();
+                fadeTransition.play();
+            });
+        });
     }
     public void sliderDragged(){
         packetTransportDelay = (int)slider.getValue();

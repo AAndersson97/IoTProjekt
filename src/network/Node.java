@@ -52,8 +52,8 @@ public class Node implements Comparator<Node>, Runnable {
 
     @Override
     public void run() {
+        timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
         while (active) {
-                    timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
             while (buffer.isEmpty() && active) {
                 try {
                     synchronized (buffer) {
