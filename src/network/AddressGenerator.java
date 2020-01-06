@@ -1,6 +1,6 @@
 package network;
 import static network.Constants.Network.FIRST_ADDRESS;
-import static network.Constants.Node.ADDRESS_LENGTH;
+import static network.Constants.Protocol.ADDRESS_LENGTH;
 import static network.Constants.Node.MAX_NODES;
 
 public class AddressGenerator {

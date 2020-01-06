@@ -3,7 +3,7 @@ package network;
 import java.util.LinkedList;
 
 public final class Constants {
-    public static final boolean LOG_ACTIVE = true;
+    public static final boolean LOG_ACTIVE = false;
     private Constants() {}
     public static final class GUI {
         public static final int WINDOW_WIDTH = 660;

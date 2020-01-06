@@ -127,3 +127,8 @@ Omkalkylering av MPR-noder sker när ändringar upptäcks i symmetriska 1-hoppsk
 Varje strikt 2-hoppsgranne ska kunna nås av minst en MPR-nod och samtidigt hålla mängden av MPR-noden till ett minimum.
 
 MPR-mängden kan i vissa fall bestå enbart av hela mängden av symmetriska grannar. Vanligt i nya nätverk.
+
+Varje gång en nod upptäcker en ändring i sin "advertised neighbor set" ökar den sitt sekvensnummer. Detta nummer
+skickas i ANSN-fältet av ett TC-meddelande för att hålla koll på senaste informationen. När en nod tar emot ett
+TC-meddelande kan den besluta på grundval av detta ANS-nummer hurvida den inhämtade informationen om annonserade
+grannar av ursprungsnoden är nyare än existerande information hos noden.

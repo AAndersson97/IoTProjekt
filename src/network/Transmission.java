@@ -32,10 +32,10 @@ public class Transmission {
      * @return
      */
     public static boolean isInsideTransmissionArea(int transmissionRadius, Location sender, Location receiver) {
-        if (Constants.LOG_ACTIVE)
-            System.out.println("isInsideTransmissionArea " +  "Sender x: " + sender.getX() + " Sender y: " + sender.getY() + " Receiver x: " + receiver.getX() + " Receiver y: " + receiver.getY());
         double a = Math.pow(Math.abs(receiver.getX()-sender.getX()), 2);
         double b = Math.pow(Math.abs(receiver.getY()-sender.getX()),2);
+        if (Constants.LOG_ACTIVE && Math.sqrt(a + b) <= transmissionRadius)
+            System.out.println("isInsideTransmissionArea " +  "Sender x: " + sender.getX() + " Sender y: " + sender.getY() + " Receiver x: " + receiver.getX() + " Receiver y: " + receiver.getY());
         return Math.sqrt(a + b) <= transmissionRadius;
     }
 

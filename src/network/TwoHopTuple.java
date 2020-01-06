@@ -13,7 +13,7 @@ public class TwoHopTuple {
     public TwoHopTuple(short[] n_neighbor_main_addr, short[] n_2hop_addr, float vTime) {
         this.n_neighbor_main_addr = n_neighbor_main_addr;
         this.n_2hop_addr = n_2hop_addr;
-        this.n_time = System.currentTimeMillis() + vTime;
+        this.n_time = System.currentTimeMillis() + (vTime * 1000);
     }
 
     @Override

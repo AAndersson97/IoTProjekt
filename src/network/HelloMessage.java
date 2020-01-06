@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import static network.Constants.Protocol.*;
 
 public class HelloMessage extends OLSRMessage {
+    // Strukturen på meddelandet skiljer sig något från specifikationen i RFC3626-dokumentet för att förenkla hanteringen av
+    // hello-meddelanden. Dock är all nödvändig information inkluderad i varje meddelande.
     public final short reserved;
     public final Willingness willingness; // vanligtvis WILL_DEFAULT
     public final LinkCode linkCode; // information om länken mellan avsändarens gränssnitt och listan över grannars gränssnitt. Specificerar även grannes status.

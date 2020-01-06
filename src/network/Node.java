@@ -19,10 +19,10 @@ public class Node implements Comparator<Node>, Runnable {
     private short[][] mprSet; // lista över grannar som valts som MPR-nod
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private final ArrayList<TwoHopTuple> twoHopNeighborSet;
-    private final HashMap<short[], Double> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
+    private final HashMap<short[], MPRSelectorTupple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final ArrayList<TopologyTuple> topologySet;
     private final Transmission transmission;
-    private final ConcurrentLinkedQueue<OLSRPacket> buffer; // tillfällig lagring av paket som inte än har bearbetas
+    private final ConcurrentLinkedQueue<OLSRPacket<OLSRMessage>> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private final ArrayList<short[]> routingTable;
 
     public Location getLocation() {
@@ -37,9 +37,8 @@ public class Node implements Comparator<Node>, Runnable {
         address = AddressGenerator.generateAddress();
         thread = new Thread(this);
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
-        thread.start();
-        duplicateSets = new HashMap<>();
         timer = new Timer();
+        duplicateSets = new HashMap<>();
         neighborSet = new HashMap<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new HashMap<>();
@@ -47,12 +46,13 @@ public class Node implements Comparator<Node>, Runnable {
         linkSet = new HashMap<>();
         willingness = Willingness.WILL_DEFAULT;
         Network.registerNode(this);
+        thread.start();
     }
 
     @Override
     public void run() {
         while (active) {
-            timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
+                    timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
             while (buffer.isEmpty() && active) {
                 try {
                     synchronized (buffer) {
@@ -88,7 +88,7 @@ public class Node implements Comparator<Node>, Runnable {
         return address;
     }
 
-    public void receivePacket(OLSRPacket packet) {
+    public void receivePacket(OLSRPacket<OLSRMessage> packet) {
         synchronized (buffer) {
             buffer.add(packet);
             buffer.notifyAll();
@@ -98,8 +98,7 @@ public class Node implements Comparator<Node>, Runnable {
     private <T extends OLSRMessage> void handlePacket(OLSRPacket<T> packet) {
         for (OLSRMessage message : packet.messages) {
             if (OLSRPacket.canBeProcessed(message, address)) {
-                if (doImplementMsgType())
-                    processAccordingToMsgType(packet);
+                processAccordingToMsgType(packet);
                 HashMap<Integer, DuplicateTuple> duplicateSet;
                 // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
                 if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
@@ -172,7 +171,7 @@ public class Node implements Comparator<Node>, Runnable {
         IPHeader ipHeader = new IPHeader(messages.size() * HelloMessage.length(), address, BROADCAST, UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
-        OLSRPacket olsrPacket = new OLSRPacket(ipHeader, udpHeader, olsrHeader, messages);
+        OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
         incrementSeqNum();
         Network.sendPacket(this, olsrPacket);
     }
@@ -208,7 +207,7 @@ public class Node implements Comparator<Node>, Runnable {
      * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras
      * @param packet Packet som ska vidarebefodras
      */
-    private void prepareForwardingOLSR(OLSRPacket packet) {
+    private <T extends OLSRMessage>void prepareForwardingOLSR(OLSRPacket<T> packet) {
         if (doImplementMsgType())
             forwardAccordingToMsgType(packet);
         // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
@@ -216,7 +215,7 @@ public class Node implements Comparator<Node>, Runnable {
             doForwardOLSRPacket(packet);
     }
 
-    private void doForwardOLSRPacket(OLSRPacket packet) {
+    private <T extends OLSRMessage>void doForwardOLSRPacket(OLSRPacket<T> packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
@@ -257,6 +256,7 @@ public class Node implements Comparator<Node>, Runnable {
         if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
             linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime, message.vTime);
             linkSet.put(message.originatorAddr, linkTuple);
+            detectNeighborLoss(linkTuple);
         } else {
             // sant om avsändaren är en symmetrisk granne
             if (linkTuple.l_sym_time >= timeNow) {
@@ -283,6 +283,9 @@ public class Node implements Comparator<Node>, Runnable {
                 linkTuple.l_time = linkTuple.l_sym_time + NEIGHB_HOLD_TIME;
             }
         }
+        if (message.linkCode.neighborType == LinkCode.NeighborTypes.MPR_NEIGH)
+            recordMPRSelector(message);
+
         // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
         // detta tillåter grannar att upptäcka länkbräckage.
         linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
@@ -294,6 +297,64 @@ public class Node implements Comparator<Node>, Runnable {
         changeNeighborStatus(linkTuple, neighborTuple);
         removeLinkTupleTimer(linkTuple);
         mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
+    }
+
+    private void detectNeighborLoss(LinkTuple tuple) {
+        long timeNow = System.currentTimeMillis();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                if (tuple.l_asym_time > timeNow)
+                    timer.schedule(this, (long) tuple.l_asym_time - timeNow);
+                else
+                    lossOfNeighbor(tuple.l_neighbor_iface_addr);
+            }
+        }, (long) tuple.l_asym_time - timeNow);
+    }
+
+    private void recordMPRSelector(HelloMessage message) {
+        MPRSelectorTupple tuple;
+        if ((tuple = mprSelectorSet.get(message.originatorAddr)) == null) {
+            tuple = new MPRSelectorTupple(message.originatorAddr, message.vTime);
+            mprSelectorSet.put(message.originatorAddr, tuple);
+            removeMPRSelectorTimer(tuple);
+        } else {
+            tuple.ms_main_addr = message.originatorAddr;
+            tuple.ms_time = System.currentTimeMillis() + message.vTime;
+        }
+    }
+
+    /**
+     * När en grannod försvinner måste alla tvåhoppsgrannetuppler med grannadress lika med grannodens adress tas bort.
+     * Detsamma gäller för tupplerna i mprSelectorSet.
+     * @param neighborAddress Grannodens adress
+     */
+    private void lossOfNeighbor(short[] neighborAddress) {
+        synchronized (mprSelectorSet) {
+            mprSelectorSet.remove(neighborAddress);
+        }
+        synchronized (twoHopNeighborSet) {
+            twoHopNeighborSet.removeIf((tuple) -> Arrays.equals(tuple.n_neighbor_main_addr, neighborAddress));
+        }
+        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
+    }
+
+    private void removeMPRSelectorTimer(MPRSelectorTupple tuple) {
+        long timeNow = System.currentTimeMillis();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                if (tuple.ms_time > timeNow)
+                    timer.schedule(this, (long) tuple.ms_time - timeNow);
+                else {
+                    synchronized (mprSelectorSet) {
+                        mprSelectorSet.remove(tuple.ms_main_addr);
+                    }
+                }
+            }
+        }, (long) tuple.ms_time - timeNow);
     }
 
     private void removeLinkTupleTimer(LinkTuple tuple) {
@@ -327,9 +388,7 @@ public class Node implements Comparator<Node>, Runnable {
                 if (tuple.n_time > timeNow)
                     timer.schedule(this, (long) tuple.n_time - timeNow);
                 else {
-                    synchronized (twoHopNeighborSet) {
-                        twoHopNeighborSet.remove(tuple);
-                    }
+                    lossOfNeighbor(tuple.n_neighbor_main_addr);
                 }
             }
         }, (long) tuple.n_time - timeNow);

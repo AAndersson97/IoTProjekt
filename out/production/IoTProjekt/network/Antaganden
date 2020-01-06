@@ -1,3 +1,129 @@
 * Paket utan meddelande (vars längd är mindre eller lika med storleken på packethuvudet)
 måste slängas
 * Tider anges i sekunder
+
+* Uni-directional links: nod A kan skicka till nod B men nod B kan inte skicka till nod A. Leder till att nod A
+inte kan få "acknowledgment"-paket från nod B (dock krävs ej sådana paket när UDP-protokollet används).
+Att välja en MPR löser problemet med uni-directional links. En MPR, multipoint relay, räknar ut rutt från
+nod A till destinationsnoden och ger informationen till nod A.
+
+OLSR fungerar oberoende av andra protokoll och gör inga antaganden om underliggande länklager (se OSI-modellen)
+
+OLSR använder konceptet om vidarebefodring från protokollet HIPERLAN
+
+OLSR - Optimized Link State Routing Protocol
+Nod - en MANET som implementerar OLSR-protokollet
+MANET - mobile Ad Hoc Network, ett decentraliserat nätverk som kommunicerar trådlöst och där noder kan förflyttas
+OLSR-gränssnitt - en nätverksenhet som deltar i ett MANET som kör OLSR-protokollet. En nod kan ha flera
+OLSR-gränsnitt och varje gränssnitt tilldelas en unik IP-address (i detta fall används enbart ett gränssnitt)
+Icke-OLSR-gränssnitt - gränssnitt som kör andra protokoll än OLSR, kan vara trådad eller trådlös.
+Routinginformation från dessa gränssnitt kan i vissa fall injiceras i OLSR-nätverket.
+Main address - huvudsakliga IP-adressen en nod anger som avsändare när paket skickas. I detta fall har varje
+nod enbart en IP-adress och denna är den huvudsakliga adressen.
+Grannod - nod X är granne till nod Y om nod Y kan nå nod X, alltså att det existerar en länk mellan OLSR-gränssnittet
+på nod X och OLSR-gränsnittet på nod Y
+
+Strikt 2-hoppgranne - en 2-hoppgranne (en nod som kan nås av en grannod) som inte är noden själv eller en granne
+till noden, och är en granne till en granne, med villighet skiljt från WILL_NEVER, av noden.
+
+MPR (multipoint relay) - en nod som väljs av dess 1-hoppgranne, nod X, att vidarebefodra alla broadcast-meddelanden
+som den mottar från X givet att meddelandet inte är en dubblett och att TTL-fältet är större än 1.
+
+MPR selector - en nod som har valt dess 1-hoppgranne till MPR kallas MPR selector.
+
+Länk - två olika noder vars OLSR-gränssnitt kan upprätta en direktkontakt.
+Symmetrisk länk - en verifierad dubbelriktad länk mellan två OLSR-gränssnitt
+Asymmetrisk - en länk mellan två OLSR-gränssnitt som enbart verifierats i en riktining
+Symmetrisk 1-hoppskvarter - mängden av noder som har minst en symmetrisk länk till nod X
+Symmetriskt 2-hoppskvarter - mängden av noder, exklusive nod X, som har en symmetrisk länk till en nod i
+nod Xs symmetriska 1-hoppskvarter och med villighet skiljt från WILL_NEVER.
+
+Varje nod använder dess lokala informatin för att dirigera paket. OLSR använder hopp-för-hopp-routing.
+
+Rutter för kända destinationer sparas. Protokollet är proaktivt, d.v.s rutterna mellan noder är kända i förhand.
+
+Alla MPR-noder måste deklarera länkar till alla MPR selector-noder.
+
+Kontrollmeddelanden skickas periodvis och kan skickas oftare om snabb reaktion till ändringar i topologin
+är nödvändigt.
+
+Paketförluster är oundvikliga men acceptabla, OLSR kräver ej fullständigt tillförlitliga pakettransporter.
+
+Alla existerande IP-stack kan användas som den är utan ändringar, OLSR-protokollet styr enbart hanteringen
+av routingtabeller.
+
+En nod kan välja flera av sina grannar till att bli en MPR-nod. MPR-noderna ingår i mängden av MPR-noder.
+Noder som är granne till nod X men ingår ej i mängden av MPR-noder vidarebefodrar ej broadcast meddelanden från
+nod X.
+
+Varje nod väljer sin mängd av MPR-noder från sina 1-hopps symmetriska grannar. Mängden av MPR-noder väljs så att
+det täcker alla symmetriska strikt 2-hoppsnoder. Villkoren för att välja en nod till att bli MPR-nod är:
+* Noden måste vara symmetrisk 1-hoppsgranne till nod X
+* Varje nod i det symmetriska 2-hoppskvarteret till nod X måste ha en symmetrisk länk till nod X mängd av MPR-noder
+
+Varje nod bevarar info om mängden av grannar som har vald den som MPR-nod. Dessa grannar ingår i mängden kallad
+"Multipoint relay selector set". En nod erhåller denna info från periodiska HELLO-meddelanden inhämtad från sina
+grannar.
+
+Ett broadcast-meddelande, som ska ut i hela nätverket, som kommer från en MPR-selector till nod X antas vara
+vidarebefodrar av nod X om X ej ha mottagit det än. Mängden av MPR-noder kan ändras över tiden, vilket indikeras
+av selector nodes i deras HELLO-meddelanden.
+
+Kärnan i protokollet utgörs av:
+* Formattering av paket och vidarebefodring, inkluderar en optimerad "flooding mechanism"
+* Link Sensing - uppnås m.h.a periodvisa utsändningar av HELLO-meddelandet över gränssnittet. Resultatet från
+link sensing är en lokal mängd av länkar mellan lokala gränssnitt och fjärrgränsnitt (grannoders gränsnitt)
+* Upptäcka grannar - en nod kan härleda sin mängd av grannoder direkt från informationen som utbytts som en
+del av link sensing.
+* Välja MPR - syftet är att broadcast meddelanden som nod X skickas ska vidarebefodras av de valda MPR-noderna
+så att de kan nås av noder 2 hopp ifrån. Mängden av MPR-noder beräknas så att det är möjligt att uppnå syftet.
+Informationen som krävs för att uföra beräkningen inhämtas genom periodiskt utbyte av HELLO-meddelanden.
+Om tillräcklig information tillhandahålls av länklager kan detta användas för att populera lokala länkmängden
+istället för att skicka ut HELLO-meddelanden. Dock är detta ej relevant i detta program.
+* Information om topologin sprids ut i nätverket med syftet att varje nod får tillgång till tillräcklig
+link-state information för att göra det möjligt att beräkna rutter.
+* Beräkning av rutter - givet link state-informationen som inhämtas genom periodiskt utbyte av meddelande, så
+väl som konfigurationen av gränsnittet av noderna, kan dirigeringstabellen för varje nod beräknas.
+
+OLSR-paket packas i UDP-datagram (UDP-paket)
+
+Paket kan skickas till alla noder i nätverket eller enbart skickas till noder inom viss diameter i termer av
+antalet hopp från avsändaren. Nät kontrollmeddelande skickas över hela nätverket elimineras lokala dubbletter.
+Varje nod bevarar en dubblett för att undvika att skicka ut samma OLSR-kontrollmeddelande två gånger.
+
+En nod kan granska ett meddelandes header för att erhålla info om distans i termer av antalet hopp till avsändaren
+till meddelandet. Denna funktion kan vara användbar i situationer där t.ex. tidsinformationen från ett mottaget
+kontrollmeddelande lagrat i en nod beror på avståndet till avsändaren.
+
+Paket i OLSR kommuniceras vid UDP-protokollet. Port 698 används av OLSR-protokollet.
+
+Uppehovsnoden är noden som skapade paketet som skickas över nätverket. Avsändarnoden är noden som tar emot
+paket och väljer att skicka vidare paketet. Uppehovsnodens adress finns i OLSRpaketet, avsändarens adress finns
+i IP-headern.
+
+Noder kan skicka och ta emot från/på olika gränssnitt, varje gränssnitt har sin egna adress. I detta program
+används ett gränssnitt.
+
+HELLO-meddelande - skickas ut i nätverket för att hitta grannar, hitta länkar och signalera MPR
+TC-meddelande - skickas ut i nätverket för att deklarera nätverkets topologi (advertisement of link states)
+MID-meddelande - skickas ut i nätverket för att deklarara närvaron av flertalet gränssnitt på en nod
+
+Jitter används för att förhindra att flera noder samtidigt skickar ut meddelande i nätverket, vilket kan orsaka en
+kollision och att meddelanden inte kommer fram.
+
+Hello-meddelanden baseras på informationen lagrad i den lokala "Link set", "Neighbor set" och "MPR set" från den lokala "link information base"
+
+Ett Hello-meddelande innehåller en lista över länkar på gränssnittet och en lista över hela kvarteret med en associerad granntyp (neighbor type).
+
+vTime-fältet sätts till värdet av nodens NEIGHB_HOLD_TIME parameter. hTime-fältet sätts till värdet av nodens HELLO_INTERVAL parameter.
+
+Hello-meddelanden vidarebefordras aldrig och placeras ej i duplicate set.
+
+När en länktuppel tas bort ska även associerad granntuppel (neighbor tuple) tas bort så att varje granntuppel har
+minst en associerad länktuppel.
+
+Omkalkylering av MPR-noder sker när ändringar upptäcks i symmetriska 1-hoppskvarteret eller i symmetriskt strikt 2-hoppskvarteret.
+
+Varje strikt 2-hoppsgranne ska kunna nås av minst en MPR-nod och samtidigt hålla mängden av MPR-noden till ett minimum.
+
+MPR-mängden kan i vissa fall bestå enbart av hela mängden av symmetriska grannar. Vanligt i nya nätverk.

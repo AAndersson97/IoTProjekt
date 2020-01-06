@@ -16,7 +16,7 @@ import network.IPHeader;
 import java.util.Arrays;
 import java.util.List;
 
-import static network.Constants.Node.ADDRESS_LENGTH;
+import static network.Constants.Protocol.ADDRESS_LENGTH;
 import static network.Constants.GUI.PACKET_GUI_Y;
 import static network.Constants.GUI.PACKET_GUI_X;
 

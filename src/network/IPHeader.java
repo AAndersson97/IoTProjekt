@@ -41,10 +41,10 @@ public final class IPHeader implements Header {
     }
 
     public IPHeader(int dataLength, short[] sourceAddress, short[] destinationAddress, int protocol) {
-        this.totalLength = calculateHeaderLength(this) + dataLength;
         this.protocol = protocol;
         this.sourceAddress = sourceAddress;
         this.destinationAddress = destinationAddress;
+        this.totalLength = calculateHeaderLength(this) + dataLength;
         checksum = Checksum.generateChecksum(toByteArray());
     }
 

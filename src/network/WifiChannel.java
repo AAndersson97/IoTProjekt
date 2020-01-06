@@ -11,7 +11,6 @@ import static network.Constants.Network.PACKET_LOSS;
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
     private ArrayList<Node> observers;
-    private double packetLoss; // I procent
 
     {
         observers = new ArrayList<>();
@@ -21,8 +20,8 @@ public class WifiChannel extends Channel {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> observers.forEach(node -> {
-                if (simulateLoss() || !isWithinTransmissionArea(sender, node) || !OLSRPacket.canRetransmit(packet));
-                else if (!Arrays.equals(sender.getAddress(), node.getAddress()))
+                if (simulateLoss());
+                else if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node))
                     node.receivePacket(packet);
         }));
     }
