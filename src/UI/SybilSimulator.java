@@ -79,11 +79,15 @@ public class SybilSimulator extends Application {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
-        anchorPane.getChildren().add(tACircle);
+        Label nodeLabel = createAddresslabel(createdNode);
+        anchorPane.getChildren().addAll(tACircle, nodeLabel);
+        addressLabels.add(nodeLabel);
         for (SybilNode node : createdNode.getSybilNodes()){
-            addressLabels.add(createAddresslabel(node));
+            //addressLabels.add(createAddresslabel(node));
             Circle taCircle = createTACircle(node);
-            anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle);
+            nodeLabel = createAddresslabel(node);
+            anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), taCircle, nodeLabel);
+            addressLabels.add(nodeLabel);
         }
     }
 
@@ -184,15 +188,13 @@ public class SybilSimulator extends Application {
 
     }
 
-    public void animateDroppedPath(){
+    public void animateDroppedPath(Node node){
         Circle newCircle = new Circle(2, Color.RED);
-        ArrayList<Node> test = Network.getNodeList();
-        anchorPane.getChildren().add(newCircle);
         Line newLine = new Line();
-        newLine.setStartX(test.get(0).getLocation().getX());
-        newLine.setStartY(test.get(0).getLocation().getY());
-        newLine.setEndX(test.get(0).getLocation().getX());
-        newLine.setEndY(test.get(0).getLocation().getY()+20);
+        newLine.setStartX(node.getLocation().getX());
+        newLine.setStartY(node.getLocation().getY());
+        newLine.setEndX(node.getLocation().getX());
+        newLine.setEndY(node.getLocation().getY()+20);
         PathTransition transition = new PathTransition();
         transition.setNode(newCircle);
         transition.setDuration(Duration.millis(500));
@@ -207,6 +209,5 @@ public class SybilSimulator extends Application {
     }
     public void sliderDragged(){
         packetTransportDelay = ((int)slider.getValue())*10;
-
     }
 }
