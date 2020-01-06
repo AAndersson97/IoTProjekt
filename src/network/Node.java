@@ -26,7 +26,7 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final HashMap<short[], TopologyTuple> topologySet;
     private final Transmission transmission;
-    private final ConcurrentLinkedQueue<OLSRPacket<OLSRMessage>> buffer; // tillfällig lagring av paket som inte än har bearbetas
+    private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private final HashMap<short[], RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
 
     public Location getLocation() {
@@ -92,41 +92,24 @@ public class Node implements Comparator<Node>, Runnable {
         return address;
     }
 
-    public void receivePacket(OLSRPacket<OLSRMessage> packet) {
+    public void receivePacket(Packet packet) {
         synchronized (buffer) {
             buffer.add(packet);
             buffer.notifyAll();
         }
     }
 
-    private <T extends OLSRMessage> void handlePacket(OLSRPacket<T> packet) {
-        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
-        for (OLSRMessage message : packet.messages) {
-            if (OLSRPacket.canBeProcessed(message, address)) {
-                processAccordingToMsgType(packet);
-                HashMap<Integer, DuplicateTuple> duplicateSet;
-                // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
-                if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
-                    DuplicateTuple tuple;
-                    // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
-                    if ((tuple = duplicateSet.get(seqNum)) != null) {
-                        // om nedanstående villkor är sant ska paketet förberedas för vidaresändning
-                        if (!Arrays.equals(tuple.d_iface, address))
-                            prepareForwardingOLSR(packet);
-                            // Paketet ska varken bearbetas eller skickas vidare
-                        else {
-                            //updateDuplicateSet(packet);
-                            dropPacket(packet);
-                        }
-                    }
-                    // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
-                    if (!routingTable.containsKey(packet.ipHeader.sourceAddress))
-                        dropPacket(packet);
-                    else if (!Arrays.equals(tuple.d_iface, address) && !tuple.d_retransmitted) {
-                        prepareForwardingOLSR(packet);
-                    }
-                }
-            } else
+    /**
+     * Metodens syfte är att ta reda på vilket sorts paket som skickats till noden. Efteråt dirigeras arbetet för bearbetning eller vidaresändning till annan metod, alternativt slängs paketet.
+     * @param packet Paketet som noden mottagit och ska bearbetas, vidaresändas eller kastas.
+     */
+    private void handlePacket(Packet packet) {
+        if (packet instanceof OLSRPacket) {
+            OLSRPacket olsrPacket = (OLSRPacket) packet;
+            processAccordingToMsgType(olsrPacket);
+        } else {
+            // Om sändarens adress ej finns i denna nods 1-hoppskvarter ska paketet slängas
+            if (!routingTable.containsKey(packet.ipHeader.sourceAddress))
                 dropPacket(packet);
         }
     }
@@ -170,7 +153,7 @@ public class Node implements Comparator<Node>, Runnable {
         IPHeader ipHeader = new IPHeader(messages.size() * HelloMessage.length(), address, BROADCAST, UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
-        OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
+        OLSRPacket olsrPacket = new OLSRPacket(ipHeader, udpHeader, olsrHeader, messages);
         incrementSeqNum();
         Network.sendPacket(this, olsrPacket);
     }
@@ -206,13 +189,13 @@ public class Node implements Comparator<Node>, Runnable {
      * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras
      * @param packet Packet som ska vidarebefodras
      */
-    private <T extends OLSRMessage>void prepareForwardingOLSR(OLSRPacket<T> packet) {
+    private void prepareForwardingOLSR(OLSRPacket packet) {
         // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
         if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
             doForwardOLSRPacket(packet);
     }
 
-    private <T extends OLSRMessage> void doForwardOLSRPacket(OLSRPacket<T> packet) {
+    private void doForwardOLSRPacket(OLSRPacket packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
@@ -223,22 +206,45 @@ public class Node implements Comparator<Node>, Runnable {
         incrementSeqNum();
     }
 
-    private <T extends OLSRMessage> void processAccordingToMsgType(OLSRPacket<T> packet) {
-        for (OLSRMessage message : packet.messages) {
+    private void processAccordingToMsgType(OLSRPacket packet) {
+        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
+        boolean dropped = false;
+        loop: for (OLSRMessage message : packet.messages) {
             switch (message.msgType) {
                 case HELLO_MESSAGE:
                     processHelloMessage((HelloMessage) message);
                     break;
                 case TC_MESSAGE:
-                    if (neighborSet.get(packet.ipHeader.sourceAddress) == null) {
+                    if (isADuplicate(message) || neighborSet.get(packet.ipHeader.sourceAddress) == null) {
+                        dropped = true;
                         dropPacket(packet);
-                        break;
+                        break loop;
                     }
                     processTCMessage((TCMessage) message);
                     break;
             }
         }
+        if (!dropped)
+            updateRoutingTable();
+    }
 
+    /**
+     * Metoden kontrollera i duplicateSets för att se om samma meddelandet redan skickats förut.
+     * @return true om meddelandet är en dubblett
+     */
+    private boolean isADuplicate(OLSRMessage message) {
+        HashMap<Integer, DuplicateTuple> duplicateSet;
+        // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
+        if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
+            // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
+            return  duplicateSet.containsKey(message.msgSeqNum);
+        }
+        return false;
+    }
+
+    private boolean alreadyForwarded(OLSRMessage message) {
+        DuplicateTuple tuple = duplicateSets.get(message.originatorAddr).get(message.msgSeqNum);
+        return Arrays.equals(tuple.d_addr, address);
     }
 
     private void processTCMessage(TCMessage message) {
@@ -497,7 +503,7 @@ public class Node implements Comparator<Node>, Runnable {
         return (long)(Math.random() * MAX_JITTER_MS);
     }
 
-    private void dropPacket(OLSRPacket packet) {
+    private void dropPacket(Packet packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
         PacketLocator.reportPacketDropped(this);

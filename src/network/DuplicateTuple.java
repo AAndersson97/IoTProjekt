@@ -8,7 +8,7 @@ import static network.Constants.Protocol.MPR_SELECTOR_HOLD_TIME;
  */
 public class DuplicateTuple {
     public final short[] d_addr; // Sändarens IP-adresss
-    public final short d_seq_num; // meddelandet sekvensnummer
+    public final short d_seq_num; // meddelandets sekvensnummer
     public boolean d_retransmitted; // true om meddelanden redan har vidarebefordras
     public short[] d_iface; // denna nods IP-adress, variabeltypen ändras till en lista om noden har flera gränssnitt (listan innehåller då adresser på gränssnitten som mottagit paketet)
     private long d_time; // tiden då tuppeln blir ogiltig

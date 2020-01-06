@@ -2,15 +2,12 @@ package network;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
-public class OLSRPacket<T extends OLSRMessage> {
-    public final IPHeader ipHeader;
-    public final UDPHeader udpHeader;
+public class OLSRPacket extends Packet {
     public final OLSRHeader olsrHeader;
-    public final ArrayList<T> messages;
+    public final ArrayList<? extends OLSRMessage> messages; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
 
-    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<T> messages) {
+    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<? extends OLSRMessage> messages) {
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
         this.olsrHeader = olsrHeader;
@@ -27,14 +24,6 @@ public class OLSRPacket<T extends OLSRMessage> {
     public static boolean canRetransmit(OLSRPacket packet) {
         if (packet.messages == null || packet.messages.isEmpty())
             return false;
-        Iterator<OLSRMessage> iterator = packet.messages.iterator();
-        while (iterator.hasNext()) {
-            OLSRMessage msg = iterator.next();
-            if (msg.getTTL() <= 0)
-                iterator.remove();
-            msg.decrementTTL();
-            msg.incrementHopCount();
-        }
         return true;
     }
 
