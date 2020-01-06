@@ -15,6 +15,7 @@ import network.*;
 import network.IPHeader;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static network.Constants.Protocol.ADDRESS_LENGTH;
@@ -99,7 +100,7 @@ public class SendPacketUI {
     }
 
     private void createAddressCollections() {
-        List<Node> nodeList = Network.getNodeList();
+        Collection<Node> nodeList = Network.getNodeList().values();
         addressStrings = FXCollections.observableArrayList();
         listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
         int count = 0;
