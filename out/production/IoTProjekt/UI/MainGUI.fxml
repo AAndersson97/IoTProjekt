@@ -6,6 +6,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
@@ -47,12 +48,14 @@
             <items>
               <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
               <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
-                  <MenuItem fx:id="animate" mnemonicParsing="false" onAction="#animateDroppedPath" text="Animate" />
+                <!-- -->
+                  <MenuItem fx:id="animate" mnemonicParsing="false" text="Animate" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
       <Slider fx:id="slider" layoutX="58.0" layoutY="1.0" max="800.0" min="2.0" onMouseReleased="#sliderDragged" prefHeight="26.0" prefWidth="199.0" />
+      <TextArea editable="false" layoutX="257.0" layoutY="2.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="104.0" text="Animation Delay" />
    </children>
 
 </AnchorPane>
