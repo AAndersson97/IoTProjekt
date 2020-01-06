@@ -2,6 +2,10 @@ package network;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static network.Constants.GUI.PACKET_TRANSPORT_DELAY;
 
 public class PacketLocator {
 
@@ -17,8 +21,15 @@ public class PacketLocator {
             else if (Arrays.equals(endNode, node.getAddress()))
                 end = node.getLocation();
         }
-        if (start != null && end != null)
-            locationListener.reportedTransport(start, end);
+        if (start != null && end != null) {
+            Location finalStart = start, finalEnd = end;
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    locationListener.reportedTransport(finalStart, finalEnd);
+                }
+            }, PACKET_TRANSPORT_DELAY);
+        }
         else
             if (Constants.LOG_ACTIVE) {
                 System.out.println("Start and/or end location is/are null");
