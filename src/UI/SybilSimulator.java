@@ -162,22 +162,22 @@ public class SybilSimulator extends Application {
         Simulator.shutdown();
         super.stop();
     }
-    public void animatePath(Node originNode, Node destinationNode){
+    public void animatePath(){
         Circle newCircle = new Circle(2, Color.BLUE);
+        PacketLocator.registerListener((start, end)-> {
+            anchorPane.getChildren().add(newCircle);
+            Line newLine = new Line();
+            newLine.setStartX(start.getX());
+            newLine.setStartY(start.getY());
+            newLine.setEndX(end.getX());
+            newLine.setEndY(end.getY());
+            PathTransition transition = new PathTransition();
+            transition.setNode(newCircle);
+            transition.setDuration(Duration.millis(2500));
+            transition.setPath(newLine);
+            transition.setCycleCount(1);
+            transition.play();
+        });
 
-        anchorPane.getChildren().add(newCircle);
-        Line newLine = new Line();
-//        ArrayList<Node> nodeList;
-//                nodeList = Network.getNodeList();
-        newLine.setStartX(nodeList.get(0).getLocation().getX());
-        newLine.setStartY(nodeList.get(0).getLocation().getY());
-        newLine.setEndX(nodeList.get(1).getLocation().getX());
-        newLine.setEndY(nodeList.get(1).getLocation().getY());
-        PathTransition transition = new PathTransition();
-        transition.setNode(newCircle);
-        transition.setDuration(Duration.millis(500));
-        transition.setPath(newLine);
-        transition.setCycleCount(PathTransition.INDEFINITE);
-        transition.play();
     }
 }
