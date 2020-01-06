@@ -1,10 +1,7 @@
 package network;
 
-import UI.SybilSimulator;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
 
 import static network.Constants.Network.BROADCAST;
 import static network.Constants.Protocol.*;
@@ -115,18 +112,27 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void updateDuplicateSet(OLSRMessage message) {
-        DuplicateTuple tuple = duplicateSets.get(message.originatorAddr).get(message.msgSeqNum);
-        tuple.renewTupple();
-        tuple.d_iface = address;
-        tuple.d_retransmitted = true;
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                synchronized (duplicateSets) {
-                    duplicateSets.get(message.originatorAddr).remove(message.msgSeqNum);
-                }
+        HashMap<Integer, DuplicateTuple> duplicateSet = duplicateSets.get(message.originatorAddr);
+        if (duplicateSet != null && duplicateSet.containsKey(message.msgSeqNum)) {
+            DuplicateTuple tuple = duplicateSet.get(message.msgSeqNum);
+            tuple.renewTupple();
+            tuple.d_iface = address;
+        } else {
+            if (duplicateSet == null) {
+                duplicateSet = new HashMap<>();
+                duplicateSets.put(message.originatorAddr, duplicateSet);
             }
-        }, DUP_HOLD_TIME);
+            DuplicateTuple tuple = new DuplicateTuple(message.originatorAddr, address, message.msgSeqNum);
+            duplicateSet.put(message.msgSeqNum, tuple);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (duplicateSets) {
+                        duplicateSets.get(message.originatorAddr).remove(message.msgSeqNum);
+                    }
+                }
+            }, DUP_HOLD_TIME);
+        }
     }
 
     private void sendHelloPacket() {
@@ -234,12 +240,14 @@ public class Node implements Comparator<Node>, Runnable {
      */
     private boolean isADuplicate(OLSRMessage message) {
         HashMap<Integer, DuplicateTuple> duplicateSet;
+        boolean isADuplicate = false;
         // Kontrollerar om ursprungsadressen finns i samlingen över Duplicate Set
         if ((duplicateSet = duplicateSets.get(message.originatorAddr)) != null) {
             // om nedanstående villlkor är sant ska paketet ej bearbetas men möjligtvis ska den skickas vidare
-            return  duplicateSet.containsKey(message.msgSeqNum);
-        }
-        return false;
+            isADuplicate = duplicateSet.containsKey(message.msgSeqNum);
+        } if (isADuplicate)
+            updateDuplicateSet(message);
+        return isADuplicate;
     }
 
     private boolean alreadyForwarded(OLSRMessage message) {
