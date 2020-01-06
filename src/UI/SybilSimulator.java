@@ -208,6 +208,6 @@ public class SybilSimulator extends Application {
         fadeTransition.play();
     }
     public void sliderDragged(){
-        packetTransportDelay = ((int)slider.getValue())*10;
+        packetTransportDelay = (int)slider.getValue();
     }
 }
