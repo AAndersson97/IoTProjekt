@@ -20,11 +20,11 @@ public class Node implements Comparator<Node>, Runnable {
     private short[][] mprSet; // lista över grannar som valts som MPR-nod
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private final ArrayList<TwoHopTuple> twoHopNeighborSet;
-    private final HashMap<short[], MPRSelectorTupple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
+    private final HashMap<short[], MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final HashMap<short[], TopologyTuple> topologySet;
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<OLSRPacket<OLSRMessage>> buffer; // tillfällig lagring av paket som inte än har bearbetas
-    private final ArrayList<short[]> routingTable;
+    private final ArrayList<short[]> routingTable; // Nyckel: destination, värde: RoutingTuple
 
     public Location getLocation() {
         return location;
@@ -129,7 +129,7 @@ public class Node implements Comparator<Node>, Runnable {
 
     private void updateDuplicateSet(OLSRMessage message) {
         DuplicateTuple tuple = duplicateSets.get(message.originatorAddr).get(message.msgSeqNum);
-        tuple.d_time = System.currentTimeMillis()/1000 + DUP_HOLD_TIME;
+        tuple.renewTupple();
         tuple.d_iface = address;
         tuple.d_retransmitted = true;
         new Timer().schedule(new TimerTask() {
@@ -252,11 +252,12 @@ public class Node implements Comparator<Node>, Runnable {
             for (short[] neighbor : message.advertisedNMA) {
                 if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
                     if (Arrays.equals(topologyTuple.t_last_addr, message.originatorAddr)) {
-                        topologyTuple.t_time = System.currentTimeMillis() + message.vTime;
+                        topologyTuple.renewTupple();
                     }
                 } else {
                     timeNow = System.currentTimeMillis();
-                   // topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN, timeNow + message.vTime);
+                    topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN);
+                    topologySet.put(topologyTuple.t_last_addr,topologyTuple);
                 }
             }
         }
@@ -266,7 +267,7 @@ public class Node implements Comparator<Node>, Runnable {
         LinkTuple linkTuple;
         long timeNow = System.currentTimeMillis();
         if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
-            linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime, message.vTime);
+            linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime);
             linkSet.put(message.originatorAddr, linkTuple);
             detectNeighborLoss(linkTuple);
         } else {
@@ -276,7 +277,7 @@ public class Node implements Comparator<Node>, Runnable {
                 if (neighborType == LinkCode.NeighborTypes.SYM_NEIGH || neighborType == LinkCode.NeighborTypes.MPR_NEIGH) {
                     // en nod är inte sin egen 2-hoppsgranne vilket är fallet om nedanstående inte är sant
                     if (!Arrays.equals(address, message.originatorAddr)) {
-                        //TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, message.neighborIfaceAdr ,message.vTime);
+                        TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, message.neighborIfaceAdr);
                         //twoHopNeighborSet.add(twoHopTuple);
                         //removeTwoHopTimer(twoHopTuple);
                         updateTwoHopSet(message);
@@ -326,14 +327,14 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void recordMPRSelector(HelloMessage message) {
-        MPRSelectorTupple tuple;
+        MPRSelectorTuple tuple;
         if ((tuple = mprSelectorSet.get(message.originatorAddr)) == null) {
-            tuple = new MPRSelectorTupple(message.originatorAddr, message.vTime);
+            tuple = new MPRSelectorTuple(message.originatorAddr);
             mprSelectorSet.put(message.originatorAddr, tuple);
             removeMPRSelectorTimer(tuple);
         } else {
             tuple.ms_main_addr = message.originatorAddr;
-            tuple.ms_time = System.currentTimeMillis() + message.vTime;
+            tuple.renewTupple();
         }
     }
 
@@ -352,21 +353,21 @@ public class Node implements Comparator<Node>, Runnable {
         mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
     }
 
-    private void removeMPRSelectorTimer(MPRSelectorTupple tuple) {
+    private void removeMPRSelectorTimer(MPRSelectorTuple tuple) {
         long timeNow = System.currentTimeMillis();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 long timeNow = System.currentTimeMillis();
-                if (tuple.ms_time > timeNow)
-                    timer.schedule(this, (long) tuple.ms_time - timeNow);
+                if (tuple.get_time() > timeNow)
+                    timer.schedule(this, (long) tuple.get_time() - timeNow);
                 else {
                     synchronized (mprSelectorSet) {
                         mprSelectorSet.remove(tuple.ms_main_addr);
                     }
                 }
             }
-        }, (long) tuple.ms_time - timeNow);
+        }, (long) tuple.get_time() - timeNow);
     }
 
     private void removeLinkTupleTimer(LinkTuple tuple) {
@@ -397,13 +398,13 @@ public class Node implements Comparator<Node>, Runnable {
             public void run() {
                 long timeNow = System.currentTimeMillis();
                 // fältet l_time kan ha uppdateras mellan tiden då detta TimerTask-objektet skapades och när metoden run() anropas
-                if (tuple.n_time > timeNow)
-                    timer.schedule(this, (long) tuple.n_time - timeNow);
+                if (tuple.get_time() > timeNow)
+                    timer.schedule(this, (long) tuple.get_time() - timeNow);
                 else {
                     lossOfNeighbor(tuple.n_neighbor_main_addr);
                 }
             }
-        }, (long) tuple.n_time - timeNow);
+        }, (long) tuple.get_time() - timeNow);
     }
 
     private void updateTwoHopSet(HelloMessage message) {
