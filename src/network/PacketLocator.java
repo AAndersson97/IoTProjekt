@@ -2,25 +2,20 @@ package network;
 
 import UI.SybilSimulator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class PacketLocator {
 
     private static LocationListener locationListener;
+    private static PacketDroppedListener packetDroppedListener;
 
+    public synchronized static void reportPacketDropped(Node node) {
+        packetDroppedListener.packetDropped(node);
+    }
 
     public synchronized static void reportPacketTransport(short[] startNode, short[] endNode) {
-        ArrayList<Node> nodeList = Network.getNodeList();
-        Location start = null, end = null;
-        for (Node node : nodeList) {
-            if (Arrays.equals(startNode, node.getAddress()))
-                start = node.getLocation();
-            else if (Arrays.equals(endNode, node.getAddress()))
-                end = node.getLocation();
-        }
+        HashMap<short[],Node> nodeList = Network.getNodeList();
+        Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
         if (start != null && end != null) {
             Location finalStart = start, finalEnd = end;
             new Timer().schedule(new TimerTask() {
@@ -37,8 +32,12 @@ public class PacketLocator {
 
     }
 
-    public static void registerListener(LocationListener listener) {
+    public static void registerLocationListener(LocationListener listener) {
         locationListener = listener;
+    }
+
+    public static void registerPacketDroppedListener(PacketDroppedListener listener) {
+        packetDroppedListener = listener;
     }
 
     @FunctionalInterface
@@ -46,5 +45,9 @@ public class PacketLocator {
         void reportedTransport(Location start, Location end);
     }
 
+    @FunctionalInterface
+    public interface PacketDroppedListener {
+        void packetDropped(Node node);
+    }
 
 }

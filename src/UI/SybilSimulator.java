@@ -170,7 +170,7 @@ public class SybilSimulator extends Application {
         super.stop();
     }
     public void animatePath(){
-        PacketLocator.registerListener((start, end)-> {
+        PacketLocator.registerLocationListener((start, end)-> {
             Circle newCircle = new Circle(2, Color.BLUE);
             anchorPane.getChildren().add(newCircle);
             Line newLine = new Line();

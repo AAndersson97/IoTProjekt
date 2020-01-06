@@ -500,8 +500,7 @@ public class Node implements Comparator<Node>, Runnable {
     private void dropPacket(OLSRPacket packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
-        Node node = Network.getNodeList().get(packet.ipHeader.sourceAddress);
-        SybilSimulator.animateDroppedPath(node);
+        PacketLocator.reportPacketDropped(this);
     }
 
     public void turnOff() {
