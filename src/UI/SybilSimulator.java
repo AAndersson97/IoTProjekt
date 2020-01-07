@@ -65,7 +65,8 @@ public class SybilSimulator extends Application {
         stage.setResizable(false);
         stage.show();
         taCircles = new ArrayList<>();
-        animatePath();
+        PacketLocator.registerLocationListener(createLocationCallback());
+        PacketLocator.registerPacketDroppedListener(createDroppedPacketCallback());
     }
 
     public void onCreateNode() {
@@ -183,8 +184,8 @@ public class SybilSimulator extends Application {
         Simulator.shutdown();
         super.stop();
     }
-    public void animatePath() {
-        PacketLocator.registerLocationListener((start, end)-> {
+    public PacketLocator.LocationListener createLocationCallback() {
+        return (start, end)-> {
             Platform.runLater(() -> {
                 Circle newCircle = new Circle(2, Color.BLUE);
                 root.getChildren().add(newCircle);
@@ -206,14 +207,14 @@ public class SybilSimulator extends Application {
                     }
                 }, packetTransportDelay);
             });
-        });
-
+        };
     }
 
-    public static void animateDroppedPath() {
-        PacketLocator.registerPacketDroppedListener((node) -> {
+    public PacketLocator.PacketDroppedListener createDroppedPacketCallback() {
+        return ((node) -> {
             Platform.runLater(() -> {
                 Circle newCircle = new Circle(2, Color.RED);
+                root.getChildren().add(newCircle);
                 Line newLine = new Line();
                 newLine.setStartX(node.getLocation().getX());
                 newLine.setStartY(node.getLocation().getY());
@@ -230,6 +231,12 @@ public class SybilSimulator extends Application {
                 fadeTransition.setToValue(0.0f);
                 transition.play();
                 fadeTransition.play();
+                Simulator.scheduleFutureTask(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> root.getChildren().remove(newCircle));
+                    }
+                }, packetTransportDelay);
             });
         });
     }

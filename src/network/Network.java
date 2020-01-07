@@ -3,6 +3,7 @@ package network;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Network {
     private static int numOfNodes;
@@ -44,7 +45,7 @@ public class Network {
         numOfNodes++;
     }
 
-    public static HashMap<short[], Node> getNodeList() {
+    public static ConcurrentHashMap<short[], Node> getNodeList() {
         return wifiChannel.getObservers();
     }
 
