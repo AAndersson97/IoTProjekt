@@ -1,5 +1,6 @@
 package UI;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -31,8 +32,7 @@ public class SybilAttackUI {
 
     private ObservableList<String> addressStrings;
     private short[][] listOfAddresses;
-    private CountDownLatch countDownLatch;
-    private static short[] result;
+    private static ResultListener listener;
 
     public void start(Stage stage) throws Exception{
         if (Network.getNumOfNodes() == 0) {
@@ -42,7 +42,6 @@ public class SybilAttackUI {
         Parent root = FXMLLoader.load(getClass().getResource("SybilAttackUI.fxml"));
         stage.setScene(new Scene(root));
         stage.setResizable(false);
-        createAddressCollection();
         stage.show();
     }
 
@@ -51,27 +50,33 @@ public class SybilAttackUI {
      * ett resultat (result == null eller innehåller ett gammalt värde)
      * @throws Exception
      */
-    public void showUIAndBlock() throws Exception {
-        countDownLatch = new CountDownLatch(1);
+    public void showUI(ResultListener listener) throws Exception {
+        if (listener == null)
+            throw new NullPointerException("Listener must not be null");
         start(new Stage());
-        countDownLatch.await();
-    }
-
-    public static short[] getResult() {
-        return result;
+        SybilAttackUI.listener = listener;
     }
 
     public void onStartAttack() {
-        result = listOfAddresses[nodeAddrs.getSelectionModel().getSelectedIndex()];
-        countDownLatch.countDown();
+        listener.resultGenerated(listOfAddresses[nodeAddrs.getSelectionModel().getSelectedIndex()]);
+        listener = null;
     }
 
     public void fillAddresses() {
+        if (addressStrings == null)
+            createAddressCollection();
         if (nodeAddrs.getItems().isEmpty()) {
             nodeAddrs.setItems(addressStrings);
-            nodeAddrs.hide();
-            nodeAddrs.show();
         }
+    }
+
+    public void choiceboxShown() {
+        fillAddresses();
+        if (nodeAddrs.getSelectionModel().getSelectedIndex() < 0)
+            nodeAddrs.getSelectionModel().selectFirst();
+        nodeAddrs.hide();
+        nodeAddrs.show();
+        attackBtn.setDisable(false);
     }
 
     private void createAddressCollection() {
@@ -84,5 +89,10 @@ public class SybilAttackUI {
             addressStrings.add(addressString.substring(1, addressString.length()-1));
             listOfAddresses[count] = node.getAddress();
         }
+    }
+
+    @FunctionalInterface
+    public interface ResultListener {
+        void resultGenerated(short[] result);
     }
 }

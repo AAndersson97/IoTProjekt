@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import static network.Constants.GUI.*;
 
 public class LocationCreator {
-    private static LocationCreator instance ;
+    private static LocationCreator instance;
     private static ArrayList<Location> locations;
 
     static {

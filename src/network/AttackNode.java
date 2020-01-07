@@ -4,7 +4,7 @@ public class AttackNode extends Node {
 
     private SybilNode[] sybilNodes;
 
-    public AttackNode(int numOfSybil) {
+    public AttackNode(int numOfSybil, short[] nodToAttack) {
         sybilNodes = new SybilNode[Constants.Node.NUM_OF_SYBIL];
         createSybilNodes(numOfSybil);
     }

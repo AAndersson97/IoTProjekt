@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static network.Constants.Network.PACKET_LOSS;
 
 /**
@@ -11,10 +13,10 @@ import static network.Constants.Network.PACKET_LOSS;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private HashMap<short[],Node> observers;
+    private final ConcurrentHashMap<short[],Node> observers;
 
     {
-        observers = new HashMap<>();
+        observers = new ConcurrentHashMap<>();
     }
 
     public void send(Node sender, OLSRPacket packet) {
@@ -37,10 +39,11 @@ public class WifiChannel extends Channel {
     }
 
     public void addObserver(Node node) {
-        observers.put(node.getAddress(),node);
+        observers.put(node.getAddress(), node);
+
     }
 
-    public HashMap<short[], Node> getObservers() {
+    public ConcurrentHashMap<short[], Node> getObservers() {
         return observers;
     }
 
