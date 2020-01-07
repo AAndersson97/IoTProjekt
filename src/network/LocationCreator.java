@@ -57,6 +57,20 @@ public class LocationCreator {
         return locationsWithinRange.get((int)(Math.random() * (locationsWithinRange.size() - 1)));
     }
 
+    public ArrayList<Location> getLocationWithinRange(short[] addr) {
+        Node node = Network.getNodeList().get(addr);
+        if (node == null)
+            throw new NullPointerException("There exists no node with the specified address");
+        ArrayList<Location> locationsWithinRange = new ArrayList<>();
+        for (Location l : locations) {
+            if (Transmission.isInsideTransmissionArea(node.getTransmissionRadius(), node.getLocation(), l)) {
+                locationsWithinRange.add(l);
+            }
+        }
+        locations.removeAll(locationsWithinRange);
+        return locationsWithinRange;
+    }
+
     public static LocationCreator getInstance() {
         return instance;
     }

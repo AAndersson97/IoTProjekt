@@ -542,4 +542,8 @@ public class Node implements Comparator<Node>, Runnable {
     public void incrementSeqNum() {
        seqNum = (short) (seqNum+1 % Short.MAX_VALUE);
     }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 }
