@@ -45,6 +45,7 @@ public class Node implements Comparator<Node>, Runnable {
         topologySet = new HashMap<>();
         linkSet = new HashMap<>();
         willingness = Willingness.WILL_DEFAULT;
+        location = LocationCreator.getInstance().getLocation(this);
         Network.registerNode(this);
         thread.start();
     }
@@ -52,7 +53,6 @@ public class Node implements Comparator<Node>, Runnable {
     @Override
     public void run() {
         timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
-        location = LocationCreator.getInstance().getLocation(this);
         while (active) {
             while (buffer.isEmpty() && active) {
                 try {

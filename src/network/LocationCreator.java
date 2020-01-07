@@ -41,18 +41,16 @@ public class LocationCreator {
             latestNode = node;
             return location;
         }
-       Location location = findLocationWithinRange(node);
+       Location location = findLocationWithinRange();
        locations.remove(location);
        latestNode = node;
        return location;
     }
 
-    public Location findLocationWithinRange(Node node) {
-        if (node == null)
-            throw new NullPointerException("The node must not be null");
+    public Location findLocationWithinRange() {
         ArrayList<Location> locationsWithinRange = new ArrayList<>();
         for (Location l : locations) {
-            if (Transmission.isInsideTransmissionArea(node.getTransmissionRadius(), latestNode.getLocation(), node.getLocation())) {
+            if (Transmission.isInsideTransmissionArea(latestNode.getTransmissionRadius(), latestNode.getLocation(), l)) {
                 locationsWithinRange.add(l);
             }
         }
