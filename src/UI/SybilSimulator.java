@@ -118,6 +118,12 @@ public class SybilSimulator extends Application {
         return nodeLabel;
     }
 
+    /**
+     * Skapar ett GUI element för att representera en nod.
+     * @param node Noden som ska representeras.
+     * @param fill Elementets färg, använder javafx.scene.paint.
+     * @return
+     */
     public Circle createNodeCircle(Node node, Color fill) {
         Circle circle = new Circle();
         circle.setFill(fill);
@@ -128,6 +134,9 @@ public class SybilSimulator extends Application {
         return circle;
     }
 
+    /**
+     * Öppnar ny UI för addressering av paket mellan noder
+     */
     public void onSendPacket() {
         try {
             SendPacketUI sPUI = new SendPacketUI();
@@ -183,6 +192,9 @@ public class SybilSimulator extends Application {
         Simulator.shutdown();
         super.stop();
     }
+    /**
+    * Skapar en animation mellan noder när paket har skickats
+     */
     public void animatePath() {
         PacketLocator.registerLocationListener((start, end)-> {
             Platform.runLater(() -> {
