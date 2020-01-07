@@ -1,1 +1,2 @@
-* Simulera tid och överföringshastighet
+* Undvika att sybilnoder hamnar i listan över adresser på noder som kan attackeras
+* Se till att attacknoden och sybilnoderna hamnar inom "range", ta hänsyn till om det finns existerande noder på de lediga platserna - kan orsaka att det ej finns tillräckligt många lediga platser att fördela noderna på
