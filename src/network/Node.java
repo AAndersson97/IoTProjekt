@@ -32,7 +32,6 @@ public class Node implements Comparator<Node>, Runnable {
 
     public Node() {
         buffer = new ConcurrentLinkedQueue<>();
-        location = LocationCreator.getInstance().getLocation();
         routingTable = new HashMap<>();
         active = true;
         address = AddressGenerator.generateAddress();
@@ -53,6 +52,7 @@ public class Node implements Comparator<Node>, Runnable {
     @Override
     public void run() {
         timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
+        location = LocationCreator.getInstance().getLocation(this);
         while (active) {
             while (buffer.isEmpty() && active) {
                 try {

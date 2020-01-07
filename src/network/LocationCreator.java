@@ -7,6 +7,7 @@ import static network.Constants.GUI.*;
 public class LocationCreator {
     private static LocationCreator instance;
     private static ArrayList<Location> locations;
+    private Node latestNode;
 
     static {
         locations = new ArrayList<>();
@@ -32,11 +33,30 @@ public class LocationCreator {
         }
     }
 
-    public Location getLocation() {
-        int index = (int)(Math.random() * (locations.size()-1));
-        Location location = locations.get(index);
-        locations.remove(index);
-        return location;
+    public Location getLocation(Node node) {
+        if (latestNode == null) {
+            int index = (int)(Math.random() * (locations.size()-1));
+            Location location = locations.get(index);
+            locations.remove(index);
+            latestNode = node;
+            return location;
+        }
+       Location location = findLocationWithinRange(node);
+       locations.remove(location);
+       latestNode = node;
+       return location;
+    }
+
+    public Location findLocationWithinRange(Node node) {
+        if (node == null)
+            throw new NullPointerException("The node must not be null");
+        ArrayList<Location> locationsWithinRange = new ArrayList<>();
+        for (Location l : locations) {
+            if (Transmission.isInsideTransmissionArea(node.getTransmissionRadius(), latestNode.getLocation(), node.getLocation())) {
+                locationsWithinRange.add(l);
+            }
+        }
+        return locationsWithinRange.get((int)(Math.random() * (locationsWithinRange.size() - 1)));
     }
 
     public static LocationCreator getInstance() {
