@@ -36,8 +36,6 @@ public class SybilSimulator extends Application {
     @FXML
     MenuItem IPMenu;
     @FXML
-    MenuItem animate;
-    @FXML
     AnchorPane anchorPane;
     @FXML
     Button sendPacketBtn;
