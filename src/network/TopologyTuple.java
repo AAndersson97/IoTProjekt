@@ -1,6 +1,5 @@
 package network;
 
-import static network.Constants.Protocol.MPR_SELECTOR_HOLD_TIME;
 import static network.Constants.Protocol.TCP_HOLD_TIME;
 
 /**
