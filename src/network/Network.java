@@ -49,4 +49,11 @@ public class Network {
         return wifiChannel.getObservers();
     }
 
+    public static ArrayList<Location> getNodeLocations() {
+        ArrayList<Location> locations = new ArrayList<>();
+        for (Node node : getNodeList().values())
+            locations.add(node.getLocation());
+        return locations;
+    }
+
 }

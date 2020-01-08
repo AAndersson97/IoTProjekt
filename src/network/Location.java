@@ -1,10 +1,12 @@
 package network;
 
 public class Location {
-    private int x, y;
-    Location(int x, int y) {
+    private final int x, y;
+    private final GridCell gridCell;
+    Location(int x, int y, GridCell gridCell) {
         this.x = x;
         this.y = y;
+        this.gridCell = gridCell;
     }
 
     public int getX() {
@@ -15,11 +17,7 @@ public class Location {
         return y;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
+    public GridCell getGridCell() {
+        return gridCell;
     }
 }

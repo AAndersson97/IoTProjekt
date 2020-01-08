@@ -45,9 +45,12 @@ public class Node implements Comparator<Node>, Runnable {
         topologySet = new HashMap<>();
         linkSet = new HashMap<>();
         willingness = Willingness.WILL_DEFAULT;
-        location = LocationCreator.getInstance().getLocation(this);
+        if (this.getClass() == Node.class) {
+            location = LocationManager.getInstance().getLocation(this);
+            // Innan tråden kan startas i SybilNode- och i AttackNode-objekten måste objektet skapas först
+            thread.start();
+        }
         Network.registerNode(this);
-        thread.start();
     }
 
     @Override
@@ -545,5 +548,10 @@ public class Node implements Comparator<Node>, Runnable {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+    public void turnOn() {
+        this.active = true;
+        if (!thread.isAlive())
+            thread.start();
     }
 }
