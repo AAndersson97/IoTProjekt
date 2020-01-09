@@ -1,7 +1,6 @@
 package network;
 
-import static network.Constants.Protocol.NEIGHB_HOLD_TIME;
-import static network.Constants.Protocol.SCALING_FACTOR;
+import static network.Constants.Protocol.*;
 
 public abstract class OLSRMessage {
     public final MessageType msgType;
@@ -19,7 +18,7 @@ public abstract class OLSRMessage {
         this.timeToLive = timeToLive;
         this.hopCount = 0;
         this.msgSeqNum = msgSeqNum;
-        setVtime(this);
+        this.vTime = System.currentTimeMillis() + MESSAGE_VTIME;
     }
 
     protected OLSRMessage(OLSRMessage message) {
@@ -31,12 +30,6 @@ public abstract class OLSRMessage {
         this.hopCount = message.hopCount;
         this.msgSize = message.msgSize;
     };
-
-    private static void setVtime(OLSRMessage msg) {
-        int a = NEIGHB_HOLD_TIME & 0b11110000; // fyra högsta bitarna i Vtime-fältet
-        int b = NEIGHB_HOLD_TIME & 0b00001111; // fyra lägsta bitarna i Vtime-fältet
-        msg.vTime = (int) (SCALING_FACTOR * (1+a/16.0) * Math.pow(2,b));
-    }
 
     public void decrementTTL() {
         timeToLive--;

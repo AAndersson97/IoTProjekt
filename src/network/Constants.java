@@ -37,6 +37,7 @@ public final class Constants {
         public static final int DUP_HOLD_TIME = 30000;
         public static final int TCP_HOLD_TIME = 3000;
         public static final int TWO_HOP_HOLD_TIME = 6000;
+        public static final int MESSAGE_VTIME = 4000;
         public static final int LINK_HOLD_TIME = 4000;
         public static final int MPR_SELECTOR_HOLD_TIME = 4000;
         public static final int MID_HOLD_TIME = 15000;

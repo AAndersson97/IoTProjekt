@@ -299,6 +299,9 @@ public class Node implements Comparator<Node>, Runnable {
     private void processHelloMessage(HelloMessage message) {
         LinkTuple linkTuple;
         long timeNow = System.currentTimeMillis();
+        // Bearbeta inte paket vars giltighetstid har gått ut
+        if (message.vTime < timeNow)
+            return;
         if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
             linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, timeNow + message.vTime);
             linkSet.put(message.originatorAddr, linkTuple);
@@ -311,11 +314,15 @@ public class Node implements Comparator<Node>, Runnable {
                         LinkCode.NeighborTypes neighborType = linkCode.neighborType;
                         if (neighborType == LinkCode.NeighborTypes.SYM_NEIGH || neighborType == LinkCode.NeighborTypes.MPR_NEIGH) {
                             // en nod är inte sin egen 2-hoppsgranne vilket är fallet om nedanstående inte är sant
-                            if (!Arrays.equals(neighborAddress, message.originatorAddr)) {
+                            if (!Arrays.equals(neighborAddress, address)) {
                                 TwoHopTuple twoHopTuple = new TwoHopTuple(message.originatorAddr, neighborAddress);
-                                addIfNotOneHop(message, twoHopTuple);
+                                twoHopNeighborSet.remove(twoHopTuple);
+                                twoHopNeighborSet.add(twoHopTuple);
+                                removeTwoHopTimer(twoHopTuple);
                             }
                         }
+                    } else {
+                        updateTwoHopSet(message.originatorAddr, neighborAddress);
                     }
                     timeNow = System.currentTimeMillis();
                     linkTuple.l_asym_time = timeNow + message.vTime;
@@ -329,13 +336,10 @@ public class Node implements Comparator<Node>, Runnable {
                         }
                     }
                 }
-
                 if (linkCode.neighborType == LinkCode.NeighborTypes.MPR_NEIGH)
                     recordMPRSelector(message);
             }
         }
-
-
         // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
         // detta tillåter grannar att upptäcka länkbräckage.
         linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
@@ -417,13 +421,12 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void detectNeighborLoss(LinkTuple tuple) {
-        long timeNow = System.currentTimeMillis();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 long timeNow = System.currentTimeMillis();
                 if (tuple.l_asym_time > timeNow)
-                    timer.schedule(this, (long) tuple.l_asym_time - timeNow);
+                    timer.schedule(this, (long) tuple.l_asym_time);
                 else
                     lossOfNeighbor(tuple.l_neighbor_iface_addr);
             }
@@ -492,7 +495,7 @@ public class Node implements Comparator<Node>, Runnable {
                     }
                 }
             }
-        }, (long) tuple.l_time);
+        }, (long) tuple.l_time - timeNow);
     }
 
     private void removeTwoHopTimer(TwoHopTuple tuple) {
@@ -513,18 +516,9 @@ public class Node implements Comparator<Node>, Runnable {
 
     /**
      * Lägg till tuppeln om tvåhoppsgrannen inte redan är registrerad som enhoppsgrannen
-     * @param message
-     * @param tuple
      */
-    private void addIfNotOneHop(HelloMessage message, TwoHopTuple tuple) {
-        for (ArrayList<short[]> neighbors : message.neighborIfaceAdr.values()) {
-            for (short[] neighbor : neighbors) {
-                if (Arrays.equals(neighbor, tuple.n_2hop_addr))
-                    return;
-            }
-        }
-        twoHopNeighborSet.add(tuple);
-        removeTwoHopTimer(tuple);
+    private void updateTwoHopSet(short[] originator, short[] mainAddress) {
+        twoHopNeighborSet.removeIf(tuple -> Arrays.equals(tuple.n_neighbor_main_addr, originator) && Arrays.equals(tuple.n_2hop_addr, mainAddress));
     }
 
     private void changeNeighborStatus(LinkTuple tuple, NeighborTuple neighborTuple) {
