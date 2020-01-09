@@ -11,7 +11,6 @@ public class LocationManager {
     private static int numOfCols, numOfRows;
     private static final int cellHeight = CIRCLE_RADIUS*5;
     private static final int cellWidth = 40;
-    private Node latestNode;
 
     static {
         locations = new HashMap<>();
@@ -44,25 +43,26 @@ public class LocationManager {
     }
 
     public Location getLocation(Node node) {
-        if (latestNode == null) {
-            int col = (int)(Math.random() * (numOfCols));
-            int row = (int)(Math.random() * (numOfRows));
+        if (Network.getNumOfNodes() == 0) {
+            int col = numOfCols / 2;
+            int row = numOfRows / 2;
             GridCell key = new GridCell(col, row);
             Location location = locations.get(key);
             locations.remove(key);
-            latestNode = node;
             return location;
         }
        Location location = findLocationWithinRange();
        locations.remove(location.getGridCell());
-       latestNode = node;
        return location;
     }
 
     public Location findLocationWithinRange() {
+        List<short[]> keysList = new ArrayList<>(Network.getNodeList().keySet());
+        int index = (int)(Math.random() * keysList.size());
+        Node neighbor = Network.getNodeList().get(keysList.get(index)) ;
         ArrayList<Location> locationsWithinRange = new ArrayList<>();
         for (Location l : locations.values()) {
-            if (Transmission.isInsideTransmissionArea(latestNode.getTransmissionRadius(), latestNode.getLocation(), l)) {
+            if (Transmission.isInsideTransmissionArea(neighbor.getTransmissionRadius(), neighbor.getLocation(), l)) {
                 locationsWithinRange.add(l);
             }
         }

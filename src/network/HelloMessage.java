@@ -1,5 +1,8 @@
 package network;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import static network.Constants.Protocol.*;
 
 public class HelloMessage extends OLSRMessage {
@@ -7,18 +10,17 @@ public class HelloMessage extends OLSRMessage {
     // hello-meddelanden. Dock är all nödvändig information inkluderad i varje meddelande.
     public final short reserved;
     public final Willingness willingness; // vanligtvis WILL_DEFAULT
-    public final LinkCode linkCode; // information om länken mellan avsändarens gränssnitt och listan över grannars gränssnitt. Specificerar även grannes status.
     public final int linkMsgSize;
-    public final short[] neighborIfaceAdr; // neighbor interface address
-    private float hTime; // specificerar när nästa HELLO-meddelande skickas
+    public final HashMap<LinkCode, ArrayList<short[]>> neighborIfaceAdr; // neighbor interface address
+    public final float hTime; // specificerar när nästa HELLO-meddelande skickas
 
-    HelloMessage(short[] originatorAddr, int msgSeqNum, Willingness willingness, LinkCode linkCode, short[] neighbor) {
+    HelloMessage(short[] originatorAddr, int msgSeqNum, Willingness willingness, HashMap<LinkCode, ArrayList<short[]>> neighbors) {
         super(MessageType.HELLO_MESSAGE, originatorAddr, 1, msgSeqNum);
         reserved = 0;
-        this.linkCode = linkCode;
         this.willingness = willingness;
-        neighborIfaceAdr = neighbor;
-        linkMsgSize = Short.SIZE + Integer.SIZE * 2 + neighborIfaceAdr.length; // storleken på linkCode, linkMsgSize, neighborIfaceAdr och hTime;
+        neighborIfaceAdr = neighbors;
+        linkMsgSize = Short.SIZE + Integer.SIZE * 2 + Float.SIZE + neighborIfaceAdr.keySet().size() * Integer.SIZE * 2
+                + neighborIfaceAdr.values().size() * Short.SIZE * ADDRESS_LENGTH; // storleken på linkCode, linkMsgSize, neighborIfaceAdr och hTime;
         hTime = System.currentTimeMillis() + HELLO_INTERVAL;
     }
 
@@ -26,9 +28,9 @@ public class HelloMessage extends OLSRMessage {
         super(message);
         reserved = 0;
         this.willingness = message.willingness;
-        this.linkCode = message.linkCode;
         this.neighborIfaceAdr = message.neighborIfaceAdr;
-        this.linkMsgSize = Short.SIZE + Integer.SIZE * 2 + neighborIfaceAdr.length;
+        this.linkMsgSize = message.linkMsgSize;
+        this.hTime = message.hTime;
     }
 
     public static int length() {

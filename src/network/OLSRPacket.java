@@ -1,28 +1,27 @@
 package network;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
-public class OLSRPacket extends Packet {
+public class OLSRPacket<T extends OLSRMessage> extends Packet {
     public final OLSRHeader olsrHeader;
-    public final ArrayList<? extends OLSRMessage> messages; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
+    public final T message; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
 
-    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, ArrayList<? extends OLSRMessage> messages) {
+    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, T message) {
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
         this.olsrHeader = olsrHeader;
-        this.messages = messages;
+        this.message = message;
     }
 
-    public OLSRPacket(OLSRPacket packet) {
+    public OLSRPacket(OLSRPacket<T> packet) {
         this.ipHeader = new IPHeader(packet.ipHeader);
         this.udpHeader = new UDPHeader(packet.udpHeader);
         this.olsrHeader = packet.olsrHeader;
-        this.messages = packet.messages;
+        this.message = packet.message;
     }
 
-    public static boolean canRetransmit(OLSRPacket packet) {
-        if (packet.messages == null || packet.messages.isEmpty())
+    public static boolean canRetransmit(OLSRPacket<OLSRMessage> packet) {
+        if (packet.message == null)
             return false;
         return true;
     }
@@ -37,14 +36,11 @@ public class OLSRPacket extends Packet {
         return  !(message.getTTL() <= 0 || Arrays.equals(message.originatorAddr, receiver));
     }
 
-    public OLSRPacket copy() {
+    public OLSRPacket<? extends OLSRMessage> copy() {
         IPHeader ipHeader = new IPHeader(this.ipHeader);
         UDPHeader udpHeader = new UDPHeader(this.udpHeader);
         OLSRHeader olsrHeader = new OLSRHeader(this.olsrHeader);
-        ArrayList<OLSRMessage> messages = new ArrayList<>();
-        for (OLSRMessage message : this.messages)
-            messages.add(message.copy());
-        return new OLSRPacket(ipHeader, udpHeader, olsrHeader, messages);
+        return new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, message);
     }
 
     @Override
@@ -52,7 +48,7 @@ public class OLSRPacket extends Packet {
         return "OLSRPacket{" +
                 "ipHeader=" + ipHeader.toString() +
                 ", udpHeader=" + udpHeader.toString() +
-                ", length=" + messages.size() +
+                ", length=" + OLSRMessage.length(message) +
                 ", seqNum=" + olsrHeader.packetSeqNum + "}";
     }
 }
