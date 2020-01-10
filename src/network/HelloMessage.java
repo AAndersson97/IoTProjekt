@@ -12,7 +12,7 @@ public class HelloMessage extends OLSRMessage {
     public final Willingness willingness; // vanligtvis WILL_DEFAULT
     public final int linkMsgSize;
     public final HashMap<LinkCode, ArrayList<short[]>> neighborIfaceAdr; // neighbor interface address
-    public final float hTime; // specificerar när nästa HELLO-meddelande skickas
+    public final long hTime; // specificerar när nästa HELLO-meddelande skickas
 
     HelloMessage(short[] originatorAddr, int msgSeqNum, Willingness willingness, HashMap<LinkCode, ArrayList<short[]>> neighbors) {
         super(MessageType.HELLO_MESSAGE, originatorAddr, 1, msgSeqNum);

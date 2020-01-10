@@ -9,7 +9,7 @@ public class TopologyTuple {
     public final short[] t_dest_addr; // destinationens huvudadress
     public final short[] t_last_addr; // adress till en nod som kan nå t_dest_addr i ett hopp, vanligtvis MPR-nod till t_dest_addr
     public final int t_seq; // sekvensnummer
-    private float t_time; // specificerar tiden då tupeln går ut och måste tas bort
+    private long t_time; // specificerar tiden då tupeln går ut och måste tas bort
 
     public TopologyTuple(short[] t_dest_addr, short[] t_last_addr, int t_seq) {
         this.t_dest_addr = t_dest_addr;
@@ -22,7 +22,7 @@ public class TopologyTuple {
         t_time = System.currentTimeMillis() + TCP_HOLD_TIME;
     }
 
-    public float get_time() {
+    public long get_time() {
         return t_time;
     }
 }

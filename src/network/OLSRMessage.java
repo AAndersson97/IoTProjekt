@@ -6,7 +6,7 @@ public abstract class OLSRMessage {
     public final MessageType msgType;
     public final int msgSize;
     public final short[] originatorAddr;
-    public float vTime; // Hur lång tid mottagande av paket en nod måste anse att informationen i meddelandet är giltig om inte nylig uppdatering till informationen har mottagits
+    public long vTime; // Hur lång tid mottagande av paket en nod måste anse att informationen i meddelandet är giltig om inte nylig uppdatering till informationen har mottagits
     public final int msgSeqNum;
     private int timeToLive;
     private int hopCount; // Måste öka med ett för varje hopp

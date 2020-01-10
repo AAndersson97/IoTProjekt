@@ -11,8 +11,12 @@ public class LinkCode {
             throw new IllegalStateException("There can't exist a link with a non neighbor");
     }
 
+    /**
+     * Det är inte möjligt att ha en länk till en nod samtidigt som noden ej är en granne
+     * @return
+     */
     private boolean validCombination() {
-        return (linkType != LinkTypes.SYM_LINK && linkType != LinkTypes.ASYM_LINK) || neighborType != NeighborTypes.NOT_NEIGH;
+        return !(linkType == LinkTypes.SYM_LINK && neighborType == NeighborTypes.NOT_NEIGH);
     }
 
     /**

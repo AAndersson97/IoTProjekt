@@ -23,7 +23,7 @@ public class DuplicateTuple {
     public void renewTupple() {
         d_time = System.currentTimeMillis() + DUP_HOLD_TIME;
     }
-    public float get_time() {
+    public long get_time() {
         return d_time;
     }
 }

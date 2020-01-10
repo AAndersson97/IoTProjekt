@@ -11,7 +11,7 @@ import static network.Constants.Protocol.TWO_HOP_HOLD_TIME;
 public class TwoHopTuple {
     public final short[] n_neighbor_main_addr; // huvudadressen till en granne
     public final short[] n_2hop_addr; // huvudadressen till en 2-hopsgranne med en symmetrisk länk till n_neighbor_main_addr
-    private float n_time; // specificerar tiden då tupeln blir ogiltig och ska tas bort
+    private long n_time; // specificerar tiden då tupeln blir ogiltig och ska tas bort
 
     public TwoHopTuple(short[] n_neighbor_main_addr, short[] n_2hop_addr) {
         this.n_neighbor_main_addr = n_neighbor_main_addr;
@@ -40,7 +40,7 @@ public class TwoHopTuple {
     public void renewTupple() {
         n_time = System.currentTimeMillis() + TWO_HOP_HOLD_TIME;
     }
-    public float get_time() {
+    public long get_time() {
         return n_time;
     }
 }
