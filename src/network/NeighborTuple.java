@@ -12,6 +12,12 @@ public class NeighborTuple {
         n_willingness = willingness;
     }
 
+    NeighborTuple(short[] neighbor, Willingness willingness) {
+        n_neighbor_main_addr = neighbor;
+        this.status = N_status.NOT_SYM;
+        n_willingness = willingness;
+    }
+
     enum N_status {
         NOT_SYM, SYM;
     }

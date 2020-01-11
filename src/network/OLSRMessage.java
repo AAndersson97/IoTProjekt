@@ -18,7 +18,7 @@ public abstract class OLSRMessage {
         this.timeToLive = timeToLive;
         this.hopCount = 0;
         this.msgSeqNum = msgSeqNum;
-        this.vTime = System.currentTimeMillis() + MESSAGE_VTIME;
+        this.vTime = System.currentTimeMillis() + NEIGHB_HOLD_TIME;
     }
 
     protected OLSRMessage(OLSRMessage message) {
