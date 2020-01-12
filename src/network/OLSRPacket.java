@@ -7,15 +7,13 @@ public class OLSRPacket<T extends OLSRMessage> extends Packet {
     public final T message; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
 
     public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader , OLSRHeader olsrHeader, T message) {
-        this.ipHeader = ipHeader;
-        this.udpHeader = udpHeader;
+        super(ipHeader, udpHeader);
         this.olsrHeader = olsrHeader;
         this.message = message;
     }
 
     public OLSRPacket(OLSRPacket<T> packet) {
-        this.ipHeader = new IPHeader(packet.ipHeader);
-        this.udpHeader = new UDPHeader(packet.udpHeader);
+        super(packet.ipHeader, packet.udpHeader);
         this.olsrHeader = packet.olsrHeader;
         this.message = packet.message;
     }

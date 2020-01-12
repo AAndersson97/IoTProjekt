@@ -3,9 +3,11 @@ package network;
 import utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
+
 import static network.Constants.Protocol.UDP_HEADER_SIZE;
 
-public final class UDPHeader {
+public final class UDPHeader implements Serializable {
     private short senderPort;
     private short destinationPort;
     private short length;

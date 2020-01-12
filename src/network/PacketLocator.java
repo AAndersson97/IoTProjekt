@@ -18,15 +18,16 @@ public class PacketLocator {
         packetDroppedListener.packetDropped(node);
     }
 
-    public synchronized static void reportPacketTransport(short[] startNode, short[] endNode) {
+    public synchronized static void reportPacketTransport(short[] startNode, short[] endNode, Packet packet) {
         ConcurrentHashMap<short[],Node> nodeList = Network.getNodeList();
+        System.out.println("Start node, null? " + (startNode == null) + " end node, null?" + (endNode == null) + "  packet, null? " + (packet==null));
         Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
         if (start != null && end != null) {
             Location finalStart = start, finalEnd = end;
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    locationListener.reportedTransport(finalStart, finalEnd);
+                    locationListener.reportedTransport(finalStart, finalEnd, packet);
                 }
             }, SybilSimulator.packetTransportDelay);
         }
@@ -51,7 +52,7 @@ public class PacketLocator {
 
     @FunctionalInterface
     public interface LocationListener {
-        void reportedTransport(Location start, Location end);
+        void reportedTransport(Location start, Location end, Packet packet);
     }
 
     @FunctionalInterface

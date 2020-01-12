@@ -4,13 +4,14 @@ import utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Klassens syfte är att skapa en implementera en IP-header som javaobjekt. Alla fält som vanligtvis förekommer i en IP-header har inkluderas i denna klass, dock sker ej explicit tilldelning av värden till varje fält
  * då samma information redan finns i OLSR-Header eller är inte nödvändiga för att simulera nätverkskommunikation över protokollet OLSR.
  */
-public final class IPHeader implements Header {
+public final class IPHeader implements Header, Serializable {
     private static byte version = (byte) 4;
     private short typeOfService;
     private int totalLength;

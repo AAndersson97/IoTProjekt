@@ -1,6 +1,8 @@
 package network;
 
-public class WifiMacHeader {
+import java.io.Serializable;
+
+public class WifiMacHeader implements Serializable {
 
     public final byte ctrlType;
     public final byte ctrlSubType;

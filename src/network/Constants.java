@@ -39,6 +39,7 @@ public final class Constants {
         public static final int UDP_PROTOCOL_NUM = 17;
         public static final short OLSR_PORT = 698;
         public static final short TFTP_PORT = 69;
+        public static final short TFTP_PROTOCOL_NUM = 69;
         public static final short OLSR_HEADER_SIZE = Integer.SIZE * 2;
         public static final int DEFAULT_TTL = 255; // maximalt antal hopp ett icke-OLSR paket kan göra innan den kastas
         public static final long MAX_JITTER_MS = (HELLO_INTERVAL/4) * 1000; // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering

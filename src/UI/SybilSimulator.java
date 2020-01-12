@@ -14,6 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import network.*;
@@ -195,24 +196,39 @@ public class SybilSimulator extends Application {
     }
 
     public PacketLocator.LocationListener createLocationCallback() {
-        return (start, end)-> Platform.runLater(() -> {
-            Circle newCircle = new Circle(2, Color.BLUE);
+        return (start, end, packet)-> Platform.runLater(() -> {
+            Circle newCircle = new Circle(2, packet instanceof TFTPPacket ? Color.DARKSEAGREEN :Color.BLUE);
             root.getChildren().add(newCircle);
             Line newLine = new Line();
             newLine.setStartX(start.getX());
             newLine.setStartY(start.getY());
             newLine.setEndX(end.getX());
             newLine.setEndY(end.getY());
+            Label label = new Label("HEJ");
+            label.setFont(new Font("Arial", 18));
+            Line textLine = new Line();
+            root.getChildren().add(label);
+            textLine.setStartX(start.getX() - 20);
+            textLine.setStartY(start.getY() - 20);
+            textLine.setEndX(end.getX() - 20);
+            textLine.setEndY(end.getY() - 20);
             PathTransition transition = new PathTransition();
             transition.setNode(newCircle);
             transition.setDuration(Duration.millis(packetTransportDelay));
             transition.setPath(newLine);
             transition.setCycleCount(1);
+            //transition.play();
+            PathTransition textTransition = new PathTransition();
+            textTransition.setNode(label);
+            textTransition.setDuration(Duration.millis(packetTransportDelay));
+            transition.setPath(textLine);
+            transition.setCycleCount(1);
             transition.play();
+            textTransition.play();
             Simulator.scheduleFutureTask(new TimerTask() {
                 @Override
                 public void run() {
-                    Platform.runLater(() -> root.getChildren().remove(newCircle));
+                    Platform.runLater(() -> root.getChildren().removeAll(newCircle, label));
                 }
             }, packetTransportDelay);
         });

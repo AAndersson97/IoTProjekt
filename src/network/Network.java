@@ -31,7 +31,11 @@ public class Network {
     public static void sendPacket(Node sender, short[] receiver,Packet packet) {
         if (sender == null || packet == null)
             throw new IllegalArgumentException("Source address neither packet must be null");
-        wifiChannel.send(sender, receiver, packet);
+        packet.setWifiMacHeader(new WifiMacHeader(sender.getAddress(), receiver));
+        WifiMacTrailer trailer = new WifiMacTrailer();
+        packet.setWifiMacTrailer(trailer);
+        trailer.setCheckSum(packet.toBytes());
+        wifiChannel.send(sender, packet);
     }
 
     public static void shutdownNetwork() {

@@ -84,12 +84,12 @@ public class SendPacketUI {
             return;
         }
         String msg = msgBox.getText().trim();
-        int msgLength = msg.length();
         String[] srcAddress = sourceAddress.getSelectionModel().getSelectedItem().split("\\.");
         String[] destination = destAddress.getSelectionModel().getSelectedItem().split("\\.");
         short[] src = stringsToShorts(srcAddress);
         short[] dest = stringsToShorts(destination);
-        IPHeader ipHeader = null;
+        TFTPPacket tftpPacket = PacketGenerator.generateTFTPPacket(src, dest, msg);
+        Network.getNodeList().get(src).receivePacket(tftpPacket);
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Packet sent!", ButtonType.OK);
         alert.setHeaderText("Shipment of packet");
         alert.show();

@@ -10,6 +10,11 @@ public abstract class Packet {
     public UDPHeader udpHeader;
     public WifiMacTrailer wifiMacTrailer;
 
+    public Packet(IPHeader ipHeader, UDPHeader udpHeader) {
+        this.ipHeader = ipHeader;
+        this.udpHeader = udpHeader;
+    }
+
     public byte[] toBytes() {
         if (wifiMacHeader == null || ipHeader == null ||udpHeader == null|| wifiMacTrailer == null)
             throw new NullPointerException("The headers and trailers must not be null");
@@ -18,7 +23,7 @@ public abstract class Packet {
                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(wifiMacHeader);
             oos.writeObject(ipHeader);
-            oos.writeObject(udpHeader);;
+            oos.writeObject(udpHeader);
             oos.writeObject(wifiMacTrailer);
             oos.flush();
             bytes = bos.toByteArray();

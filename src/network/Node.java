@@ -184,7 +184,7 @@ public class Node implements Comparator<Node>, Runnable {
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
         OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
         incrementSeqNum();
-        Network.sendPacket(this, BROADCAST,olsrPacket);
+        Network.sendPacket(this, BROADCAST, olsrPacket);
     }
 
     private LinkCode createLinkCode(LinkTuple tuple) {
@@ -241,7 +241,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void processAccordingToMsgType(OLSRPacket packet) {
-        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address);
+        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
         boolean dropped = false;
             switch (packet.message.msgType) {
                 case HELLO_MESSAGE:
@@ -315,7 +315,6 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private boolean processHelloMessage(HelloMessage message) {
-        count++;
         LinkTuple linkTuple;
         long timeNow = System.currentTimeMillis();
         boolean linkUpdated = false, linkAdded = false;
