@@ -127,6 +127,10 @@ public final class IPHeader implements Header, Serializable {
         return destinationAddress;
     }
 
+    public void decrementTTL() {
+        timeToLive--;
+    }
+
     public int getLength() {
         return totalLength;
     }

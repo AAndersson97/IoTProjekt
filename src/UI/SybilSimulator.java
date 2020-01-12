@@ -197,38 +197,47 @@ public class SybilSimulator extends Application {
 
     public PacketLocator.LocationListener createLocationCallback() {
         return (start, end, packet)-> Platform.runLater(() -> {
-            Circle newCircle = new Circle(2, packet instanceof TFTPPacket ? Color.DARKSEAGREEN :Color.BLUE);
+            Circle newCircle = new Circle(2, Color.BLUE);
             root.getChildren().add(newCircle);
             Line newLine = new Line();
             newLine.setStartX(start.getX());
             newLine.setStartY(start.getY());
             newLine.setEndX(end.getX());
             newLine.setEndY(end.getY());
-            Label label = new Label("HEJ");
-            label.setFont(new Font("Arial", 18));
-            Line textLine = new Line();
-            root.getChildren().add(label);
-            textLine.setStartX(start.getX() - 20);
-            textLine.setStartY(start.getY() - 20);
-            textLine.setEndX(end.getX() - 20);
-            textLine.setEndY(end.getY() - 20);
             PathTransition transition = new PathTransition();
             transition.setNode(newCircle);
             transition.setDuration(Duration.millis(packetTransportDelay));
             transition.setPath(newLine);
             transition.setCycleCount(1);
-            //transition.play();
-            PathTransition textTransition = new PathTransition();
-            textTransition.setNode(label);
-            textTransition.setDuration(Duration.millis(packetTransportDelay));
-            transition.setPath(textLine);
-            transition.setCycleCount(1);
+            if (packet instanceof TFTPPacket) {
+                newCircle.setRadius(4);
+                newCircle.setFill(Color.DARKSEAGREEN);
+                Label label = new Label("Packet on the way");
+                label.setFont(new Font("Arial", 16));
+                Line textLine = new Line();
+                root.getChildren().add(label);
+                textLine.setStartX(start.getX() - 15);
+                textLine.setStartY(start.getY() - 15);
+                textLine.setEndX(end.getX() - 15);
+                textLine.setEndY(end.getY() - 15);
+                PathTransition textTransition = new PathTransition();
+                textTransition.setNode(label);
+                textTransition.setDuration(Duration.millis(packetTransportDelay));
+                textTransition.setPath(textLine);
+                textTransition.setCycleCount(1);
+                textTransition.play();
+                Simulator.scheduleFutureTask(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> root.getChildren().remove(label));
+                    }
+                }, packetTransportDelay);
+            }
             transition.play();
-            textTransition.play();
             Simulator.scheduleFutureTask(new TimerTask() {
                 @Override
                 public void run() {
-                    Platform.runLater(() -> root.getChildren().removeAll(newCircle, label));
+                    Platform.runLater(() -> root.getChildren().removeAll(newCircle));
                 }
             }, packetTransportDelay);
         });

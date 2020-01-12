@@ -42,9 +42,7 @@ public class WifiChannel extends Channel {
     }
 
     public ArrayList<Node> getObservers() {
-        ArrayList<Node> copy = new ArrayList<>();
-        Collections.copy(observers, copy);
-        return copy;
+        return new ArrayList<>(observers);
     }
 
 }

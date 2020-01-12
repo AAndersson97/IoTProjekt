@@ -8,10 +8,10 @@ import java.io.Serializable;
 import static network.Constants.Protocol.UDP_HEADER_SIZE;
 
 public final class UDPHeader implements Serializable {
-    private short senderPort;
-    private short destinationPort;
-    private short length;
-    private int checksum;
+    public final short senderPort;
+    public final short destinationPort;
+    public final short length;
+    public final int checksum;
 
     UDPHeader(short senderPort, short destinationPort, short dataLength) {
         this.senderPort = senderPort;

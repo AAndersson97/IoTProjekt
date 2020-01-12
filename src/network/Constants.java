@@ -42,7 +42,7 @@ public final class Constants {
         public static final short TFTP_PROTOCOL_NUM = 69;
         public static final short OLSR_HEADER_SIZE = Integer.SIZE * 2;
         public static final int DEFAULT_TTL = 255; // maximalt antal hopp ett icke-OLSR paket kan göra innan den kastas
-        public static final long MAX_JITTER_MS = (HELLO_INTERVAL/4) * 1000; // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering
+        public static final long MAX_JITTER_MS = (HELLO_INTERVAL/4); // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering
 
         /** Betecknar hur villig en nod är att vidarebefodra traffik för andra noder.
          *  WILL_NEBER indikerar en nod som inte vill hantera traffik för andra noder, oftast p.g.a resursbrist.
