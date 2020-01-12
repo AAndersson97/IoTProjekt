@@ -16,6 +16,7 @@ import network.IPHeader;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import static network.Constants.Protocol.ADDRESS_LENGTH;
 import static network.Constants.GUI.PACKET_GUI_Y;
@@ -89,7 +90,7 @@ public class SendPacketUI {
         short[] src = stringsToShorts(srcAddress);
         short[] dest = stringsToShorts(destination);
         TFTPPacket tftpPacket = PacketGenerator.generateTFTPPacket(src, dest, msg);
-        Network.getNodeList().get(src).receivePacket(tftpPacket);
+        Objects.requireNonNull(Network.getNode(src)).receivePacket(tftpPacket);
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Packet sent!", ButtonType.OK);
         alert.setHeaderText("Shipment of packet");
         alert.show();
@@ -100,7 +101,7 @@ public class SendPacketUI {
     }
 
     private void createAddressCollection() {
-        Collection<Node> nodeList = Network.getNodeList().values();
+        Collection<Node> nodeList = Network.getNodeList();
         addressStrings = FXCollections.observableArrayList();
         listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
         int count = 0;

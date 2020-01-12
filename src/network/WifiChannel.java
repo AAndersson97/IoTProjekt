@@ -1,9 +1,6 @@
 package network;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static network.Constants.Network.PACKET_LOSS;
@@ -13,16 +10,16 @@ import static network.Constants.Network.PACKET_LOSS;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private final ConcurrentHashMap<short[], Node> observers;
+    private final ArrayList<Node> observers;
 
     {
-        observers = new ConcurrentHashMap<>();
+        observers = new ArrayList<>();
     }
 
     public void send(Node sender, Packet packet) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
-        Simulator.scheduleTask(() -> observers.forEach((address,node) -> {
+        Simulator.scheduleTask(() -> observers.forEach((node) -> {
             if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
                 if (!simulateLoss()) {
                     node.receivePacket(packet.copy());
@@ -40,12 +37,14 @@ public class WifiChannel extends Channel {
     }
 
     public void addObserver(Node node) {
-        observers.put(node.getAddress(), node);
+        observers.add(node);
 
     }
 
-    public ConcurrentHashMap<short[], Node> getObservers() {
-        return observers;
+    public ArrayList<Node> getObservers() {
+        ArrayList<Node> copy = new ArrayList<>();
+        Collections.copy(observers, copy);
+        return copy;
     }
 
 }

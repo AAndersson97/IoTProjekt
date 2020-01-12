@@ -57,9 +57,8 @@ public class LocationManager {
     }
 
     public Location findLocationWithinRange() {
-        List<short[]> keysList = new ArrayList<>(Network.getNodeList().keySet());
-        int index = (int)(Math.random() * keysList.size());
-        Node neighbor = Network.getNodeList().get(keysList.get(index)) ;
+        int index = (int)(Math.random() * (Network.getNumOfNodes()-1));
+        Node neighbor = Network.getNodeList().get(index);
         ArrayList<Location> locationsWithinRange = new ArrayList<>();
         for (Location l : locations.values()) {
             if (Transmission.isInsideTransmissionArea(neighbor.getTransmissionRadius(), neighbor.getLocation(), l)) {
@@ -76,7 +75,7 @@ public class LocationManager {
      * @return
      */
     public ArrayList<Location> findLocationToAttack(List<Node> blacklist) {
-        ArrayList<Node> candidates = new ArrayList<>(Network.getNodeList().values());
+        ArrayList<Node> candidates = Network.getNodeList();
         candidates.removeIf(blacklist::contains);
         ArrayList<Location> list = new ArrayList<>();
         for (Node candidate : candidates) {
@@ -102,20 +101,6 @@ public class LocationManager {
         }
         return list;
     }
-
-    /*public ArrayList<Location> getLocationWithinRange(short[] addr) {
-        Node node = Network.getNodeList().get(addr);
-        if (node == null)
-            throw new NullPointerException("There exists no node with the specified address");
-        ArrayList<Location> locationsWithinRange = new ArrayList<>();
-        for (Location l : locations) {
-            if (Transmission.isInsideTransmissionArea(node.getTransmissionRadius(), node.getLocation(), l)) {
-                locationsWithinRange.add(l);
-            }
-        }
-        locations.removeAll(locationsWithinRange);
-        return locationsWithinRange;
-    }*/
 
     public static LocationManager getInstance() {
         return instance;

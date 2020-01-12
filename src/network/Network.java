@@ -2,6 +2,7 @@ package network;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +40,7 @@ public class Network {
     }
 
     public static void shutdownNetwork() {
-        for (Node node : wifiChannel.getObservers().values()) {
+        for (Node node : wifiChannel.getObservers()) {
             node.turnOff();
         }
     }
@@ -49,15 +50,16 @@ public class Network {
         numOfNodes++;
     }
 
-    public static ConcurrentHashMap<short[], Node> getNodeList() {
-        return wifiChannel.getObservers();
+    public static Node getNode(short[] addr) {
+        for (Node node : getNodeList())
+            if (Arrays.equals(node.getAddress(), addr))
+                return node;
+
+         return null;
     }
 
-    public static ArrayList<Location> getNodeLocations() {
-        ArrayList<Location> locations = new ArrayList<>();
-        for (Node node : getNodeList().values())
-            locations.add(node.getLocation());
-        return locations;
+    public static ArrayList<Node> getNodeList() {
+        return wifiChannel.getObservers();
     }
 
 }
