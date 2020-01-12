@@ -13,7 +13,7 @@ import static network.Constants.Network.PACKET_LOSS;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private final ConcurrentHashMap<short[],Node> observers;
+    private final ConcurrentHashMap<short[], Node> observers;
 
     {
         observers = new ConcurrentHashMap<>();

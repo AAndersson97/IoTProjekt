@@ -9,7 +9,7 @@ import static network.Constants.Protocol.*;
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     private final Timer timer;
-    private short[] address;
+    private final short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
     private int ANSN; // ett sekvensnummer som ökar med 1 varje gång mängden av grannar i "neighborSet" uppdateras.
@@ -108,6 +108,7 @@ public class Node implements Comparator<Node>, Runnable {
      * @param packet Paketet som noden mottagit och ska bearbetas, vidaresändas eller kastas.
      */
     private void handlePacket(Packet packet) {
+        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
         if (packet instanceof OLSRPacket) {
             OLSRPacket olsrPacket = (OLSRPacket) packet;
             processAccordingToMsgType(olsrPacket);
@@ -241,7 +242,6 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void processAccordingToMsgType(OLSRPacket packet) {
-        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
         boolean dropped = false;
             switch (packet.message.msgType) {
                 case HELLO_MESSAGE:
@@ -544,9 +544,6 @@ public class Node implements Comparator<Node>, Runnable {
 
     public boolean isActive() {
         return thread.isAlive();
-    }
-    public void setAddress(short[] address) {
-        this.address = address;
     }
     public void incrementSeqNum() {
        seqNum = (short) (seqNum+1 % Short.MAX_VALUE);

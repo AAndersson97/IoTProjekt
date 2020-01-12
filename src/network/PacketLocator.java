@@ -20,8 +20,10 @@ public class PacketLocator {
 
     public synchronized static void reportPacketTransport(short[] startNode, short[] endNode, Packet packet) {
         ConcurrentHashMap<short[],Node> nodeList = Network.getNodeList();
-        System.out.println("Start node, null? " + (startNode == null) + " end node, null?" + (endNode == null) + "  packet, null? " + (packet==null));
-        Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
+        System.out.println("Contains start: " + nodeList.get(startNode) + " contains end: " + nodeList.contains(endNode));
+        nodeList.forEach((key,value) -> {if (Arrays.equals(key, startNode) || Arrays.equals(key, endNode))
+            System.out.println("Match found: " + Arrays.toString(key));});
+        /*Location start = nodeList.get(startNode).getLocation(), end = nodeList.get(endNode).getLocation();
         if (start != null && end != null) {
             Location finalStart = start, finalEnd = end;
             timer.schedule(new TimerTask() {
@@ -35,7 +37,7 @@ public class PacketLocator {
             if (Constants.LOG_ACTIVE) {
                 System.out.println("Start and/or end location is/are null");
             }
-
+            */
     }
 
     public static void registerLocationListener(LocationListener listener) {
