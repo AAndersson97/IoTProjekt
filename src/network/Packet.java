@@ -18,7 +18,7 @@ public abstract class Packet {
                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(wifiMacHeader);
             oos.writeObject(ipHeader);
-            oos.writeObject(udpHeader);
+            oos.writeObject(udpHeader);;
             oos.writeObject(wifiMacTrailer);
             oos.flush();
             bytes = bos.toByteArray();
