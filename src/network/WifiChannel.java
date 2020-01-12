@@ -19,13 +19,16 @@ public class WifiChannel extends Channel {
         observers = new ConcurrentHashMap<>();
     }
 
-    public void send(Node sender, OLSRPacket packet) {
+    public void send(Node sender, short[] receiver, Packet packet) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
+        packet.setWifiMacHeader(new WifiMacHeader(sender.getAddress(), receiver));
+        packet.setWifiMacTrailer(new WifiMacTrailer(packet.toBytes()));
         Simulator.scheduleTask(() -> observers.forEach((address,node) -> {
             if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
-                if (!simulateLoss())
-                    node.receivePacket(packet);
+                if (!simulateLoss()) {
+                    node.receivePacket(packet.copy());
+                }
             }
         }));
     }

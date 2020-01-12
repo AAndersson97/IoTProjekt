@@ -19,4 +19,8 @@ public class LinkTuple {
         this.l_time = l_asym_time;
     }
 
+    public void renewTuple() {
+        l_time = l_asym_time;
+    }
+
 }

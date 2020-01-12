@@ -28,10 +28,10 @@ public class Network {
      * @param sender Avsändaren
      * @param packet Paketet som ska skickas
      */
-    public static void sendPacket(Node sender, OLSRPacket packet) {
+    public static void sendPacket(Node sender, short[] receiver,Packet packet) {
         if (sender == null || packet == null)
             throw new IllegalArgumentException("Source address neither packet must be null");
-        wifiChannel.send(sender, packet);
+        wifiChannel.send(sender, receiver, packet);
     }
 
     public static void shutdownNetwork() {

@@ -21,7 +21,7 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
     private final HashMap<short[], TwoHopTuple> twoHopNeighborSet; // nykeln är tvåhoppsgrannen
     private final HashMap<short[], MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
-    private final HashMap<short[], TopologyTuple> topologySet;
+    private final HashMap<short[], TopologyTuple> topologySet; // nyckeln är destinationsadressen
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     private final HashMap<short[], RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
@@ -57,7 +57,7 @@ public class Node implements Comparator<Node>, Runnable {
 
     @Override
     public void run() {
-        timer.schedule(sendHelloMsgTask(), 0, HELLO_INTERVAL);
+        timer.schedule(sendOLSRMsgTask(), 0, HELLO_INTERVAL);
         while (active) {
             while (buffer.isEmpty() && active) {
                 try {
@@ -76,11 +76,13 @@ public class Node implements Comparator<Node>, Runnable {
         }
     }
 
-    private TimerTask sendHelloMsgTask() {
+    private TimerTask sendOLSRMsgTask() {
         return new TimerTask() {
             @Override
             public void run() {
                 sendHelloPacket();
+                if (!mprSelectorSet.isEmpty())
+                    sendTCPacket();
             }
         };
     }
@@ -141,31 +143,32 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void sendTCPacket() {
-        int seqNum = 0, count = 0;
+        int count = 0;
         short[][] advertisedNMA = new short[linkSet.size()][];
         for (LinkTuple linkTuple : linkSet.values())
             advertisedNMA[count++] = linkTuple.l_neighbor_iface_addr;
-        TCMessage tcMessage = new TCMessage(address, seqNum++, ANSN++, advertisedNMA);
+        TCMessage tcMessage = new TCMessage(address, seqNum, ANSN++, advertisedNMA);
         IPHeader ipHeader = new IPHeader(advertisedNMA.length * (ADDRESS_LENGTH * Short.SIZE), address, BROADCAST, UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
         OLSRPacket olsrPacket = new OLSRPacket(ipHeader, udpHeader, olsrHeader, tcMessage);
         incrementSeqNum();
-        Network.sendPacket(this, olsrPacket);
+        Network.sendPacket(this, BROADCAST, olsrPacket);
     }
 
     private void sendHelloPacket() {
         HashMap<LinkCode, ArrayList<short[]>> neighbors = new HashMap<>(); // grannar som har en länk till denna nod, info som används för att senare hitta grannar utan länk till denna nod
         long timeNow = System.currentTimeMillis();
-        for (LinkTuple tuple : linkSet.values()) {
-            if (tuple.l_time >= timeNow) {
-                LinkCode linkCode = createLinkCode(tuple);
-                if (linkCode == null)
-                    continue;
-                neighbors.computeIfAbsent(linkCode, k -> new ArrayList<>());
-                neighbors.get(linkCode).add(tuple.l_neighbor_iface_addr);
+        synchronized (this) {
+            for (LinkTuple tuple : linkSet.values()) {
+                if (tuple.l_time >= timeNow) {
+                    LinkCode linkCode = createLinkCode(tuple);
+                    if (linkCode == null)
+                        continue;
+                    neighbors.computeIfAbsent(linkCode, k -> new ArrayList<>());
+                    neighbors.get(linkCode).add(tuple.l_neighbor_iface_addr);
+                }
             }
-        }
             for (NeighborTuple tuple : neighborSet.values()) {
                 if (!linkSet.containsKey(tuple.n_neighbor_main_addr)) {
                     LinkCode.NeighborTypes neighborType = tuple.status == NeighborTuple.N_status.SYM ? LinkCode.NeighborTypes.SYM_NEIGH : LinkCode.NeighborTypes.NOT_NEIGH;
@@ -174,13 +177,14 @@ public class Node implements Comparator<Node>, Runnable {
                     neighbors.get(linkCode).add(tuple.n_neighbor_main_addr);
                 }
             }
+        }
         HelloMessage messages = new HelloMessage(address, seqNum, willingness, neighbors);
         IPHeader ipHeader = new IPHeader(HelloMessage.length(), address, BROADCAST, UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
         OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
         incrementSeqNum();
-        Network.sendPacket(this, olsrPacket);
+        Network.sendPacket(this, BROADCAST,olsrPacket);
     }
 
     private LinkCode createLinkCode(LinkTuple tuple) {
@@ -241,7 +245,7 @@ public class Node implements Comparator<Node>, Runnable {
         boolean dropped = false;
             switch (packet.message.msgType) {
                 case HELLO_MESSAGE:
-                    processHelloMessage((HelloMessage) packet.message);
+                    dropped = !processHelloMessage((HelloMessage) packet.message);
                     break;
                 case TC_MESSAGE:
                     if (isADuplicate(packet.message) || neighborSet.get(packet.ipHeader.sourceAddress) == null) {
@@ -250,6 +254,7 @@ public class Node implements Comparator<Node>, Runnable {
                         break;
                     }
                     processTCMessage((TCMessage) packet.message);
+                    System.out.println("TC Message from: " + Arrays.toString(packet.message.originatorAddr));
                     break;
             }
         if (!dropped)
@@ -279,74 +284,85 @@ public class Node implements Comparator<Node>, Runnable {
 
     private void processTCMessage(TCMessage message) {
         long timeNow = System.currentTimeMillis();
-        if (message.vTime >= timeNow) {
+        if (linkSet.containsKey(message.originatorAddr) && message.vTime >= timeNow) {
             TopologyTuple topologyTuple;
-            if ((topologyTuple = topologySet.get(message.originatorAddr)) != null
-                    && topologyTuple.t_seq < message.ANSN) {
-                // Tar bort tuppel som innehåller äldre information än informationen i meddelandet
-                synchronized (topologySet) {
-                    topologySet.remove(topologyTuple.t_last_addr);
-                }
-            }
-            for (short[] neighbor : message.advertisedNMA) {
+            synchronized (topologySet) {
                 if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
-                    if (Arrays.equals(topologyTuple.t_last_addr, message.originatorAddr)) {
-                        topologyTuple.renewTupple();
+                    if (topologyTuple.t_seq < message.ANSN) {
+                        // Tar bort tuppel som innehåller äldre information än informationen i meddelandet
+                        topologySet.remove(topologyTuple.t_last_addr);
+                    } else {
+                        return;
                     }
-                } else {
-                    topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN);
-                    topologySet.put(topologyTuple.t_last_addr,topologyTuple);
+                }
+                for (short[] neighbor : message.advertisedNMA) {
+                    if ((topologyTuple = topologySet.get(message.originatorAddr)) != null) {
+                        topologyTuple.renewTupple();
+                    } else {
+                        topologyTuple = new TopologyTuple(neighbor, message.originatorAddr, ANSN);
+                        topologySet.put(topologyTuple.t_last_addr, topologyTuple);
+                        removeTCTuppleTimer(topologyTuple);
+                    }
                 }
             }
         }
-        updateRoutingTable();
     }
 
-    private void processHelloMessage(HelloMessage message) {
+    private void removeTCTuppleTimer(TopologyTuple topologyTuple) {
+        synchronized (timer) {
+            timer.schedule(createTCTuppleRemoveTask(topologyTuple), 0, topologyTuple.get_time() - System.currentTimeMillis());
+        }
+    }
+
+    private boolean processHelloMessage(HelloMessage message) {
         count++;
         LinkTuple linkTuple;
         long timeNow = System.currentTimeMillis();
         boolean linkUpdated = false, linkAdded = false;
         // Bearbeta inte paket vars giltighetstid har gått ut
         if (message.vTime < timeNow)
-            return;
-        if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
-            linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, message.vTime);
-            linkSet.put(message.originatorAddr, linkTuple);
-            linkAdded = true;
-            detectNeighborLoss(linkTuple);
-        }
-        linkTuple.l_neighbor_iface_addr = message.originatorAddr;
-        linkTuple.l_asym_time = message.vTime;
-        for (LinkCode linkCode : message.neighborIfaceAdr.keySet()) {
-            timeNow = System.currentTimeMillis();
-            for (short[] neighborAddress : message.neighborIfaceAdr.get(linkCode)) {
-                if (Arrays.equals(neighborAddress, address)) {
-                    if (linkCode.linkType == LinkCode.LinkTypes.LOST_LINK) {
-                        linkTuple.l_sym_time = timeNow - 1;
-                        linkUpdated = true;
-                    } else if (linkCode.linkType == LinkCode.LinkTypes.SYM_LINK || linkCode.linkType == LinkCode.LinkTypes.ASYM_LINK) {
-                        linkTuple.l_sym_time = message.vTime;
-                        linkTuple.l_time = linkTuple.l_sym_time;
-                        linkUpdated = true;
+            return false;
+        synchronized (this) {
+            if ((linkTuple = linkSet.get(message.originatorAddr)) == null) {
+                linkTuple = new LinkTuple(address, message.originatorAddr, timeNow - 1, message.vTime);
+                linkSet.put(message.originatorAddr, linkTuple);
+                linkAdded = true;
+                detectNeighborLoss(linkTuple);
+            }
+            linkTuple.l_neighbor_iface_addr = message.originatorAddr;
+            linkTuple.l_asym_time = message.vTime;
+            for (LinkCode linkCode : message.neighborIfaceAdr.keySet()) {
+                timeNow = System.currentTimeMillis();
+                for (short[] neighborAddress : message.neighborIfaceAdr.get(linkCode)) {
+                    if (Arrays.equals(neighborAddress, address)) {
+                        if (linkCode.linkType == LinkCode.LinkTypes.LOST_LINK) {
+                            linkTuple.l_sym_time = timeNow - 1;
+                            linkTuple.renewTuple();
+                            linkUpdated = true;
+                        } else if (linkCode.linkType == LinkCode.LinkTypes.SYM_LINK || linkCode.linkType == LinkCode.LinkTypes.ASYM_LINK) {
+                            linkTuple.l_sym_time = message.vTime;
+                            linkTuple.l_time = linkTuple.l_sym_time;
+                            linkUpdated = true;
+                        }
+                        if (linkCode.neighborType == LinkCode.NeighborTypes.MPR_NEIGH)
+                            recordMPRSelector(message);
+                    } else {
+                        populateTwoHopNeighborSet(neighborAddress, linkCode, message);
                     }
-                    if (linkCode.neighborType == LinkCode.NeighborTypes.MPR_NEIGH)
-                        recordMPRSelector(message);
-                } else {
-                    populateTwoHopNeighborSet(neighborAddress, linkCode, message);
                 }
             }
+            linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
+            if (linkUpdated)
+                linkTupleUpdated(linkTuple, message.willingness);
+            else if (linkAdded)
+                linkTupleAdded(linkTuple, message.willingness);
         }
-        if (linkUpdated)
-            linkTupleUpdated(linkTuple, message.willingness);
-        else if (linkAdded)
-            linkTupleAdded(linkTuple, message.willingness);
 
         // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
         // detta tillåter grannar att upptäcka länkbräckage.
         //linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
-        count++;
         mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet.values(), address).populateAndReturnMPRSet();
+        return true;
     }
 
     private void linkTupleUpdated(LinkTuple linkTuple, Willingness willingness) {
@@ -404,7 +420,8 @@ public class Node implements Comparator<Node>, Runnable {
         for (NeighborTuple tuple : neighborSet.values()) {
             if (tuple.status == NeighborTuple.N_status.SYM) {
                 LinkTuple linkTuple;
-                if ((linkTuple = linkSet.get(tuple.n_neighbor_main_addr)) != null && linkTuple.l_time >= System.currentTimeMillis()) {
+                if ((linkTuple = linkSet.get(tuple.n_neighbor_main_addr)) != null
+                        && linkTuple.l_time >= System.currentTimeMillis()) {
                     RoutingTuple routingTuple;
                     if (routingTable.containsKey(tuple.n_neighbor_main_addr)) {
                         routingTuple = new RoutingTuple(linkTuple.l_neighbor_iface_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
@@ -416,7 +433,7 @@ public class Node implements Comparator<Node>, Runnable {
             }
         }
         for (TwoHopTuple tuple : twoHopNeighborSet.values()) {
-            if (!Arrays.equals(address, tuple.n_2hop_addr) && !neighborSet.containsKey(tuple.n_2hop_addr)) {
+            if (!Arrays.equals(address, tuple.n_2hop_addr) && !neighborSet.containsKey(tuple.n_neighbor_main_addr)) {
                 RoutingTuple neighbor = routingTable.get(tuple.n_2hop_addr);
                 if (neighbor != null) {
                     RoutingTuple routingTuple = new RoutingTuple(tuple.n_2hop_addr, neighbor.r_next_addr, 2, neighbor.r_iface_addr);
@@ -442,18 +459,21 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void detectNeighborLoss(LinkTuple tuple) {
-        timer.schedule(createNeighborLossDetectionTask(tuple), tuple.l_asym_time);
+        synchronized (timer) {
+            timer.schedule(createNeighborLossDetectionTask(tuple), tuple.l_asym_time);
+        }
     }
 
     private void recordMPRSelector(HelloMessage message) {
         MPRSelectorTuple tuple;
-        if ((tuple = mprSelectorSet.get(message.originatorAddr)) == null) {
-            tuple = new MPRSelectorTuple(message.originatorAddr);
-            mprSelectorSet.put(message.originatorAddr, tuple);
-            removeMPRSelectorTimer(tuple);
-        } else {
-            tuple.ms_main_addr = message.originatorAddr;
-            tuple.renewTupple();
+        synchronized (mprSelectorSet) {
+            if ((tuple = mprSelectorSet.get(message.originatorAddr)) == null) {
+                tuple = new MPRSelectorTuple(message.originatorAddr);
+                mprSelectorSet.put(message.originatorAddr, tuple);
+                removeMPRSelectorTimer(tuple);
+            } else {
+                tuple.renewTupple();
+            }
         }
     }
 
@@ -469,21 +489,27 @@ public class Node implements Comparator<Node>, Runnable {
         synchronized (twoHopNeighborSet) {
             twoHopNeighborSet.remove(neighborAddress);
         }
+        //linkTupleUpdated(linkSet.get(neighborAddress), Willingness.WILL_DEFAULT);
         mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet.values(), address).populateAndReturnMPRSet();
+        updateRoutingTable();
     }
 
     private void removeMPRSelectorTimer(MPRSelectorTuple tuple) {
-        long timeNow = System.currentTimeMillis();
-        timer.schedule(createMPRSelectorRemoveTask(tuple), tuple.get_time() - timeNow);
+        synchronized (timer) {
+            timer.schedule(createMPRSelectorRemoveTask(tuple), tuple.get_time() - System.currentTimeMillis());
+        }
     }
 
     private void removeTwoHopTimer(TwoHopTuple tuple) {
-        long timeNow = System.currentTimeMillis();
-        timer.schedule(createTwoHopTimer(tuple), tuple.get_time() - timeNow);
+        synchronized (timer) {
+            timer.schedule(createTwoHopTimer(tuple), tuple.get_time() - System.currentTimeMillis());
+        }
     }
 
     private void removeLinkTimer(LinkTuple linkTuple) {
-        timer.schedule(createLinkTupleRemoveTask(linkTuple), linkTuple.l_time - System.currentTimeMillis());
+        synchronized (timer) {
+            timer.schedule(createLinkTupleRemoveTask(linkTuple), linkTuple.l_time - System.currentTimeMillis());
+        }
     }
 
     // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
@@ -555,6 +581,23 @@ public class Node implements Comparator<Node>, Runnable {
             }
         };
     }
+
+    private TimerTask createTCTuppleRemoveTask(TopologyTuple tuple) {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                if (tuple.get_time() > timeNow)
+                    timer.schedule(createTCTuppleRemoveTask(tuple), tuple.get_time() - timeNow);
+                else {
+                    synchronized (topologySet) {
+                        topologySet.remove(tuple.t_dest_addr);
+                    }
+                }
+            }
+        };
+    }
+
 
     private TimerTask createMPRSelectorRemoveTask(MPRSelectorTuple tuple) {
         return new TimerTask() {

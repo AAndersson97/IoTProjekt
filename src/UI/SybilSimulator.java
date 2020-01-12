@@ -138,6 +138,7 @@ public class SybilSimulator extends Application {
                 sendPacketBtn.setDisable(false);
             });
             showIPAddresses();
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -194,60 +195,56 @@ public class SybilSimulator extends Application {
     }
 
     public PacketLocator.LocationListener createLocationCallback() {
-        return (start, end)-> {
-            Platform.runLater(() -> {
-                Circle newCircle = new Circle(2, Color.BLUE);
-                root.getChildren().add(newCircle);
-                Line newLine = new Line();
-                newLine.setStartX(start.getX());
-                newLine.setStartY(start.getY());
-                newLine.setEndX(end.getX());
-                newLine.setEndY(end.getY());
-                PathTransition transition = new PathTransition();
-                transition.setNode(newCircle);
-                transition.setDuration(Duration.millis(packetTransportDelay));
-                transition.setPath(newLine);
-                transition.setCycleCount(1);
-                transition.play();
-                Simulator.scheduleFutureTask(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(() -> root.getChildren().remove(newCircle));
-                    }
-                }, packetTransportDelay);
-            });
-        };
+        return (start, end)-> Platform.runLater(() -> {
+            Circle newCircle = new Circle(2, Color.BLUE);
+            root.getChildren().add(newCircle);
+            Line newLine = new Line();
+            newLine.setStartX(start.getX());
+            newLine.setStartY(start.getY());
+            newLine.setEndX(end.getX());
+            newLine.setEndY(end.getY());
+            PathTransition transition = new PathTransition();
+            transition.setNode(newCircle);
+            transition.setDuration(Duration.millis(packetTransportDelay));
+            transition.setPath(newLine);
+            transition.setCycleCount(1);
+            transition.play();
+            Simulator.scheduleFutureTask(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(() -> root.getChildren().remove(newCircle));
+                }
+            }, packetTransportDelay);
+        });
     }
 
     public PacketLocator.PacketDroppedListener createDroppedPacketCallback() {
-        return ((node) -> {
-            Platform.runLater(() -> {
-                Circle newCircle = new Circle(2, Color.RED);
-                root.getChildren().add(newCircle);
-                Line newLine = new Line();
-                newLine.setStartX(node.getLocation().getX());
-                newLine.setStartY(node.getLocation().getY());
-                newLine.setEndX(node.getLocation().getX());
-                newLine.setEndY(node.getLocation().getY()+20);
-                PathTransition transition = new PathTransition();
-                transition.setNode(newCircle);
-                transition.setDuration(Duration.millis(500));
-                transition.setPath(newLine);
-                transition.setCycleCount(1);
-                FadeTransition fadeTransition =
-                        new FadeTransition(Duration.millis(1000), newCircle);
-                fadeTransition.setFromValue(1.0f);
-                fadeTransition.setToValue(0.0f);
-                transition.play();
-                fadeTransition.play();
-                Simulator.scheduleFutureTask(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(() -> root.getChildren().remove(newCircle));
-                    }
-                }, packetTransportDelay);
-            });
-        });
+        return ((node) -> Platform.runLater(() -> {
+            Circle newCircle = new Circle(2, Color.RED);
+            root.getChildren().add(newCircle);
+            Line newLine = new Line();
+            newLine.setStartX(node.getLocation().getX());
+            newLine.setStartY(node.getLocation().getY());
+            newLine.setEndX(node.getLocation().getX());
+            newLine.setEndY(node.getLocation().getY()+20);
+            PathTransition transition = new PathTransition();
+            transition.setNode(newCircle);
+            transition.setDuration(Duration.millis(500));
+            transition.setPath(newLine);
+            transition.setCycleCount(1);
+            FadeTransition fadeTransition =
+                    new FadeTransition(Duration.millis(1000), newCircle);
+            fadeTransition.setFromValue(1.0f);
+            fadeTransition.setToValue(0.0f);
+            transition.play();
+            fadeTransition.play();
+            Simulator.scheduleFutureTask(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(() -> root.getChildren().remove(newCircle));
+                }
+            }, packetTransportDelay);
+        }));
     }
     public void sliderDragged(){
         packetTransportDelay = (int)slider.getValue();
