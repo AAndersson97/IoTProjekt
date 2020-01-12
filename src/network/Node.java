@@ -19,7 +19,7 @@ public class Node implements Comparator<Node>, Runnable {
     private final HashMap<short[], NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
     private short[][] mprSet; // lista över grannar som valts som MPR-nod
     private final HashMap<short[], LinkTuple> linkSet; // nyckeln är grannens ip-adress
-    private final ArrayList<TwoHopTuple> twoHopNeighborSet;
+    private final HashMap<short[], TwoHopTuple> twoHopNeighborSet; // nykeln är tvåhoppsgrannen
     private final HashMap<short[], MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final HashMap<short[], TopologyTuple> topologySet;
     private final Transmission transmission;
@@ -42,7 +42,7 @@ public class Node implements Comparator<Node>, Runnable {
         timer = new Timer();
         duplicateSets = new HashMap<>();
         neighborSet = new HashMap<>();
-        twoHopNeighborSet = new ArrayList<>();
+        twoHopNeighborSet = new HashMap<>();
         mprSelectorSet = new HashMap<>();
         topologySet = new HashMap<>();
         linkSet = new HashMap<>();
@@ -156,8 +156,9 @@ public class Node implements Comparator<Node>, Runnable {
 
     private void sendHelloPacket() {
         HashMap<LinkCode, ArrayList<short[]>> neighbors = new HashMap<>(); // grannar som har en länk till denna nod, info som används för att senare hitta grannar utan länk till denna nod
+        long timeNow = System.currentTimeMillis();
         for (LinkTuple tuple : linkSet.values()) {
-            if (tuple.l_time >= System.currentTimeMillis()) {
+            if (tuple.l_time >= timeNow) {
                 LinkCode linkCode = createLinkCode(tuple);
                 if (linkCode == null)
                     continue;
@@ -302,6 +303,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void processHelloMessage(HelloMessage message) {
+        count++;
         LinkTuple linkTuple;
         long timeNow = System.currentTimeMillis();
         boolean linkUpdated = false, linkAdded = false;
@@ -335,8 +337,6 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
         }
-        if (Arrays.equals(address, new short[]{110,0,0,6}))
-            System.out.println("two hop size: " + twoHopNeighborSet.size());
         if (linkUpdated)
             linkTupleUpdated(linkTuple, message.willingness);
         else if (linkAdded)
@@ -346,7 +346,7 @@ public class Node implements Comparator<Node>, Runnable {
         // detta tillåter grannar att upptäcka länkbräckage.
         //linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
         count++;
-        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
+        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet.values(), address).populateAndReturnMPRSet();
     }
 
     private void linkTupleUpdated(LinkTuple linkTuple, Willingness willingness) {
@@ -357,7 +357,6 @@ public class Node implements Comparator<Node>, Runnable {
         }
         if (neighborTuple == null)
             throw new IllegalStateException("There must exist a neighbor tuple associated with a at least one link tuple");
-
         if (Arrays.equals(linkTuple.l_neighbor_iface_addr, neighborTuple.n_neighbor_main_addr)) {
             neighborTuple.status = NeighborTuple.N_status.SYM;
         } else {
@@ -385,27 +384,19 @@ public class Node implements Comparator<Node>, Runnable {
                     // En nod är inte sin egen tvåhoppsgranne
                     if (!Arrays.equals(neighborAddress, address)) {
                         TwoHopTuple twoHopTuple;
-                        if ((twoHopTuple = findTwoHopTuple(message.originatorAddr, neighborAddress)) == null) {
+                        if ((twoHopTuple = twoHopNeighborSet.get(neighborAddress)) == null) {
                             twoHopTuple = new TwoHopTuple(message.originatorAddr, neighborAddress);
-                            twoHopNeighborSet.add(twoHopTuple);
+                            twoHopNeighborSet.put(twoHopTuple.n_2hop_addr,twoHopTuple);
                             removeTwoHopTimer(twoHopTuple);
                         } else {
                             twoHopTuple.renewTupple();
                         }
                     }
                 } else if (linkCode.neighborType == LinkCode.NeighborTypes.NOT_NEIGH) {
-                    twoHopNeighborSet.removeIf(tuple -> Arrays.equals(tuple.n_neighbor_main_addr, neighborAddress) && Arrays.equals(tuple.n_2hop_addr, neighborAddress));
+                    twoHopNeighborSet.values().removeIf(tuple -> Arrays.equals(tuple.n_neighbor_main_addr, neighborAddress) && Arrays.equals(tuple.n_2hop_addr, neighborAddress));
                 }
             }
         }
-    }
-
-    private TwoHopTuple findTwoHopTuple(short[] originator, short[] neighbor) {
-        for (TwoHopTuple twoHopTuple : twoHopNeighborSet)
-            if (Arrays.equals(twoHopTuple.n_neighbor_main_addr, originator) && Arrays.equals(twoHopTuple.n_2hop_addr, neighbor))
-                return twoHopTuple;
-
-        return null;
     }
 
     public void updateRoutingTable() {
@@ -413,7 +404,7 @@ public class Node implements Comparator<Node>, Runnable {
         for (NeighborTuple tuple : neighborSet.values()) {
             if (tuple.status == NeighborTuple.N_status.SYM) {
                 LinkTuple linkTuple;
-                if ((linkTuple = findLinkTuple(tuple)) != null && linkTuple.l_time >= System.currentTimeMillis()) {
+                if ((linkTuple = linkSet.get(tuple.n_neighbor_main_addr)) != null && linkTuple.l_time >= System.currentTimeMillis()) {
                     RoutingTuple routingTuple;
                     if (routingTable.containsKey(tuple.n_neighbor_main_addr)) {
                         routingTuple = new RoutingTuple(linkTuple.l_neighbor_iface_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
@@ -424,54 +415,30 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
         }
-        for (TwoHopTuple tuple : twoHopNeighborSet) {
+        for (TwoHopTuple tuple : twoHopNeighborSet.values()) {
             if (!Arrays.equals(address, tuple.n_2hop_addr) && !neighborSet.containsKey(tuple.n_2hop_addr)) {
-                RoutingTuple neighbor = findExistingRouteTuple(tuple);
-                RoutingTuple routingTuple = new RoutingTuple(tuple.n_2hop_addr, neighbor.r_next_addr, 2, neighbor.r_iface_addr);
-                routingTable.put(routingTuple.r_dest_addr, routingTuple);
+                RoutingTuple neighbor = routingTable.get(tuple.n_2hop_addr);
+                if (neighbor != null) {
+                    RoutingTuple routingTuple = new RoutingTuple(tuple.n_2hop_addr, neighbor.r_next_addr, 2, neighbor.r_iface_addr);
+                    routingTable.put(routingTuple.r_dest_addr, routingTuple);
+                }
             }
         }
-        for (int h = 2, count = 0;;h++, count = 0) {
+        for (int h = 2;;h++) {
+            boolean added = false;
             for (TopologyTuple topologyTuple : topologySet.values()) {
-                RoutingTuple tuple = null;
-                if ((routingTable.get(topologyTuple.t_dest_addr) == null) ||
-                        (Arrays.equals(topologyTuple.t_last_addr, tuple.r_dest_addr) && tuple.r_dist == h)) {
-                    RoutingTuple existing = findExistingRouteTuple(topologyTuple);
-                    if (existing != null) {
-                        RoutingTuple routingTuple = new RoutingTuple(topologyTuple.t_dest_addr, existing.r_next_addr, h + 1, existing.r_iface_addr);
-                        routingTable.put(routingTuple.r_dest_addr, routingTuple);
-                        count++;
-                    }
+                RoutingTuple tuple = routingTable.get(topologyTuple.t_dest_addr);
+                RoutingTuple existing = routingTable.get(topologyTuple.t_last_addr);
+                if (tuple == null && existing != null && existing.r_dist == h) {
+                    RoutingTuple routingTuple = new RoutingTuple(topologyTuple.t_dest_addr, existing.r_next_addr, h + 1, existing.r_iface_addr);
+                    routingTable.put(routingTuple.r_dest_addr, routingTuple);
+                    added = true;
                 }
             }
             // om nedanstående är sant finns inga fler grannar som ligger det antal hop som är specificerat i variabeln h
-            if (count == 0)
+            if (!added)
                 break;
         }
-    }
-
-    public RoutingTuple findExistingRouteTuple(TopologyTuple topologyTuple) {
-        for (RoutingTuple routingTuple : routingTable.values())
-            if (Arrays.equals(routingTuple.r_dest_addr, topologyTuple.t_last_addr))
-                return routingTuple;
-
-        return null;
-    }
-    public RoutingTuple findExistingRouteTuple(TwoHopTuple twoHopTuple) {
-        for (RoutingTuple routingTuple : routingTable.values())
-            if (Arrays.equals(routingTuple.r_dest_addr, twoHopTuple.n_2hop_addr))
-                return routingTuple;
-
-        return null;
-    }
-
-    private LinkTuple findLinkTuple(NeighborTuple neighborTuple) {
-        for (LinkTuple tuple : linkSet.values()) {
-            if (Arrays.equals(tuple.l_neighbor_iface_addr, neighborTuple.n_neighbor_main_addr)) {
-                return tuple;
-            }
-        }
-        return null;
     }
 
     private void detectNeighborLoss(LinkTuple tuple) {
@@ -500,9 +467,9 @@ public class Node implements Comparator<Node>, Runnable {
             mprSelectorSet.remove(neighborAddress);
         }
         synchronized (twoHopNeighborSet) {
-            twoHopNeighborSet.removeIf((tuple) -> Arrays.equals(tuple.n_neighbor_main_addr, neighborAddress));
+            twoHopNeighborSet.remove(neighborAddress);
         }
-        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet, address).populateAndReturnMPRSet();
+        mprSet = new MPRCalculator(neighborSet.values(), twoHopNeighborSet.values(), address).populateAndReturnMPRSet();
     }
 
     private void removeMPRSelectorTimer(MPRSelectorTuple tuple) {
@@ -614,7 +581,7 @@ public class Node implements Comparator<Node>, Runnable {
                 if (tuple.get_time() > timeNow)
                     timer.schedule(createTwoHopTimer(tuple), tuple.get_time() - timeNow);
                 else {
-                    lossOfNeighbor(tuple.n_neighbor_main_addr);
+                    lossOfNeighbor(tuple.n_2hop_addr);
                 }
             }
         };

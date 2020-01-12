@@ -10,9 +10,9 @@ public class MPRCalculator {
     private final short[] currentNode;
     private Set<short[]> mprSet;
 
-    public MPRCalculator(Collection<NeighborTuple> membersOfN, ArrayList<TwoHopTuple> twoHopNeighbors, short[] currentNode) {
+    public MPRCalculator(Collection<NeighborTuple> membersOfN, Collection<TwoHopTuple> twoHopNeighbors, short[] currentNode) {
         this.membersOfN = new ArrayList<>(membersOfN);
-        this.twoHopNeighbors = twoHopNeighbors;
+        this.twoHopNeighbors = new ArrayList<>(twoHopNeighbors);
         this.currentNode = currentNode;
         mprSet = new HashSet<>();
         degreeOfY = new HashMap<>();
