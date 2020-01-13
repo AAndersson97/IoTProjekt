@@ -3,7 +3,6 @@ package network;
 import UI.SybilSimulator;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PacketLocator {
 
@@ -25,15 +24,15 @@ public class PacketLocator {
 
     public synchronized static void reportPacketTransport(short[] startNode, short[] endNode, Packet packet) {
         ArrayList<Node> nodeList = Network.getNodeList();
-        Location start = null, end = null;
+        Node start = null, end = null;
         for (Node node : nodeList) {
             if (Arrays.equals(node.getAddress(), startNode))
-                start = node.getLocation();
+                start = node;
             else if (Arrays.equals(node.getAddress(), endNode))
-                end = node.getLocation();
+                end = node;
         }
         if (start != null && end != null) {
-            Location finalStart = start, finalEnd = end;
+            Location finalStart = start.getLocation(), finalEnd = end.getLocation();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {

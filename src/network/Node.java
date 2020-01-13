@@ -35,7 +35,7 @@ public class Node implements Comparator<Node>, Runnable {
 
     public Node() {
         buffer = new ConcurrentLinkedQueue<>();
-        routingTable = Collections.synchronizedList(new ArrayList<RoutingTuple>());
+        routingTable = Collections.synchronizedList(new ArrayList<>());
         active = true;
         address = AddressGenerator.generateAddress();
         thread = new Thread(this);
@@ -114,10 +114,11 @@ public class Node implements Comparator<Node>, Runnable {
     private void handlePacket(Packet packet) {
         if (packet instanceof OLSRPacket) {
             OLSRPacket olsrPacket = (OLSRPacket) packet;
-            PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
+            if (olsrPacket.message instanceof HelloMessage)
+                PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
             processAccordingToMsgType(olsrPacket);
-            if (olsrPacket.message instanceof TCMessage && !mprSelectorSet.isEmpty())
-                prepareForwarding(packet);
+            //if (olsrPacket.message instanceof TCMessage && !mprSelectorSet.isEmpty())
+              //  prepareForwarding(packet);
         } else {
             PacketLocator.reportPacketTransport(packet.wifiMacHeader.sender, address, packet);
             if (!Arrays.equals(packet.wifiMacHeader.receiver, address))
@@ -322,7 +323,7 @@ public class Node implements Comparator<Node>, Runnable {
             System.out.println(e.getMessage());
         }
         incrementSeqNum();
-        RoutingTuple nextHop = findRoutingTuple(packet.ipHeader.destinationAddress);
+        RoutingTuple nextHop = findShortestPath(packet.ipHeader.destinationAddress);
         packet.ipHeader.decrementTTL();
         if (nextHop == null);
             //Network.sendPacket(this, BROADCAST, packet);
@@ -337,6 +338,20 @@ public class Node implements Comparator<Node>, Runnable {
                 return tuple;
         }
         return null;
+    }
+
+    public RoutingTuple findShortestPath(short[] destination) {
+        if (routingTable.isEmpty())
+            return null;
+        RoutingTuple minTuple = routingTable.get(0);
+        int hopMin = minTuple.r_dist;
+        for (RoutingTuple tuple : routingTable) {
+            if (Arrays.equals(tuple.r_dest_addr, destination) && tuple.r_dist < hopMin) {
+                minTuple = tuple;
+                hopMin = tuple.r_dist;
+            }
+        }
+        return minTuple;
     }
 
     private void processAccordingToMsgType(OLSRPacket packet) {
@@ -553,13 +568,15 @@ public class Node implements Comparator<Node>, Runnable {
         }
         for (int h = 2;; h++) {
             boolean added = false;
-            for (TopologyTuple topologyTuple : topologySet) {
-                RoutingTuple tuple = findRoutingTuple(topologyTuple.t_dest_addr);
-                RoutingTuple existing = findRoutingTuple(topologyTuple.t_last_addr);
-                if (tuple == null && existing != null && existing.r_dist == h) {
-                    RoutingTuple routingTuple = new RoutingTuple(topologyTuple.t_dest_addr, existing.r_next_addr, h + 1, existing.r_iface_addr);
-                    routingTable.add(routingTuple);
-                    added = true;
+            synchronized (topologySet) {
+                for (TopologyTuple topologyTuple : topologySet) {
+                    RoutingTuple tuple = findRoutingTuple(topologyTuple.t_dest_addr);
+                    RoutingTuple existing = findRoutingTuple(topologyTuple.t_last_addr);
+                    if (tuple == null && existing != null && existing.r_dist == h) {
+                        RoutingTuple routingTuple = new RoutingTuple(topologyTuple.t_dest_addr, existing.r_next_addr, h + 1, existing.r_iface_addr);
+                        routingTable.add(routingTuple);
+                        added = true;
+                    }
                 }
             }
             // om nedanstående är sant finns inga fler grannar som ligger det antal hop som är specificerat i variabeln h
