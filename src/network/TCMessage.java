@@ -10,7 +10,7 @@ public class TCMessage extends OLSRMessage {
     public final short[][] advertisedNMA; // Advertised Neighbor Main Address, innehåller adresser till ursprungsnodens grannar
 
     protected TCMessage(short[] originatorAddr, int msgSeqNum, int ANSN, short[][] advertisedNMA) {
-        super(MessageType.TC_MESSAGE, originatorAddr, TOP_HOLD_TIME, msgSeqNum);
+        super(MessageType.TC_MESSAGE, originatorAddr, 255, msgSeqNum);
         this.ANSN = ANSN;
         reserved = 0;
         this.advertisedNMA = advertisedNMA;

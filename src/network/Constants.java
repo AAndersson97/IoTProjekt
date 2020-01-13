@@ -25,7 +25,7 @@ public final class Constants {
     }
     public static final class Protocol {
         public static final float SCALING_FACTOR = (float) (1/16.0); // 0.0625 sekunder
-        public static final int HELLO_INTERVAL = 4000; // 4000 millisekunder
+        public static final int HELLO_INTERVAL = 2000; // 4000 millisekunder
         public static final int ADDRESS_LENGTH = 4; // 4 bytes per IP-adress
         public static final int TC_INTERVAL = 4000;
         public static final int TOP_HOLD_TIME = 15000;
