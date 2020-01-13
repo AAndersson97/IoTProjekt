@@ -146,30 +146,6 @@ public class Node implements Comparator<Node>, Runnable {
         System.out.println("Message received!");
     }
 
-    /*private void updateDuplicateSet(OLSRMessage message) {
-        HashMap<Integer, DuplicateTuple> duplicateSet = duplicateSets.get(message.originatorAddr);
-        if (duplicateSet != null && duplicateSet.containsKey(message.msgSeqNum)) {
-            DuplicateTuple tuple = duplicateSet.get(message.msgSeqNum);
-            tuple.renewTupple();
-            tuple.d_iface = address;
-        } else {
-            if (duplicateSet == null) {
-                duplicateSet = new HashMap<>();
-                duplicateSets.put(message.originatorAddr, duplicateSet);
-            }
-            DuplicateTuple tuple = new DuplicateTuple(message.originatorAddr, address, message.msgSeqNum);
-            duplicateSet.put(message.msgSeqNum, tuple);
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    synchronized (duplicateSets) {
-                        duplicateSets.get(message.originatorAddr).remove(message.msgSeqNum);
-                    }
-                }
-            }, DUP_HOLD_TIME);
-        }
-    }*/
-
     private void sendTCPacket() {
         int count = 0;
         short[][] advertisedNMA = new short[mprSelectorSet.size()][];
