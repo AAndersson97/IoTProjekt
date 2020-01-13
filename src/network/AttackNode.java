@@ -35,11 +35,6 @@ public class AttackNode extends Node {
             sybilNodes[num] = new SybilNode(this);
     }
 
-    @Override
-    public void receivePacket(Packet packet) {
-        dropPacket(packet);
-    }
-
     public SybilNode[] getSybilNodes() {
         return sybilNodes;
     }

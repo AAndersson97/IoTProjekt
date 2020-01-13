@@ -15,7 +15,12 @@ public class PacketLocator {
         timer = new Timer();
     }
     public synchronized static void reportPacketDropped(Node node) {
-        packetDroppedListener.packetDropped(node);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                packetDroppedListener.packetDropped(node);
+            }
+        } , SybilSimulator.packetTransportDelay);
     }
 
     public synchronized static void reportPacketTransport(short[] startNode, short[] endNode, Packet packet) {

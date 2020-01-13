@@ -119,6 +119,7 @@ public class Node implements Comparator<Node>, Runnable {
             if (olsrPacket.message instanceof TCMessage && !mprSelectorSet.isEmpty())
                 prepareForwarding(packet);
         } else {
+            PacketLocator.reportPacketTransport(packet.wifiMacHeader.sender, address, packet);
             if (!Arrays.equals(packet.wifiMacHeader.receiver, address))
                 dropPacket(packet);
             else if (packet.ipHeader.getTimeToLive() > 0) {
@@ -128,7 +129,6 @@ public class Node implements Comparator<Node>, Runnable {
                     dropPacket(packet);
                 }
                 else {
-                    PacketLocator.reportPacketTransport(packet.wifiMacHeader.sender, address, packet);
                     if (Arrays.equals(packet.ipHeader.destinationAddress, address) && packet.udpHeader.destinationPort == TFTP_PORT) {
                         processTFTPPacket((TFTPPacket) packet);
                     } else {
@@ -246,6 +246,13 @@ public class Node implements Comparator<Node>, Runnable {
             if (Arrays.equals(neighborTuple.n_neighbor_main_addr, neighbor_addr))
                 return neighborTuple;
         }
+        return null;
+    }
+
+    private short[] findNextHop(short[] destination) {
+        ArrayList<RoutingTuple> tuples = new ArrayList<>();
+        int minHopp = 0;
+        NeighborTuple shortestPath;
         return null;
     }
 
