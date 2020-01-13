@@ -212,9 +212,6 @@ public class Node implements Comparator<Node>, Runnable {
         OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
         incrementSeqNum();
         Network.sendPacket(this, BROADCAST, olsrPacket);
-        if (Arrays.equals(address, new short[]{110,0,0,2})) {
-            System.out.println("Routing table size: " + routingTable.size() + " num of nodes on network: " + Network.getNumOfNodes() + " two hops: " + twoHopNeighborSet.size());
-        }
     }
 
     private LinkCode createLinkCode(LinkTuple tuple) {
