@@ -8,11 +8,19 @@ public abstract class Packet {
     public WifiMacHeader wifiMacHeader;
     public IPHeader ipHeader;
     public UDPHeader udpHeader;
+    public OLSRHeader olsrHeader;
     public WifiMacTrailer wifiMacTrailer;
 
-    public Packet(IPHeader ipHeader, UDPHeader udpHeader) {
+    public Packet(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader header) {
+        this.olsrHeader = header;
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
+    }
+
+    public Packet(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader) {
+        this(ipHeader, udpHeader, olsrHeader);
+        this.wifiMacHeader = header;
+        this.wifiMacTrailer = trailer;
     }
 
     public byte[] toBytes() {

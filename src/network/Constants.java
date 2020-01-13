@@ -30,11 +30,11 @@ public final class Constants {
         public static final int TC_INTERVAL = 4000;
         public static final int TOP_HOLD_TIME = 15000;
         public static final int DUP_HOLD_TIME = 30000;
-        public static final int TCP_HOLD_TIME = TC_INTERVAL * 10;
-        public static final int TWO_HOP_HOLD_TIME = HELLO_INTERVAL * 10;
-        public static final int LINK_HOLD_TIME = HELLO_INTERVAL * 10; // en tuppel innehållandes information om viss länk ska vara giltig tillräcklig länge för att grannoden ska hinna skicka nytt hellopaket plus viss tidsmarginal
+        public static final int TCP_HOLD_TIME = TC_INTERVAL * 3;
+        public static final int TWO_HOP_HOLD_TIME = HELLO_INTERVAL * 3;
+        public static final int LINK_HOLD_TIME = HELLO_INTERVAL * 3; // en tuppel innehållandes information om viss länk ska vara giltig tillräcklig länge för att grannoden ska hinna skicka nytt hellopaket plus viss tidsmarginal
         public static final int NEIGHB_HOLD_TIME = LINK_HOLD_TIME;
-        public static final int MPR_SELECTOR_HOLD_TIME = HELLO_INTERVAL * 10;
+        public static final int MPR_SELECTOR_HOLD_TIME = HELLO_INTERVAL * 3;
         public static final int UDP_HEADER_SIZE = Short.SIZE * 3 + Integer.SIZE;
         public static final int UDP_PROTOCOL_NUM = 17;
         public static final short OLSR_PORT = 698;

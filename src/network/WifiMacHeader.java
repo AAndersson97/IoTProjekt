@@ -25,13 +25,20 @@ public class WifiMacHeader implements Serializable {
     public final byte amsduPresent;
     public final byte qosStuff;
 
-    public WifiMacHeader(short[] sender, short[] receiver) {
-        this.sender = sender;
-        this.receiver = receiver;
+    {
         ctrlType = ctrlSubType = ctrlToDs = ctrlFromDs = ctrlMoreFrag = ctrlRetry = ctrlMoreData = ctrlWep = duration = 0;
         address3 = address4 = null;
         seqSeq = qosTid = qosEosp = qosAckPolicy = qosStuff = amsduPresent = 0;
         seqFrag = 0;
+    }
+    public WifiMacHeader(short[] sender, short[] receiver) {
+        this.sender = sender;
+        this.receiver = receiver;
+    }
+
+    public WifiMacHeader(WifiMacHeader header) {
+        this.sender = header.sender;
+        this.receiver = header.receiver;
     }
 
 

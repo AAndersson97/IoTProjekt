@@ -13,18 +13,18 @@ public class Node implements Comparator<Node>, Runnable {
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
     private int ANSN; // ett sekvensnummer som ökar med 1 varje gång mängden av grannar i "neighborSet" uppdateras.
-    private final ArrayList<DuplicateTuple> duplicateSets; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
+    private final ArrayList<DuplicateTuple> duplicateSet; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
     private boolean active; // true om nodens tråd är aktiv
     private Willingness willingness;
-    private final ArrayList<NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
+    protected final ArrayList<NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
     private short[][] mprSet; // lista över grannar som valts som MPR-nod
-    private final ArrayList<LinkTuple> linkSet; // nyckeln är grannens ip-adress
-    private final ArrayList<TwoHopTuple> twoHopNeighborSet; // nykeln är tvåhoppsgrannen
-    private final ArrayList<MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
+    protected final ArrayList<LinkTuple> linkSet; // nyckeln är grannens ip-adress
+    protected final ArrayList<TwoHopTuple> twoHopNeighborSet; // nykeln är tvåhoppsgrannen
+    protected final ArrayList<MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final ArrayList<TopologyTuple> topologySet; // nyckeln är destinationsadressen
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
-    private final ArrayList<RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
+    protected final ArrayList<RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
 
     private static int count = 0;
 
@@ -40,19 +40,22 @@ public class Node implements Comparator<Node>, Runnable {
         thread = new Thread(this);
         transmission = new Transmission(Transmission.SignalStrength.VERYGOOD);
         timer = new Timer();
-        duplicateSets = new ArrayList<>();
+        duplicateSet = new ArrayList<>();
         neighborSet = new ArrayList<>();
         twoHopNeighborSet = new ArrayList<>();
         mprSelectorSet = new ArrayList<>();
         topologySet = new ArrayList<>();
         linkSet = new ArrayList<>();
         willingness = Willingness.WILL_DEFAULT;
+        mprSet = new short[0][];
         if (this.getClass() == Node.class) {
             location = LocationManager.getInstance().getLocation(this);
             // Innan tråden kan startas i SybilNode- och i AttackNode-objekten måste objektet skapas först
             thread.start();
         }
-        Network.registerNode(this);
+        if (this.getClass() != SybilNode.class) {
+            Network.registerNode(this);
+        }
     }
 
     @Override
@@ -108,16 +111,26 @@ public class Node implements Comparator<Node>, Runnable {
      * @param packet Paketet som noden mottagit och ska bearbetas, vidaresändas eller kastas.
      */
     private void handlePacket(Packet packet) {
-        PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
         if (packet instanceof OLSRPacket) {
             OLSRPacket olsrPacket = (OLSRPacket) packet;
+            PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
             processAccordingToMsgType(olsrPacket);
         } else {
+            if (!Arrays.equals(packet.wifiMacHeader.receiver, address) && !Arrays.equals(packet.wifiMacHeader.receiver, BROADCAST))
+                dropPacket(packet);
             if (packet.ipHeader.getTimeToLive() > 0) {
-                if (Arrays.equals(packet.ipHeader.destinationAddress, address) && packet.udpHeader.destinationPort == TFTP_PORT) {
-                    processTFTPPacket((TFTPPacket)packet);
-                } else {
-                    prepareForwarding(packet);
+                DuplicateTuple duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress);
+                if (duplicateTuple != null && duplicateTuple.d_seq_num == packet.olsrHeader.packetSeqNum) {
+                    duplicateTuple.renewTupple();
+                    dropPacket(packet);
+                }
+                else {
+                    PacketLocator.reportPacketTransport(packet.wifiMacHeader.sender, address, packet);
+                    if (Arrays.equals(packet.ipHeader.destinationAddress, address) && packet.udpHeader.destinationPort == TFTP_PORT) {
+                        processTFTPPacket((TFTPPacket) packet);
+                    } else {
+                        prepareForwarding(packet);
+                    }
                 }
 
             }
@@ -270,14 +283,24 @@ public class Node implements Comparator<Node>, Runnable {
      */
     private void prepareForwarding(Packet packet) {
         // enbart grannars paket ska vidarebefordras
-        if (findRoutingTuple(packet.ipHeader.sourceAddress) != null || Arrays.equals(packet.ipHeader.sourceAddress, address)) {
+        if (findNeighborTuple(packet.ipHeader.sourceAddress) != null || Arrays.equals(packet.ipHeader.sourceAddress, address)) {
             // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
             //if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
             doForward(packet);
-            packet.wifiMacHeader.sender = address;
-            packet.ipHeader.decrementTTL();
+            DuplicateTuple duplicateTuple = null;
+            if ((duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress)) == null) {
+                duplicateTuple = new DuplicateTuple(packet.ipHeader.sourceAddress, address, packet.olsrHeader.packetSeqNum);
+                duplicateSet.add(duplicateTuple);
+                removeDuplicateTupleTimer(duplicateTuple);
+            }
         }
 
+    }
+
+    private void removeDuplicateTupleTimer(DuplicateTuple duplicateTuple) {
+        synchronized (timer) {
+            timer.schedule(createDuplicateTupleRemoveTask(duplicateTuple), duplicateTuple.get_time() - System.currentTimeMillis());
+        }
     }
 
     private void doForward(Packet packet) {
@@ -290,10 +313,12 @@ public class Node implements Comparator<Node>, Runnable {
         }
         incrementSeqNum();
         RoutingTuple nextHop = findRoutingTuple(packet.ipHeader.destinationAddress);
+        packet.ipHeader.decrementTTL();
         if (nextHop == null)
-            throw new NullPointerException("Next hop neighbor not found");
-        else
+            Network.sendPacket(this, BROADCAST, packet);
+        else {
             Network.sendPacket(this, nextHop.r_next_addr, packet);
+        }
     }
 
     public RoutingTuple findRoutingTuple(short[] destination) {
@@ -317,7 +342,6 @@ public class Node implements Comparator<Node>, Runnable {
                         break;
                     }
                     processTCMessage((TCMessage) packet.message);
-                    System.out.println("TC Message from: " + Arrays.toString(packet.message.originatorAddr));
                     break;
             }
         if (!dropped)
@@ -341,7 +365,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private DuplicateTuple findDuplicateTuple(short[] originatorAddr) {
-        for (DuplicateTuple duplicateTuple : duplicateSets) {
+        for (DuplicateTuple duplicateTuple : duplicateSet) {
             if (Arrays.equals(duplicateTuple.d_addr, originatorAddr))
                 return duplicateTuple;
         }
@@ -435,6 +459,7 @@ public class Node implements Comparator<Node>, Runnable {
         // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
         // detta tillåter grannar att upptäcka länkbräckage.
         //linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
+        count++;
         mprSet = new MPRCalculator(neighborSet, twoHopNeighborSet, address).populateAndReturnMPRSet();
         return true;
     }
@@ -558,10 +583,10 @@ public class Node implements Comparator<Node>, Runnable {
      */
     private void lossOfNeighbor(short[] neighborAddress) {
         synchronized (mprSelectorSet) {
-            mprSelectorSet.remove(neighborAddress);
+            mprSelectorSet.removeIf((mprSelectorTuple -> Arrays.equals(mprSelectorTuple.ms_main_addr, neighborAddress)));
         }
         synchronized (twoHopNeighborSet) {
-            twoHopNeighborSet.remove(neighborAddress);
+            twoHopNeighborSet.removeIf(twoHopTuple ->  Arrays.equals(twoHopTuple.n_2hop_addr, neighborAddress));
         }
         //linkTupleUpdated(linkSet.get(neighborAddress), Willingness.WILL_DEFAULT);
         mprSet = new MPRCalculator(neighborSet, twoHopNeighborSet, address).populateAndReturnMPRSet();
@@ -595,7 +620,7 @@ public class Node implements Comparator<Node>, Runnable {
         return (long)(Math.random() * MAX_JITTER_MS);
     }
 
-    private void dropPacket(Packet packet) {
+    protected void dropPacket(Packet packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
         PacketLocator.reportPacketDropped(this);
@@ -643,10 +668,10 @@ public class Node implements Comparator<Node>, Runnable {
                     timer.schedule(createLinkTupleRemoveTask(tuple), tuple.l_time - timeNow);
                 else {
                     synchronized (linkSet) {
-                        linkSet.remove(tuple.l_neighbor_iface_addr);
+                        linkSet.remove(tuple);
                     }
                     synchronized (neighborSet) {
-                        neighborSet.remove(tuple.l_neighbor_iface_addr);
+                        neighborSet.remove(findNeighborTuple(tuple.l_neighbor_iface_addr));
                     }
                 }
             }
@@ -662,7 +687,7 @@ public class Node implements Comparator<Node>, Runnable {
                     timer.schedule(createTCTuppleRemoveTask(tuple), tuple.get_time() - timeNow);
                 else {
                     synchronized (topologySet) {
-                        topologySet.remove(tuple.t_dest_addr);
+                        topologySet.remove(tuple);
                     }
                 }
             }
@@ -679,7 +704,7 @@ public class Node implements Comparator<Node>, Runnable {
                     timer.schedule(createMPRSelectorRemoveTask(tuple), tuple.get_time() - timeNow);
                 else {
                     synchronized (mprSelectorSet) {
-                        mprSelectorSet.remove(tuple.ms_main_addr);
+                        mprSelectorSet.remove(tuple);
                     }
                 }
             }
@@ -696,6 +721,21 @@ public class Node implements Comparator<Node>, Runnable {
                     timer.schedule(createTwoHopTimer(tuple), tuple.get_time() - timeNow);
                 else {
                     lossOfNeighbor(tuple.n_2hop_addr);
+                }
+            }
+        };
+    }
+
+    private TimerTask createDuplicateTupleRemoveTask(DuplicateTuple duplicateTuple) {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                if (duplicateTuple.get_time() > System.currentTimeMillis())
+                    timer.schedule(createDuplicateTupleRemoveTask(duplicateTuple), duplicateTuple.get_time() - System.currentTimeMillis());
+                else {
+                    synchronized (duplicateSet) {
+                        duplicateSet.remove(duplicateTuple);
+                    }
                 }
             }
         };

@@ -3,17 +3,16 @@ package network;
 import java.util.Arrays;
 
 public class OLSRPacket<T extends OLSRMessage> extends Packet {
-    public final OLSRHeader olsrHeader;
     public final T message; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
 
     public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader , OLSRHeader olsrHeader, T message) {
-        super(ipHeader, udpHeader);
+        super(ipHeader, udpHeader, olsrHeader);
         this.olsrHeader = olsrHeader;
         this.message = message;
     }
 
     public OLSRPacket(OLSRPacket<T> packet) {
-        super(packet.ipHeader, packet.udpHeader);
+        super(packet.ipHeader, packet.udpHeader, packet.olsrHeader);
         this.olsrHeader = packet.olsrHeader;
         this.message = packet.message;
     }

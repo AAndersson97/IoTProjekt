@@ -4,13 +4,20 @@ public class TFTPPacket extends Packet {
     public final TFTPOpcode opcode;
     public final String data;
 
-    TFTPPacket(IPHeader ipHeader, UDPHeader udpHeader, TFTPOpcode opcode, String data) {
-        super(ipHeader, udpHeader);
+    TFTPPacket(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, TFTPOpcode opcode, String data) {
+        super(ipHeader, udpHeader, olsrHeader);
         this.opcode = opcode;
         this.data = data;
     }
+
+    TFTPPacket(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, TFTPOpcode opcode, String data) {
+        super(header, trailer, ipHeader, udpHeader, olsrHeader);
+        this.opcode = opcode;
+        this.data = data;
+    }
+
     TFTPPacket(TFTPPacket packet) {
-        super(packet.ipHeader, packet.udpHeader);
+        super(packet.ipHeader, packet.udpHeader, packet.olsrHeader);
         this.opcode = packet.opcode;
         this.data = packet.data;
     }
@@ -26,6 +33,6 @@ public class TFTPPacket extends Packet {
 
     @Override
     public Packet copy() {
-        return new TFTPPacket(new IPHeader(ipHeader), new UDPHeader(udpHeader),opcode, String.valueOf(data));
+        return new TFTPPacket(new WifiMacHeader(wifiMacHeader), new WifiMacTrailer(wifiMacTrailer),new IPHeader(ipHeader),  new UDPHeader(udpHeader),new OLSRHeader(olsrHeader), opcode, String.valueOf(data));
     }
 }

@@ -21,12 +21,23 @@ public class AttackNode extends Node {
             Network.registerNode(sybilNodes[i]);
         }
         Network.registerNode(this);
+        for (SybilNode sybilNode : sybilNodes) {
+            neighborSet.add(new NeighborTuple(sybilNode.getAddress(), NeighborTuple.N_status.SYM, Constants.Protocol.Willingness.WILL_DEFAULT));
+            linkSet.add(new LinkTuple(getAddress(), sybilNode.getAddress(), Long.MAX_VALUE, Long.MAX_VALUE));
+            twoHopNeighborSet.add(new TwoHopTuple(getAddress(), sybilNode.getAddress()));
+            routingTable.add(new RoutingTuple(sybilNode.getAddress(), getAddress(), 2, getAddress()));
+        }
         turnOn();
     }
 
     public void createSybilNodes(int num) {
         while (num-- > 0)
             sybilNodes[num] = new SybilNode(this);
+    }
+
+    @Override
+    public void receivePacket(Packet packet) {
+        dropPacket(packet);
     }
 
     public SybilNode[] getSybilNodes() {
