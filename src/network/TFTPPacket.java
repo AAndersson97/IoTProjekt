@@ -10,8 +10,8 @@ public class TFTPPacket extends Packet {
         this.data = data;
     }
 
-    TFTPPacket(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, TFTPOpcode opcode, String data) {
-        super(header, trailer, ipHeader, udpHeader, olsrHeader);
+    TFTPPacket(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, TFTPOpcode opcode, String data, int id) {
+        super(header, trailer, ipHeader, udpHeader, olsrHeader, id);
         this.opcode = opcode;
         this.data = data;
     }
@@ -33,6 +33,26 @@ public class TFTPPacket extends Packet {
 
     @Override
     public Packet copy() {
-        return new TFTPPacket(new WifiMacHeader(wifiMacHeader), new WifiMacTrailer(wifiMacTrailer),new IPHeader(ipHeader),  new UDPHeader(udpHeader),new OLSRHeader(olsrHeader), opcode, String.valueOf(data));
+        return new TFTPPacket(new WifiMacHeader(wifiMacHeader), new WifiMacTrailer(wifiMacTrailer),new IPHeader(ipHeader),  new UDPHeader(udpHeader),new OLSRHeader(olsrHeader), opcode, String.valueOf(data), PACKET_ID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        TFTPPacket that = (TFTPPacket) o;
+
+        if (opcode != that.opcode) return false;
+        return data.equals(that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + opcode.hashCode();
+        result = 31 * result + data.hashCode();
+        return result;
     }
 }

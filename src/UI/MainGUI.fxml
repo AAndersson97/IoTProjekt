@@ -48,6 +48,7 @@
             <items>
               <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
               <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
+                <MenuItem fx:id="helloPacketMenu" disable="true" mnemonicParsing="false" onAction="#toggleHelloPackets" text="Hide Hello packets" />
             </items>
           </Menu>
         </menus>

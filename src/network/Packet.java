@@ -1,10 +1,13 @@
 package network;
 
+import utilities.PacketIdGenerator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 public abstract class Packet {
+    public final int PACKET_ID;
     public WifiMacHeader wifiMacHeader;
     public IPHeader ipHeader;
     public UDPHeader udpHeader;
@@ -15,6 +18,13 @@ public abstract class Packet {
         this.olsrHeader = header;
         this.ipHeader = ipHeader;
         this.udpHeader = udpHeader;
+        this.PACKET_ID = PacketIdGenerator.getPacketId();
+    }
+    public Packet(IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader header, int packetId) {
+        this.olsrHeader = header;
+        this.ipHeader = ipHeader;
+        this.udpHeader = udpHeader;
+        this.PACKET_ID = packetId;
     }
 
     public Packet(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader) {
@@ -22,6 +32,13 @@ public abstract class Packet {
         this.wifiMacHeader = header;
         this.wifiMacTrailer = trailer;
     }
+
+    public Packet(WifiMacHeader header, WifiMacTrailer trailer, IPHeader ipHeader, UDPHeader udpHeader, OLSRHeader olsrHeader, int id) {
+        this(ipHeader, udpHeader, olsrHeader, id);
+        this.wifiMacHeader = header;
+        this.wifiMacTrailer = trailer;
+    }
+
 
     public byte[] toBytes() {
         if (wifiMacHeader == null || ipHeader == null ||udpHeader == null|| wifiMacTrailer == null)
@@ -50,4 +67,19 @@ public abstract class Packet {
     }
 
     public abstract Packet copy();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Packet packet = (Packet) o;
+
+        return PACKET_ID == packet.PACKET_ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return PACKET_ID;
+    }
 }

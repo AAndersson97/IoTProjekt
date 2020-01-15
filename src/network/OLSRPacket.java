@@ -5,6 +5,12 @@ import java.util.Arrays;
 public class OLSRPacket<T extends OLSRMessage> extends Packet {
     public final T message; // Hello-meddelanden är oftast flera till antalet, antalet beror på antalet grannar avsändaren har
 
+    public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader , OLSRHeader olsrHeader, T message, int id) {
+        super(ipHeader, udpHeader, olsrHeader, id);
+        this.olsrHeader = olsrHeader;
+        this.message = message;
+    }
+
     public OLSRPacket(IPHeader ipHeader, UDPHeader udpHeader , OLSRHeader olsrHeader, T message) {
         super(ipHeader, udpHeader, olsrHeader);
         this.olsrHeader = olsrHeader;
@@ -37,7 +43,25 @@ public class OLSRPacket<T extends OLSRMessage> extends Packet {
         IPHeader ipHeader = new IPHeader(this.ipHeader);
         UDPHeader udpHeader = new UDPHeader(this.udpHeader);
         OLSRHeader olsrHeader = new OLSRHeader(this.olsrHeader);
-        return new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, message);
+        return new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, message, this.PACKET_ID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        OLSRPacket<?> that = (OLSRPacket<?>) o;
+
+        return message.equals(that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + message.hashCode();
+        return result;
     }
 
     @Override

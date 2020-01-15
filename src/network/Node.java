@@ -1,5 +1,7 @@
 package network;
 
+import javafx.scene.input.Dragboard;
+
 import java.nio.channels.Pipe;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -115,30 +117,39 @@ public class Node implements Comparator<Node>, Runnable {
         if (packet instanceof OLSRPacket) {
             OLSRPacket olsrPacket = (OLSRPacket) packet;
             if (olsrPacket.message instanceof HelloMessage)
-                PacketLocator.reportPacketTransport(packet.ipHeader.sourceAddress, address, packet);
+                PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(packet.ipHeader.sourceAddress, address, packet, PacketLocator.PacketStatus.RECEIVED, PacketLocator.PacketType.HELLO));
             processAccordingToMsgType(olsrPacket);
             //if (olsrPacket.message instanceof TCMessage && !mprSelectorSet.isEmpty())
               //  prepareForwarding(packet);
         } else {
-            PacketLocator.reportPacketTransport(packet.wifiMacHeader.sender, address, packet);
-            if (!Arrays.equals(packet.wifiMacHeader.receiver, address))
+            PacketLocator.PacketStatus status = PacketLocator.PacketStatus.DROPPED;
+            if (!Arrays.equals(packet.wifiMacHeader.receiver, address)) {
                 dropPacket(packet);
+                status = PacketLocator.PacketStatus.DROPPED;
+            }
             else if (packet.ipHeader.getTimeToLive() > 0) {
                 DuplicateTuple duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress);
                 if (duplicateTuple != null && duplicateTuple.d_seq_num == packet.olsrHeader.packetSeqNum) {
                     duplicateTuple.renewTupple();
                     dropPacket(packet);
+                    status = PacketLocator.PacketStatus.DROPPED;
                 }
                 else {
                     if (Arrays.equals(packet.ipHeader.destinationAddress, address) && packet.udpHeader.destinationPort == TFTP_PORT) {
                         processTFTPPacket((TFTPPacket) packet);
+                        status = PacketLocator.PacketStatus.RECEIVED;
                     } else {
-                        prepareForwarding(packet);
+                        if (prepareForwarding(packet))
+                            status = PacketLocator.PacketStatus.FORWARDED;
+                        else
+                            status = PacketLocator.PacketStatus.DROPPED;
                     }
                 }
-
             }
-
+            if (status == PacketLocator.PacketStatus.DROPPED)
+                PacketLocator.reportPacketDropped(this);
+            else
+                PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(address, packet.wifiMacHeader.receiver, packet, status, PacketLocator.PacketType.TFTP));
         }
     }
 
@@ -268,12 +279,14 @@ public class Node implements Comparator<Node>, Runnable {
      * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras
      * @param packet Packet som ska vidarebefodras
      */
-    private void prepareForwarding(Packet packet) {
+    private boolean prepareForwarding(Packet packet) {
+        boolean doForward = false;
         // enbart grannars paket ska vidarebefordras
         if (findNeighborTuple(packet.ipHeader.sourceAddress) != null || Arrays.equals(packet.ipHeader.sourceAddress, address)) {
             // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
             //if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
             doForward(packet);
+            doForward = true;
             DuplicateTuple duplicateTuple = null;
             if ((duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress)) == null) {
                 duplicateTuple = new DuplicateTuple(packet.ipHeader.sourceAddress, address, packet.olsrHeader.packetSeqNum);
@@ -281,6 +294,7 @@ public class Node implements Comparator<Node>, Runnable {
                 removeDuplicateTupleTimer(duplicateTuple);
             }
         }
+        return doForward;
 
     }
 
@@ -628,7 +642,6 @@ public class Node implements Comparator<Node>, Runnable {
     protected void dropPacket(Packet packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
-        PacketLocator.reportPacketDropped(this);
     }
 
     public void turnOff() {

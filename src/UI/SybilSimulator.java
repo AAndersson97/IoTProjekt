@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,6 +37,8 @@ public class SybilSimulator extends Application {
     @FXML
     MenuItem IPMenu;
     @FXML
+    MenuItem helloPacketMenu;
+    @FXML
     AnchorPane anchorPane;
     @FXML
     Button sendPacketBtn;
@@ -49,7 +52,8 @@ public class SybilSimulator extends Application {
     private static Circle taVisible; // true om överföringsareor är synliga
     private static boolean IPVisible;
     private static boolean taMsgShown;
-    public static int packetTransportDelay = 3000;
+    public static int packetTransportDelay;
+    public static boolean showHelloPackets;
     private static ArrayList<Label> addressLabels = new ArrayList<>();
     public static EventHandler<MouseEvent> showTA = (event) -> {
         for (int i = 0; i < nodeCircles.size(); i++) {
@@ -76,11 +80,15 @@ public class SybilSimulator extends Application {
         stage.show();
         taCircles = new ArrayList<>();
         nodeCircles = new ArrayList<>();
+        packetTransportDelay = 3000;
+        showHelloPackets = true;
         PacketLocator.registerLocationListener(createLocationCallback());
         PacketLocator.registerPacketDroppedListener(createDroppedPacketCallback());
     }
 
     public void onCreateNode() {
+        if (helloPacketMenu.isDisable())
+            helloPacketMenu.setDisable(false);
         TAMenu.setDisable(false);
         IPMenu.setDisable(false);
         Node createdNode = new Node();
@@ -273,5 +281,10 @@ public class SybilSimulator extends Application {
     }
     public void sliderDragged(){
         packetTransportDelay = (int)slider.getValue();
+    }
+
+    public void toggleHelloPackets() {
+        showHelloPackets ^= true;
+        helloPacketMenu.setText((showHelloPackets? "Hide" : "Show") + " Hello Packets");
     }
 }
