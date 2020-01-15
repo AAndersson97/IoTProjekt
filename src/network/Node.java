@@ -234,13 +234,6 @@ public class Node implements Comparator<Node>, Runnable {
         return null;
     }
 
-    private short[] findNextHop(short[] destination) {
-        ArrayList<RoutingTuple> tuples = new ArrayList<>();
-        int minHopp = 0;
-        NeighborTuple shortestPath;
-        return null;
-    }
-
     public LinkTuple findLinkTuple(short[] neighbor) {
         for (LinkTuple linkTuple : linkSet)
             if (Arrays.equals(linkTuple.l_neighbor_iface_addr, neighbor))
@@ -521,13 +514,13 @@ public class Node implements Comparator<Node>, Runnable {
                         } else {
                             twoHopTuple.renewTupple();
                         }
-                        //updateRoutingTable();
                     }
                 } else if (linkCode.neighborType == LinkCode.NeighborTypes.NOT_NEIGH) {
                     twoHopNeighborSet.removeIf(tuple -> Arrays.equals(tuple.n_neighbor_main_addr, message.originatorAddr) && Arrays.equals(tuple.n_2hop_addr, neighborAddress));
                 }
             }
         }
+        updateRoutingTable();
     }
 
     public void updateRoutingTable() {
@@ -541,7 +534,7 @@ public class Node implements Comparator<Node>, Runnable {
                     if (findRoutingTuple(tuple.n_neighbor_main_addr) != null) {
                         routingTuple = new RoutingTuple(linkTuple.l_neighbor_iface_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
                     } else {
-                        routingTuple = new RoutingTuple(tuple.n_neighbor_main_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
+                        routingTuple = new RoutingTuple(linkTuple.l_neighbor_iface_addr, linkTuple.l_neighbor_iface_addr, 1, linkTuple.l_local_iface_addr);
                     }
                     routingTable.add(routingTuple);
                 }
@@ -572,6 +565,10 @@ public class Node implements Comparator<Node>, Runnable {
             // om nedanstående är sant finns inga fler grannar som ligger det antal hop som är specificerat i variabeln h
             if (!added)
                 break;
+        }
+        if ((count == 100 || count == 101 || count == 102 || count == 103 || count == 104) && Arrays.equals(address, new short[]{110,0,0,2})) {
+            System.out.println("Node address: " + Arrays.toString(address));
+            routingTable.forEach((tuple) -> System.out.println(tuple.toString()));
         }
 
     }
