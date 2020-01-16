@@ -2,6 +2,7 @@ package UI;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,7 +17,9 @@ import network.IPHeader;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static network.Constants.Protocol.ADDRESS_LENGTH;
 import static network.Constants.GUI.PACKET_GUI_Y;
@@ -61,6 +64,9 @@ public class SendPacketUI {
         if (addressStrings == null)
             createAddressCollection();
         if (sourceAddress.getItems().isEmpty()) {
+            ObservableList<String> addressStrings = this.addressStrings;
+            if (destAddress.getSelectionModel().getSelectedIndex() >= 0)
+                addressStrings = this.addressStrings.filtered((s) -> !destAddress.getSelectionModel().getSelectedItem().equals(s));
             sourceAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             sourceAddress.hide();
@@ -72,6 +78,9 @@ public class SendPacketUI {
         if (addressStrings == null)
             createAddressCollection();
         if (destAddress.getItems().isEmpty()) {
+            ObservableList<String> addressStrings = this.addressStrings;
+            if (sourceAddress.getSelectionModel().getSelectedIndex() >= 0)
+                addressStrings = this.addressStrings.filtered((s) -> !sourceAddress.getSelectionModel().getSelectedItem().equals(s));
             destAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             destAddress.hide();

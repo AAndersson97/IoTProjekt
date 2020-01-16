@@ -105,12 +105,14 @@ public class SybilSimulator extends Application {
         Label nodeLabel = createAddresslabel(createdNode);
         anchorPane.getChildren().addAll(tACircle, nodeLabel);
         addressLabels.add(nodeLabel);
-        for (SybilNode node : createdNode.getSybilNodes()){
+        new Alert(Alert.AlertType.INFORMATION, "The node with the address: " + Arrays.toString(createdNode.getNodeUnderAttack().getAddress())
+                + " is under attack", ButtonType.OK).show();
+        /*for (SybilNode node : createdNode.getSybilNodes()){
             addressLabels.add(createAddresslabel(node));
             nodeLabel = createAddresslabel(node);
             anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), nodeLabel);
             addressLabels.add(nodeLabel);
-        }
+        }*/
     }
 
     /**

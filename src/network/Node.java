@@ -8,7 +8,7 @@ import static network.Constants.Protocol.*;
 
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
-    private final Timer timer;
+    protected final Timer timer;
     private final short[] address;
     private Location location;
     private int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
@@ -25,10 +25,6 @@ public class Node implements Comparator<Node>, Runnable {
     private final Transmission transmission;
     private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     protected final List<RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
-
-    private static int count = 0;
-    private static int packetId = -1;
-    private static int count2 = 0;
 
     public Location getLocation() {
         return location;
@@ -134,7 +130,7 @@ public class Node implements Comparator<Node>, Runnable {
                     processTFTPPacket((TFTPPacket) packet);
                     status = PacketLocator.PacketStatus.RECEIVED;
                 } else {
-                    if (prepareForwarding(packet))
+                    if (forwardPacket(packet))
                         status = PacketLocator.PacketStatus.FORWARDED;
                     else
                         status = PacketLocator.PacketStatus.DROPPED;
@@ -165,7 +161,7 @@ public class Node implements Comparator<Node>, Runnable {
         Network.sendPacket(this, BROADCAST, olsrPacket);
     }
 
-    private void sendHelloPacket() {
+    protected void sendHelloPacket() {
         HashMap<LinkCode, ArrayList<short[]>> neighbors = new HashMap<>(); // grannar som har en länk till denna nod, info som används för att senare hitta grannar utan länk till denna nod
         long timeNow = System.currentTimeMillis();
         synchronized (this) {
@@ -187,11 +183,11 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
         }
-        HelloMessage messages = new HelloMessage(address, seqNum, willingness, neighbors);
+        HelloMessage message = new HelloMessage(address, seqNum, willingness, neighbors);
         IPHeader ipHeader = new IPHeader(HelloMessage.length(), address, BROADCAST, UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(OLSR_PORT, OLSR_PORT,(short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE));
         OLSRHeader olsrHeader = new OLSRHeader((short) (ipHeader.getTotalLength() + OLSR_HEADER_SIZE), this.seqNum);
-        OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, messages);
+        OLSRPacket<HelloMessage> olsrPacket = new OLSRPacket<>(ipHeader, udpHeader, olsrHeader, message);
         incrementSeqNum();
         Network.sendPacket(this, BROADCAST, olsrPacket);
     }
@@ -277,20 +273,7 @@ public class Node implements Comparator<Node>, Runnable {
         return null;
     }
 
-    /**
-     * Metoden utför de sista kontrollerna innan paketet verkligen vidarebefodras
-     * @param packet Packet som ska vidarebefodras
-     */
-    private boolean prepareForwarding(Packet packet) {
-        boolean doForward = false;
-        // enbart grannars paket ska vidarebefordras
-        if (findNeighborTuple(packet.wifiMacHeader.sender) != null || Arrays.equals(packet.ipHeader.sourceAddress, address)) {
-            doForward = doForward(packet);
-        }
-        return doForward;
-    }
-
-    private boolean doForward(Packet packet) {
+    private boolean forwardPacket(Packet packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
@@ -305,7 +288,6 @@ public class Node implements Comparator<Node>, Runnable {
             if (mprSet.length == 0)
                 return false;
             else {
-                packetId = packet.PACKET_ID;
                 Network.sendPacket(this, mprSet[0], packet);
                 return true;
             }
@@ -455,11 +437,6 @@ public class Node implements Comparator<Node>, Runnable {
             if (linkUpdated || linkAdded)
                 updateRoutingTable();
         }
-
-        // en länk som förlorar dess symmetri ska ändå annonseras i nätverket, åtminstående varaktigheten av giltighetstiden som finns definerad i HELLO-meddelandet.
-        // detta tillåter grannar att upptäcka länkbräckage.
-        //linkTuple.l_time = Math.max(linkTuple.l_time, linkTuple.l_asym_time);
-        count++;
         mprSet = new MPRCalculator(neighborSet, twoHopNeighborSet, address).populateAndReturnMPRSet();
     }
 
@@ -517,7 +494,7 @@ public class Node implements Comparator<Node>, Runnable {
     public void updateRoutingTable() {
         synchronized (routingTable) {
             routingTable.clear();
-            synchronized (this) {
+            synchronized (neighborSet) {
                 for (NeighborTuple tuple : neighborSet) {
                     if (tuple.status == NeighborTuple.N_status.SYM) {
                         LinkTuple linkTuple;
@@ -615,7 +592,10 @@ public class Node implements Comparator<Node>, Runnable {
 
     private void removeLinkTimer(LinkTuple linkTuple) {
         synchronized (timer) {
-            timer.schedule(createLinkTupleRemoveTask(linkTuple), linkTuple.l_time - System.currentTimeMillis());
+            if (linkTuple.l_time - System.currentTimeMillis() < 0)
+                linkSet.remove(linkTuple);
+            else
+                timer.schedule(createLinkTupleRemoveTask(linkTuple), linkTuple.l_time - System.currentTimeMillis());
         }
     }
 

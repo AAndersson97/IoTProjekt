@@ -135,4 +135,4 @@ grannar av ursprungsnoden är nyare än existerande information hos noden.
 
 Advertised link set måste inkludera åtminstående länkarna till alla noder i MPR-selector set
 
-Varje MPR-nod skickar ut TC-meddelande över nätverket.
+Varje MPR-nod skickar ut TC-meddelanden över nätverket.

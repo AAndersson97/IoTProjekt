@@ -74,7 +74,7 @@ public class LocationManager {
      * @param blacklist Lista av noder som ej ska attackeras, i första hand attacknoden och sybilnoder.
      * @return
      */
-    public ArrayList<Location> findLocationToAttack(List<Node> blacklist) {
+    public AttackData findNodeToAttack(List<Node> blacklist) {
         ArrayList<Node> candidates = Network.getNodeList();
         candidates.removeIf(blacklist::contains);
         ArrayList<Location> list = new ArrayList<>();
@@ -92,18 +92,26 @@ public class LocationManager {
                     col++;
                 }
             }
-            if (list.size() >= 4) {
-                System.out.println(Arrays.toString(candidate.getAddress()));
-                break;
+            if (list.size() >= 1) {
+                return new AttackData(candidate, list);
             }
             else
                 list.clear();
         }
-        return list;
+        return null;
     }
 
     public static LocationManager getInstance() {
         return instance;
+    }
+
+    public class AttackData {
+        Node node;
+        ArrayList<Location> locations;
+        public AttackData(Node node, ArrayList<Location> locations) {
+            this.node = node;
+            this.locations = locations;
+        }
     }
 
 
