@@ -23,12 +23,6 @@ public class OLSRPacket<T extends OLSRMessage> extends Packet {
         this.message = packet.message;
     }
 
-    public static boolean canRetransmit(OLSRPacket<OLSRMessage> packet) {
-        if (packet.message == null)
-            return false;
-        return true;
-    }
-
     /**
      * Paket utan meddelande, paket där ursprungsadressen är samma som destinationsadressen eller meddelanden
      * där TTL-fältet är 1 eller mindre ska kastas.

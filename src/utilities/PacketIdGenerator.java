@@ -7,7 +7,7 @@ package utilities;
 public class PacketIdGenerator {
     private static int highestId;
     public static int getPacketId() {
-        if (highestId >= Integer.MAX_VALUE)
+        if (highestId >= Short.MAX_VALUE)
             highestId = 0;
         return highestId++;
     }

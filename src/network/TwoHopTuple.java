@@ -2,7 +2,6 @@ package network;
 
 import java.util.Arrays;
 
-import static network.Constants.Protocol.TCP_HOLD_TIME;
 import static network.Constants.Protocol.TWO_HOP_HOLD_TIME;
 
 /**

@@ -10,7 +10,8 @@ import static network.Constants.Network.PACKET_LOSS;
  */
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
-    private final ArrayList<Node> observers;
+    private final List<Node> observers;
+    private int numOfTcPackets;
 
     {
         observers = new ArrayList<>();
@@ -20,15 +21,16 @@ public class WifiChannel extends Channel {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> {
-            for (Node node : observers) {
-                if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
-                    if (!simulateLoss()) {
-                        node.receivePacket(packet.copy());
+            synchronized (observers) {
+                for (Node node : observers) {
+                    if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
+                        if (!simulateLoss()) {
+                            node.receivePacket(packet.copy());
+                        }
                     }
                 }
             }
         });
-
     }
 
     public boolean isWithinTransmissionArea(Node sender, Node receiver) {
@@ -40,12 +42,16 @@ public class WifiChannel extends Channel {
     }
 
     public void addObserver(Node node) {
-        observers.add(node);
+        synchronized (observers) {
+            observers.add(node);
+        }
 
     }
 
     public ArrayList<Node> getObservers() {
-        return new ArrayList<>(observers);
+        synchronized (observers) {
+            return new ArrayList<>(observers);
+        }
     }
 
 }

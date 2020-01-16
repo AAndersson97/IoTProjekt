@@ -7,16 +7,19 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Klassens syfte är att simulera händelser som att packet skickas över nätet.
  */
 public class Simulator {
-    private static Thread worker;
+    private static Thread[] workers;
     private static final ArrayDeque<Runnable> queue;
     private static final ArrayList<Timer> timers;
     private volatile static boolean shutdown;
 
     static  {
         queue = new ArrayDeque<>();
-        worker = new Thread(Simulator::run);
+        workers = new Thread[2];
+        workers[0] = new Thread(newRunnable());
+        workers[1] = new Thread(newRunnable());
         shutdown = false;
-        worker.start();
+        workers[0].start();
+        workers[1].start();
         timers = new ArrayList<>();
     }
 
@@ -43,21 +46,23 @@ public class Simulator {
         PacketLocator.shutDown();
     }
 
-    public static void run() {
-        while (true) {
-            synchronized (queue) {
-                while(queue.isEmpty() && !shutdown) {
-                    try {
-                        queue.wait();
-                    } catch (InterruptedException e) {
-                        System.out.println(e.getMessage());
+    public static Runnable newRunnable() {
+        return () -> {
+            while (true) {
+                synchronized (queue) {
+                    while (queue.isEmpty() && !shutdown) {
+                        try {
+                            queue.wait();
+                        } catch (InterruptedException e) {
+                            System.out.println(e.getMessage());
+                        }
                     }
+                    if (shutdown)
+                        break;
+                    else
+                        queue.removeFirst().run();
                 }
-                if (shutdown)
-                    break;
-                else
-                    queue.removeFirst().run();
             }
-        }
+        };
     }
 }

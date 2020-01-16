@@ -9,7 +9,7 @@ public class PacketLocator {
 
     private static LocationListener locationListener;
     private static PacketDroppedListener packetDroppedListener;
-    private static HashMap<Integer, ArrayList<PacketTravel>> packetStops; // paket som ej än anlänt till slutdestination ska finnas i listan för att göra det möjligt att matcha fördröjningar i gränssnitt korrekt
+    private static final HashMap<Integer, ArrayList<PacketTravel>> packetStops; // paket som ej än anlänt till slutdestination ska finnas i listan för att göra det möjligt att matcha fördröjningar i gränssnitt korrekt
     private static Timer timer;
 
     static {
@@ -29,16 +29,20 @@ public class PacketLocator {
     }
 
     public static void reportPacketTransport(PacketTravel travel) {
+        if (Arrays.equals(travel.destination, travel.start))
+            return;
         if (travel.packetType == PacketType.HELLO && !SybilSimulator.showHelloPackets)
             return;
-        if (travel.packetStatus == PacketStatus.RECEIVED) {
-            if (packetStops.containsKey(travel.packet.PACKET_ID))
-                reportPackets(travel.packet.PACKET_ID);
-            else
-                reportPacket(travel.start, travel.destination, travel.packet, SybilSimulator.packetTransportDelay);
-        } else if (travel.packetStatus == PacketStatus.FORWARDED) {
-            packetStops.computeIfAbsent(travel.packet.PACKET_ID, packet1 -> new ArrayList<>());
-            packetStops.get(travel.packet.PACKET_ID).add(travel);
+        synchronized (packetStops) {
+            if (travel.packetStatus == PacketStatus.RECEIVED) {
+                if (packetStops.containsKey(travel.packet.PACKET_ID))
+                    reportPackets(travel.packet.PACKET_ID);
+                else
+                    reportPacket(travel.start, travel.destination, travel.packet, SybilSimulator.packetTransportDelay);
+            } else if (travel.packetStatus == PacketStatus.FORWARDED) {
+                packetStops.computeIfAbsent(travel.packet.PACKET_ID, packet1 -> new ArrayList<>());
+                packetStops.get(travel.packet.PACKET_ID).add(travel);
+            }
         }
     }
 

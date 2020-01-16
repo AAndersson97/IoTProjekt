@@ -1,6 +1,8 @@
 package network;
 
-import static network.Constants.Protocol.TCP_HOLD_TIME;
+import java.util.Arrays;
+
+import static network.Constants.Protocol.TC_HOLD_TIME;
 
 /**
  * Innehåller information om en destination i nätverket
@@ -15,14 +17,24 @@ public class TopologyTuple {
         this.t_dest_addr = t_dest_addr;
         this.t_last_addr = t_last_addr;
         this.t_seq = t_seq;
-        this.t_time = System.currentTimeMillis() + TCP_HOLD_TIME;
+        this.t_time = System.currentTimeMillis() + TC_HOLD_TIME;
     }
 
     public void renewTupple() {
-        t_time = System.currentTimeMillis() + TCP_HOLD_TIME;
+        t_time = System.currentTimeMillis() + TC_HOLD_TIME;
     }
 
     public long get_time() {
         return t_time;
+    }
+
+    @Override
+    public String toString() {
+        return "TopologyTuple{" +
+                "t_dest_addr=" + Arrays.toString(t_dest_addr) +
+                ", t_last_addr=" + Arrays.toString(t_last_addr) +
+                ", t_seq=" + t_seq +
+                ", t_time=" + t_time +
+                '}';
     }
 }

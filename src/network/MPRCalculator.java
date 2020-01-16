@@ -17,8 +17,6 @@ public class MPRCalculator {
         this.mprSet = new HashSet<>();
     }
 
-
-
     /**
      * Räknar ut graden av en 1-hoppsgranne n, n är en nod från datasamlingen neighborSet. Definieras som antalet symmetriska grannar till nod n exkluderat
      * grannar till noden som skapade detta objekt och noden själv.

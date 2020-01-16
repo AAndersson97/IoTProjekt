@@ -158,11 +158,10 @@ public final class IPHeader implements Header, Serializable {
     @Override
     public String toString() {
         return "IPHeader{" +
-                "version=" + version +
-                ", totalLength=" + totalLength +
+                "timeToLive=" + timeToLive +
                 ", protocol=" + protocol +
-                ", sourceAdress=" + Arrays.toString(sourceAddress) +
-                ", destinationAdress=" + Arrays.toString(destinationAddress) +
+                ", sourceAddress=" + Arrays.toString(sourceAddress) +
+                ", destinationAddress=" + Arrays.toString(destinationAddress) +
                 '}';
     }
 }
