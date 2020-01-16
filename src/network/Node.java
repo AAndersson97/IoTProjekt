@@ -1,8 +1,5 @@
 package network;
 
-import javafx.scene.input.Dragboard;
-
-import java.nio.channels.Pipe;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -129,6 +126,7 @@ public class Node implements Comparator<Node>, Runnable {
             }
             else if (packet.ipHeader.getTimeToLive() > 0) {
                 DuplicateTuple duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress);
+                PrintMethods.printPacketInfo(packet, this);
                 if (duplicateTuple != null && duplicateTuple.d_seq_num == packet.olsrHeader.packetSeqNum) {
                     duplicateTuple.renewTupple();
                     dropPacket(packet);
@@ -147,9 +145,19 @@ public class Node implements Comparator<Node>, Runnable {
                 }
             }
             if (status == PacketLocator.PacketStatus.DROPPED)
-                PacketLocator.reportPacketDropped(this);
+                PacketLocator.reportPacketDropped(this, PacketLocator.PacketType.TFTP, packet.PACKET_ID);
             else
                 PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(address, packet.wifiMacHeader.receiver, packet, status, PacketLocator.PacketType.TFTP));
+            updateDuplicateSet(packet, status == PacketLocator.PacketStatus.FORWARDED);
+        }
+    }
+
+    private void updateDuplicateSet(Packet packet, boolean doForward) {
+        DuplicateTuple duplicateTuple = null;
+        if ((duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress)) == null) {
+            duplicateTuple = new DuplicateTuple(packet.ipHeader.sourceAddress, address, packet.olsrHeader.packetSeqNum, doForward);
+            duplicateSet.add(duplicateTuple);
+            removeDuplicateTupleTimer(duplicateTuple);
         }
     }
 
@@ -278,17 +286,9 @@ public class Node implements Comparator<Node>, Runnable {
         if (findNeighborTuple(packet.ipHeader.sourceAddress) != null || Arrays.equals(packet.ipHeader.sourceAddress, address)) {
             // Nedanstående villkor är sant om avsändaradressen tillhör en nod som är en MPR selector till denna nod
             //if (mprSelectorSet.containsKey(packet.ipHeader.sourceAddress))
-            doForward(packet);
-            doForward = true;
-            DuplicateTuple duplicateTuple = null;
-            if ((duplicateTuple = findDuplicateTuple(packet.ipHeader.sourceAddress)) == null) {
-                duplicateTuple = new DuplicateTuple(packet.ipHeader.sourceAddress, address, packet.olsrHeader.packetSeqNum);
-                duplicateSet.add(duplicateTuple);
-                removeDuplicateTupleTimer(duplicateTuple);
-            }
+            doForward = doForward(packet);
         }
         return doForward;
-
     }
 
     private void removeDuplicateTupleTimer(DuplicateTuple duplicateTuple) {
@@ -297,7 +297,7 @@ public class Node implements Comparator<Node>, Runnable {
         }
     }
 
-    private void doForward(Packet packet) {
+    private boolean doForward(Packet packet) {
         if (Constants.LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
@@ -308,10 +308,12 @@ public class Node implements Comparator<Node>, Runnable {
         incrementSeqNum();
         RoutingTuple nextHop = findShortestPath(packet.ipHeader.destinationAddress);
         packet.ipHeader.decrementTTL();
-        if (nextHop == null);
+        if (nextHop == null)
+            return false;
             //Network.sendPacket(this, BROADCAST, packet);
         else {
             Network.sendPacket(this, nextHop.r_next_addr, packet);
+            return true;
         }
     }
 
@@ -566,11 +568,6 @@ public class Node implements Comparator<Node>, Runnable {
             if (!added)
                 break;
         }
-        if ((count == 100 || count == 101 || count == 102 || count == 103 || count == 104) && Arrays.equals(address, new short[]{110,0,0,2})) {
-            System.out.println("Node address: " + Arrays.toString(address));
-            routingTable.forEach((tuple) -> System.out.println(tuple.toString()));
-        }
-
     }
 
     private void detectNeighborLoss(LinkTuple tuple) {

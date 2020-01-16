@@ -16,13 +16,16 @@ public class PacketLocator {
         timer = new Timer();
         packetStops = new HashMap<>();
     }
-    public static void reportPacketDropped(Node node) {
+    public static void reportPacketDropped(Node node, PacketType type, int packetId) {
+        int additionalDelay = 1;
+        if (type == PacketType.TFTP && packetStops.containsKey(packetId))
+            additionalDelay = packetStops.get(packetId).size() + 1;
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 packetDroppedListener.packetDropped(node);
             }
-        } , SybilSimulator.packetTransportDelay);
+        } , SybilSimulator.packetTransportDelay * additionalDelay);
     }
 
     public static void reportPacketTransport(PacketTravel travel) {

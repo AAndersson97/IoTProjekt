@@ -13,10 +13,11 @@ public class DuplicateTuple {
     public short[] d_iface; // denna nods IP-adress, variabeltypen ändras till en lista om noden har flera gränssnitt (listan innehåller då adresser på gränssnitten som mottagit paketet)
     private long d_time; // tiden då tuppeln blir ogiltig
 
-    DuplicateTuple(short[] d_addr, short[] d_iface, int d_seq_num) {
+    DuplicateTuple(short[] d_addr, short[] d_iface, int d_seq_num, boolean retransmitted) {
         this.d_addr = d_addr;
         this.d_seq_num = d_seq_num;
         this.d_iface = d_iface;
+        this.d_retransmitted = retransmitted;
         d_time = System.currentTimeMillis() + DUP_HOLD_TIME;
     }
 
