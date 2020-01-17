@@ -1,5 +1,7 @@
 package network;
 
+import javafx.beans.property.SimpleBooleanProperty;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,8 +13,6 @@ import static network.Constants.Network.PACKET_LOSS;
 public class WifiChannel extends Channel {
     // En router som observerar i nätverkskanalen tar emot all data som skickas över kanalen
     private final List<Node> observers;
-    private int numOfTcPackets;
-
     {
         observers = new ArrayList<>();
     }
@@ -21,15 +21,14 @@ public class WifiChannel extends Channel {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> {
-            synchronized (observers) {
-                for (Node node : observers) {
-                    if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
-                        if (!simulateLoss()) {
-                            node.receivePacket(packet.copy());
-                        }
+            for (Node node : observers) {
+                if (!Arrays.equals(sender.getAddress(), node.getAddress()) && isWithinTransmissionArea(sender, node)) {
+                    if (!simulateLoss()) {
+                        node.receivePacket(packet.copy());
                     }
                 }
             }
+
         });
     }
 
@@ -42,21 +41,17 @@ public class WifiChannel extends Channel {
     }
 
     public void addObserver(Node node) {
-        synchronized (observers) {
-            observers.add(node);
-        }
-
+        Simulator.scheduleTask(() -> observers.add(node));
     }
 
     public ArrayList<Node> getObservers() {
         synchronized (observers) {
             return new ArrayList<>(observers);
         }
+
     }
 
     public void removeObserver(Node node) {
-        synchronized (observers) {
-            observers.remove(node);
-        }
+        Simulator.scheduleTask(() -> observers.remove(node));
     }
 }

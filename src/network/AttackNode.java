@@ -30,7 +30,7 @@ public class AttackNode extends Node {
 
     @Override
     public void run() {
-        timer.schedule(sendSpamMsgTask(this), 2000, 75);
+        timer.schedule(sendSpamMsgTask(this), 2000, 100);
         timer.schedule(sendOLSRMsgTask(), 0, 2000);
     }
 
@@ -112,6 +112,7 @@ public class AttackNode extends Node {
     @Override
     public void turnOff() {
         active = false;
+        Arrays.fill(sybilNodes, null);
         timer.cancel();
     }
 }

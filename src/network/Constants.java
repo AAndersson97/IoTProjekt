@@ -15,7 +15,7 @@ public final class Constants {
         public static final String WINDOW_TITLE = "Sybil Simulator";
     }
     public static final class Node {
-        public static final int MAX_NODES = 30;
+        public static final int MAX_NODES = 20;
         public static final int BUFFER_CAPACITY = 1000;
         public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
         public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;

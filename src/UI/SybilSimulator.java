@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,12 +20,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import network.*;
 import static network.Constants.GUI.*;
+import static network.Constants.Node.MAX_NODES;
 import static network.Constants.Node.NUM_OF_SYBIL;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.TimerTask;
+import java.util.*;
 
 public class SybilSimulator extends Application {
 
@@ -54,6 +53,7 @@ public class SybilSimulator extends Application {
     private static boolean taMsgShown;
     public static int packetTransportDelay;
     public static boolean showHelloPackets;
+    public static SimpleBooleanProperty ongoingAttack;
     private static ArrayList<Label> addressLabels = new ArrayList<>();
     public static EventHandler<MouseEvent> showTA = (event) -> {
         for (int i = 0; i < nodeCircles.size(); i++) {
@@ -90,6 +90,8 @@ public class SybilSimulator extends Application {
     public void onCreateNode() {
         if (helloPacketMenu.isDisable())
             helloPacketMenu.setDisable(false);
+        if (Network.getNumOfNodes() >= MAX_NODES - 5)
+            createNode.setDisable(true);
         TAMenu.setDisable(false);
         IPMenu.setDisable(false);
         Node createdNode = new Node();
@@ -100,6 +102,10 @@ public class SybilSimulator extends Application {
     }
 
     public void onStartSybilAttack() {
+        if (ongoingAttack == null) {
+            ongoingAttack = new SimpleBooleanProperty(true);
+            sybilAttack.disableProperty().bind(ongoingAttack);
+        }
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
@@ -135,7 +141,6 @@ public class SybilSimulator extends Application {
         circle.setRadius(CIRCLE_RADIUS);
         circle.setStroke(Color.BLACK);
         circle.relocate(node.getLocation().getX() - CIRCLE_RADIUS, node.getLocation().getY() - CIRCLE_RADIUS);
-        createNode.setDisable(Network.getNumOfNodes() >= Constants.Node.MAX_NODES);
         if (!fill.equals(Color.web("#cfc7c0")))
             nodeCircles.add(circle);
         return circle;
@@ -222,6 +227,7 @@ public class SybilSimulator extends Application {
                         iterator.remove();
                 }
             }
+            ongoingAttack.set(false);
         });
     }
 
@@ -242,6 +248,7 @@ public class SybilSimulator extends Application {
     public void stop() throws Exception {
         Network.shutdownNetwork();
         Simulator.shutdown();
+        System.out.println(Thread.activeCount());
         super.stop();
     }
 

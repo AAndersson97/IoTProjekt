@@ -1,6 +1,8 @@
 package network;
 
 import UI.SybilSimulator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 import java.util.*;
 import java.util.function.Function;
@@ -16,12 +18,16 @@ public class PacketLocator {
         timer = new Timer();
         packetStops = new HashMap<>();
     }
-    public static void reportPacketDropped(Node node, PacketType type, int packetId) {
+    public synchronized static void reportPacketDropped(Node node, PacketType type, int packetId) {
+        if (SybilSimulator.ongoingAttack != null && SybilSimulator.ongoingAttack.getValue())
+                return;
         int additionalDelay = 1;
         if (node == null || type == null)
             return;
-        if (type == PacketType.TFTP && packetStops.containsKey(packetId))
-            additionalDelay = packetStops.get(packetId).size() + 1;
+        synchronized (packetStops) {
+            if (type == PacketType.TFTP && packetStops.get(packetId) != null)
+                additionalDelay = packetStops.get(packetId).size() + 1;
+        }
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -30,7 +36,7 @@ public class PacketLocator {
         } , SybilSimulator.packetTransportDelay * additionalDelay);
     }
 
-    public static void reportPacketTransport(PacketTravel travel) {
+    public synchronized static void reportPacketTransport(PacketTravel travel) {
         if (Arrays.equals(travel.destination, travel.start))
             return;
         if (travel.packetType == PacketType.HELLO && !SybilSimulator.showHelloPackets)
@@ -57,7 +63,7 @@ public class PacketLocator {
         packetStops.remove(key);
     }
 
-    public static void reportPacket(short[] startAddr, short[] endAddr, Packet packet, int delay) {
+    private static void reportPacket(short[] startAddr, short[] endAddr, Packet packet, int delay) {
         ArrayList<Node> nodeList = Network.getNodeList();
         Node start = null, end = null;
         for (Node node : nodeList) {

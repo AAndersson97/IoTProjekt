@@ -12,7 +12,7 @@ public class AddressGenerator {
 
     public static short[] generateAddress() {
         if (numOfAddresses == 0) {
-            addresses = new short[MAX_NODES][ADDRESS_LENGTH];
+            addresses = new short[MAX_NODES + 5][ADDRESS_LENGTH];
             addresses[numOfAddresses++] = FIRST_ADDRESS;
             return FIRST_ADDRESS;
         }
@@ -23,5 +23,10 @@ public class AddressGenerator {
         address[3] = (short) (addresses[numOfAddresses-1][3]+1);
         addresses[numOfAddresses++] = address;
         return address;
+    }
+
+    public static void returnAddress(short[] addr) {
+        if (addr != null && numOfAddresses > 0)
+            addresses[--numOfAddresses] = addr;
     }
 }

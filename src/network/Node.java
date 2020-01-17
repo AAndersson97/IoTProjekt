@@ -27,10 +27,6 @@ public class Node implements Comparator<Node>, Runnable {
     private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     protected final List<RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
 
-    public Location getLocation() {
-        return location;
-    }
-
     public Node() {
         buffer = new ConcurrentLinkedQueue<>();
         routingTable = Collections.synchronizedList(new ArrayList<>());
@@ -56,6 +52,7 @@ public class Node implements Comparator<Node>, Runnable {
             Network.registerNode(this);
         }
     }
+    private static int n = 0;
 
     @Override
     public void run() {
@@ -348,8 +345,10 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void forwardTcPacket(OLSRPacket packet) {
-        for (MPRSelectorTuple tuple : mprSelectorSet)
-            Network.sendPacket(this, tuple.ms_main_addr, packet);
+        synchronized (mprSelectorSet) {
+            for (MPRSelectorTuple tuple : mprSelectorSet)
+                Network.sendPacket(this, tuple.ms_main_addr, packet);
+        }
     }
 
     private TwoHopTuple findTwoHopTuple(short[] neighborAddress) {
@@ -653,10 +652,15 @@ public class Node implements Comparator<Node>, Runnable {
     public void setLocation(Location location) {
         this.location = location;
     }
+
     public void turnOn() {
         this.active = true;
         if (!thread.isAlive())
             thread.start();
+    }
+
+    public Location getLocation() {
+        return location;
     }
 
     public TimerTask createLinkTupleRemoveTask(LinkTuple tuple) {

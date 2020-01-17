@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Network {
@@ -68,11 +69,12 @@ public class Network {
         numOfNodes--;
         if (listener != null)
             listener.nodeDisconnected(node);
+        AddressGenerator.returnAddress(node.getAddress());
     }
 
     public static short[] removeAttackNode() {
         AttackNode node = null;
-        for (Node n : wifiChannel.getObservers()) {
+        for (Node n : getNodeList()) {
             if (n instanceof AttackNode)
                 node = (AttackNode) n;
         }
