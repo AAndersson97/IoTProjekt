@@ -1,11 +1,7 @@
 package network;
 
 import UI.SybilSimulator;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
 import java.util.*;
-import java.util.function.Function;
 
 public class PacketLocator {
 
@@ -36,7 +32,7 @@ public class PacketLocator {
         } , SybilSimulator.packetTransportDelay * additionalDelay);
     }
 
-    public synchronized static void reportPacketTransport(PacketTravel travel) {
+    public static void reportPacketTransport(PacketTravel travel) {
         if (Arrays.equals(travel.destination, travel.start))
             return;
         if (travel.packetType == PacketType.HELLO && !SybilSimulator.showHelloPackets)

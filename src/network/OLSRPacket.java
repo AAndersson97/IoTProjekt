@@ -23,16 +23,6 @@ public class OLSRPacket<T extends OLSRMessage> extends Packet {
         this.message = packet.message;
     }
 
-    /**
-     * Paket utan meddelande, paket där ursprungsadressen är samma som destinationsadressen eller meddelanden
-     * där TTL-fältet är 1 eller mindre ska kastas.
-     * @param
-     * @return
-     */
-    public static boolean canBeProcessed(OLSRMessage message, short[] receiver) {
-        return  !(message.getTTL() <= 0 || Arrays.equals(message.originatorAddr, receiver));
-    }
-
     public OLSRPacket<? extends OLSRMessage> copy() {
         IPHeader ipHeader = new IPHeader(this.ipHeader);
         UDPHeader udpHeader = new UDPHeader(this.udpHeader);

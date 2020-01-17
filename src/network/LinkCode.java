@@ -21,9 +21,9 @@ public class LinkCode {
 
     /**
      * UNSPEC_LINK - ingen specifik info om länken finns
-     * ASYM_LINK - länkarna är asymmetriska, alltså envägs
-     * SYM_LINK - länkarna är symmetriska
-     * LOST_LINK - länkarna har gått förlorade
+     * ASYM_LINK - länken är asymmetrisk
+     * SYM_LINK - länken är symmetrisk
+     * LOST_LINK - länkeb har gått förlorade
      */
     public enum LinkTypes {
         UNSPEC_LINK(0), ASYM_LINK(1), SYM_LINK(2), LOST_LINK(3);

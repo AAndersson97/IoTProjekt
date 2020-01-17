@@ -65,6 +65,10 @@ public class AttackNode extends Node {
         return new TimerTask() {
             @Override
             public void run() {
+                if (!active) {
+                    timer.cancel();
+                    return;
+                }
                 TFTPPacket packet = generatePacket(getAddress());
                 Network.sendPacket(attackNode, underAttack.getAddress(), packet);
                 Network.sendPacket(attackNode, underAttack.getAddress(), generatePacket(sybilNodes[0].getAddress()));
@@ -112,7 +116,7 @@ public class AttackNode extends Node {
     @Override
     public void turnOff() {
         active = false;
-        Arrays.fill(sybilNodes, null);
-        timer.cancel();
+        timer.purge();
+        sybilNodes = null;
     }
 }

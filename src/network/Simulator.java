@@ -2,21 +2,20 @@ package network;
 
 import java.util.*;
 
-
 /**
  * Klassens syfte är att simulera händelser som att packet skickas över nätet.
  */
 public class Simulator {
-    private static Thread workers;
+    private static Thread worker;
     private static final ArrayDeque<Runnable> queue;
     private static final Timer timer;
     private volatile static boolean shutdown;
 
     static  {
         queue = new ArrayDeque<>();
-        workers = new Thread(Simulator::run);
+        worker = new Thread(Simulator::run);
         shutdown = false;
-        workers.start();
+        worker.start();
         timer = new Timer();
     }
 

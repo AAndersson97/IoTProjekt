@@ -1,7 +1,4 @@
 package network;
-import java.util.ArrayList;
-
-import static network.Constants.Protocol.TOP_HOLD_TIME;
 
 public class TCMessage extends OLSRMessage {
     // ANSN-numret används för att bestämma om detta meddelande innehåller nyare information om grannar i nätverket än nodens egen info om grannar

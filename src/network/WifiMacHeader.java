@@ -41,7 +41,6 @@ public class WifiMacHeader implements Serializable {
         this.receiver = header.receiver;
     }
 
-
     enum QosAckPolicy {
         NORMAL_ACK, NO_ACK, NO_EXPLICIT_ACK, BLOCK_ACK
     };

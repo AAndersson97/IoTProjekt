@@ -10,7 +10,7 @@ import static network.Constants.Protocol.*;
 public class Node implements Comparator<Node>, Runnable {
     private Thread thread;
     protected final Timer timer;
-    private final short[] address;
+    protected short[] address;
     private Location location;
     protected int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
     private int ANSN; // ett sekvensnummer som ökar med 1 varje gång mängden av grannar i "neighborSet" uppdateras.
@@ -52,7 +52,6 @@ public class Node implements Comparator<Node>, Runnable {
             Network.registerNode(this);
         }
     }
-    private static int n = 0;
 
     @Override
     public void run() {
@@ -601,11 +600,6 @@ public class Node implements Comparator<Node>, Runnable {
         }
     }
 
-    // Specifikationerna för meddelandetypen bestämmer hur paketet ska vidarebefodras
-    // HELLO-paket vidarbefodras ej, TC-meddelande vidarbefodras av MPR-noder enligt standardalgoritm
-    private void forwardAccordingToMsgType(OLSRPacket packet) {
-    }
-
     private long calculateJitter() {
         return (long)(Math.random() * MAX_JITTER_MS);
     }
@@ -698,7 +692,6 @@ public class Node implements Comparator<Node>, Runnable {
             }
         };
     }
-
 
     private TimerTask createMPRSelectorRemoveTask(MPRSelectorTuple tuple) {
         return new TimerTask() {

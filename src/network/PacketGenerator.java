@@ -2,7 +2,6 @@ package network;
 import static network.Constants.Protocol.TFTP_PORT;
 import static network.Constants.Protocol.UDP_PROTOCOL_NUM;
 
-
 public class PacketGenerator {
     private static int seqNum;
     public static TFTPPacket generateTFTPPacket(short[] sourceAddress, short[] destinationAddress,String data) {

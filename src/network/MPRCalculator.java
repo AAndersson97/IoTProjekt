@@ -3,12 +3,10 @@ package network;
 import java.util.*;
 
 public class MPRCalculator {
-    // N - den aktuella noden, noden som använder en instans av denna klass
     private ArrayList<NeighborTuple> neighborSet;
     private ArrayList<TwoHopTuple> twoHopNeighbors;
     private final short[] receiverAddress;
     private Set<short[]> mprSet;
-    private int numOfMpr;
 
     public MPRCalculator(Collection<NeighborTuple> neighborSet, Collection<TwoHopTuple> twoHopNeighbors, short[] receiverAddress) {
         this.neighborSet = new ArrayList<>(neighborSet);

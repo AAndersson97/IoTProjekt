@@ -22,7 +22,6 @@ import network.*;
 import static network.Constants.GUI.*;
 import static network.Constants.Node.MAX_NODES;
 import static network.Constants.Node.NUM_OF_SYBIL;
-
 import java.util.*;
 
 public class SybilSimulator extends Application {
@@ -54,7 +53,9 @@ public class SybilSimulator extends Application {
     public static int packetTransportDelay;
     public static boolean showHelloPackets;
     public static SimpleBooleanProperty ongoingAttack;
+    private static UpdateObserver updateObserver;
     private static ArrayList<Label> addressLabels = new ArrayList<>();
+
     public static EventHandler<MouseEvent> showTA = (event) -> {
         for (int i = 0; i < nodeCircles.size(); i++) {
             if (nodeCircles.get(i).isHover()) {
@@ -85,9 +86,18 @@ public class SybilSimulator extends Application {
         PacketLocator.registerLocationListener(createLocationCallback());
         PacketLocator.registerPacketDroppedListener(createDroppedPacketCallback());
         Network.registerNodeDisconnectListener((SybilSimulator::changeCircleColor));
+        updateObserver = new UpdateObserver(2000);
+        updateObserver.addListener(() -> {
+            Platform.runLater(() -> {
+                new Alert(Alert.AlertType.ERROR, "The behavior of the application is unexpected, please restart the application", ButtonType.OK).showAndWait();
+                System.exit(-1);
+            });
+        });
     }
 
     public void onCreateNode() {
+        if (!updateObserver.isActive() && Network.getNumOfNodes() > 1)
+            updateObserver.start();
         if (helloPacketMenu.isDisable())
             helloPacketMenu.setDisable(false);
         if (Network.getNumOfNodes() >= MAX_NODES - 5)
@@ -106,6 +116,7 @@ public class SybilSimulator extends Application {
             ongoingAttack = new SimpleBooleanProperty(true);
             sybilAttack.disableProperty().bind(ongoingAttack);
         }
+        ongoingAttack.set(true);
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
@@ -143,6 +154,7 @@ public class SybilSimulator extends Application {
         circle.relocate(node.getLocation().getX() - CIRCLE_RADIUS, node.getLocation().getY() - CIRCLE_RADIUS);
         if (!fill.equals(Color.web("#cfc7c0")))
             nodeCircles.add(circle);
+        updateObserver.update();
         return circle;
     }
 
@@ -248,12 +260,13 @@ public class SybilSimulator extends Application {
     public void stop() throws Exception {
         Network.shutdownNetwork();
         Simulator.shutdown();
-        System.out.println(Thread.activeCount());
+        updateObserver.removeListener();
+        System.exit(0);
         super.stop();
     }
 
     public PacketLocator.LocationListener createLocationCallback() {
-        return (start, end, packet)-> Platform.runLater(() -> {
+        return (start, end, packet) -> Platform.runLater(() -> {
             Circle newCircle = new Circle(2, Color.BLUE);
             root.getChildren().add(newCircle);
             Line newLine = new Line();
@@ -294,9 +307,10 @@ public class SybilSimulator extends Application {
             Simulator.scheduleFutureTask(new TimerTask() {
                 @Override
                 public void run() {
-                    Platform.runLater(() -> root.getChildren().removeAll(newCircle));
+                    Platform.runLater(() -> root.getChildren().remove(newCircle));
                 }
             }, packetTransportDelay);
+            updateObserver.update();
         });
     }
 
@@ -326,6 +340,7 @@ public class SybilSimulator extends Application {
                     Platform.runLater(() -> root.getChildren().remove(newCircle));
                 }
             }, packetTransportDelay);
+            updateObserver.update();
         }));
     }
     public void sliderDragged(){

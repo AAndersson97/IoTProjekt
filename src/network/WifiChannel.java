@@ -1,9 +1,6 @@
 package network;
 
-import javafx.beans.property.SimpleBooleanProperty;
-
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static network.Constants.Network.PACKET_LOSS;
 
@@ -28,7 +25,6 @@ public class WifiChannel extends Channel {
                     }
                 }
             }
-
         });
     }
 
@@ -40,15 +36,14 @@ public class WifiChannel extends Channel {
         return (new Random().nextInt(100/PACKET_LOSS)==0);
     }
 
-    public void addObserver(Node node) {
-        Simulator.scheduleTask(() -> observers.add(node));
-    }
-
     public ArrayList<Node> getObservers() {
         synchronized (observers) {
             return new ArrayList<>(observers);
         }
+    }
 
+    public void addObserver(Node node) {
+        Simulator.scheduleTask(() -> observers.add(node));
     }
 
     public void removeObserver(Node node) {

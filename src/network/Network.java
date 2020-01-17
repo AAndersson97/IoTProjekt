@@ -1,11 +1,6 @@
 package network;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public class Network {
     private static int numOfNodes;
@@ -16,10 +11,6 @@ public class Network {
         wifiChannel = new WifiChannel();
     }
     private Network() {
-    }
-
-    public static void newNodeAdded() {
-        numOfNodes++;
     }
 
     public static int getNumOfNodes() {
@@ -46,7 +37,7 @@ public class Network {
     }
 
     public static void shutdownNetwork() {
-        for (Node node : wifiChannel.getObservers()) {
+        for (Node node : getNodeList()) {
             node.turnOff();
         }
     }

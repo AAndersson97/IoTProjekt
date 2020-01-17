@@ -1,7 +1,5 @@
 package network;
 
-import java.util.LinkedList;
-
 public final class Constants {
     public static final boolean LOG_ACTIVE = false;
     private Constants() {}
@@ -17,8 +15,6 @@ public final class Constants {
     public static final class Node {
         public static final int MAX_NODES = 20;
         public static final int BUFFER_CAPACITY = 1000;
-        public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
-        public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;
         public static final int NUM_OF_SYBIL = 3;
     }
     public static final class Protocol {
@@ -35,7 +31,6 @@ public final class Constants {
         public static final int UDP_PROTOCOL_NUM = 17;
         public static final short OLSR_PORT = 698;
         public static final short TFTP_PORT = 69;
-        public static final short TFTP_PROTOCOL_NUM = 69;
         public static final short OLSR_HEADER_SIZE = Integer.SIZE * 2;
         public static final long MAX_JITTER_MS = (HELLO_INTERVAL/4); // jitter används för att variera intervallet när meddelanden skickas ut med syfte att undvika synkronisering
 

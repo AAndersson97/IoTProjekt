@@ -1,7 +1,5 @@
 package network;
 
-import static network.Constants.Protocol.LINK_HOLD_TIME;
-
 public class LinkTuple {
     public final short[] l_local_iface_addr; // lokala nodens adress
     public short[] l_neighbor_iface_addr; // grannens adress
