@@ -92,7 +92,7 @@ public class LocationManager {
                     col++;
                 }
             }
-            if (list.size() >= 1) {
+            if (list.size() >= 4) {
                 return new AttackData(candidate, list);
             }
             else

@@ -18,6 +18,8 @@ public class PacketLocator {
     }
     public static void reportPacketDropped(Node node, PacketType type, int packetId) {
         int additionalDelay = 1;
+        if (node == null || type == null)
+            return;
         if (type == PacketType.TFTP && packetStops.containsKey(packetId))
             additionalDelay = packetStops.get(packetId).size() + 1;
         timer.schedule(new TimerTask() {

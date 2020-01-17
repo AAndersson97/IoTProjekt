@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static network.Constants.Network.BROADCAST;
+import static network.Constants.Node.BUFFER_CAPACITY;
 import static network.Constants.Protocol.*;
 
 public class Node implements Comparator<Node>, Runnable {
@@ -11,10 +12,10 @@ public class Node implements Comparator<Node>, Runnable {
     protected final Timer timer;
     private final short[] address;
     private Location location;
-    private int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
+    protected int seqNum; // gränsnittets sekvensnummer för att göra det möjligt för grannar att sortera mellan paket
     private int ANSN; // ett sekvensnummer som ökar med 1 varje gång mängden av grannar i "neighborSet" uppdateras.
     private boolean[] receivedPacketId; // Innehåller info om mottagna paket för att undvika att samma paket vidarebefodras/bearbetas flera gånger om
-    private boolean active; // true om nodens tråd är aktiv
+    protected boolean active; // true om nodens tråd är aktiv
     private Willingness willingness;
     protected final ArrayList<NeighborTuple> neighborSet; // nyckeln är grannens ip-adress
     private short[][] mprSet; // lista över grannar som valts som MPR-nod
@@ -69,6 +70,8 @@ public class Node implements Comparator<Node>, Runnable {
                     System.out.println(e.getMessage());
                 }
             }
+            if (buffer.size() >= BUFFER_CAPACITY)
+                disconnect();
             if (!active) {
                 break;
             } else {
@@ -614,6 +617,15 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     public void turnOff() {
+        active = false;
+        timer.cancel();
+        synchronized (buffer) {
+            buffer.notifyAll();
+        }
+    }
+
+    public void disconnect() {
+        Network.unregisterNode(this);
         active = false;
         timer.cancel();
         synchronized (buffer) {

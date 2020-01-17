@@ -64,9 +64,6 @@ public class SendPacketUI {
         if (addressStrings == null)
             createAddressCollection();
         if (sourceAddress.getItems().isEmpty()) {
-            ObservableList<String> addressStrings = this.addressStrings;
-            if (destAddress.getSelectionModel().getSelectedIndex() >= 0)
-                addressStrings = this.addressStrings.filtered((s) -> !destAddress.getSelectionModel().getSelectedItem().equals(s));
             sourceAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             sourceAddress.hide();
@@ -78,9 +75,6 @@ public class SendPacketUI {
         if (addressStrings == null)
             createAddressCollection();
         if (destAddress.getItems().isEmpty()) {
-            ObservableList<String> addressStrings = this.addressStrings;
-            if (sourceAddress.getSelectionModel().getSelectedIndex() >= 0)
-                addressStrings = this.addressStrings.filtered((s) -> !sourceAddress.getSelectionModel().getSelectedItem().equals(s));
             destAddress.setItems(addressStrings);
             // En "work around" för att inte tvinga användaren att trycka två gånger första gången för att se listan över alternativ
             destAddress.hide();

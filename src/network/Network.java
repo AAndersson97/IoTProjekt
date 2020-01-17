@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Network {
     private static int numOfNodes;
     private static WifiChannel wifiChannel;
+    private static NodeDisconnetListener listener;
 
     static {
         wifiChannel = new WifiChannel();
@@ -22,6 +23,10 @@ public class Network {
 
     public static int getNumOfNodes() {
         return numOfNodes;
+    }
+
+    public static void registerNodeDisconnectListener(NodeDisconnetListener l) {
+        listener = l;
     }
 
     /**
@@ -58,8 +63,33 @@ public class Network {
          return null;
     }
 
+    public static void unregisterNode(Node node) {
+        wifiChannel.removeObserver(node);
+        numOfNodes--;
+        if (listener != null)
+            listener.nodeDisconnected(node);
+    }
+
+    public static short[] removeAttackNode() {
+        AttackNode node = null;
+        for (Node n : wifiChannel.getObservers()) {
+            if (n instanceof AttackNode)
+                node = (AttackNode) n;
+        }
+        if (node != null) {
+            node.turnOff();
+            wifiChannel.removeObserver(node);
+            return node.getAddress();
+        }
+        return null;
+    }
+
     public static ArrayList<Node> getNodeList() {
         return wifiChannel.getObservers();
     }
 
+    @FunctionalInterface
+    public interface NodeDisconnetListener {
+        void nodeDisconnected(Node node);
+    }
 }

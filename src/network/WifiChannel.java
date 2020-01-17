@@ -17,7 +17,7 @@ public class WifiChannel extends Channel {
         observers = new ArrayList<>();
     }
 
-    public void send(Node sender, Packet packet) {
+    public synchronized void send(Node sender, Packet packet) {
         if (observers.isEmpty())
             throw new NullPointerException("There is no observers on this network");
         Simulator.scheduleTask(() -> {
@@ -54,4 +54,9 @@ public class WifiChannel extends Channel {
         }
     }
 
+    public void removeObserver(Node node) {
+        synchronized (observers) {
+            observers.remove(node);
+        }
+    }
 }

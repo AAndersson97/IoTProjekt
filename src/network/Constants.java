@@ -16,6 +16,7 @@ public final class Constants {
     }
     public static final class Node {
         public static final int MAX_NODES = 30;
+        public static final int BUFFER_CAPACITY = 1000;
         public static final int MAX_XCOORDINATE = GUI.WINDOW_WIDTH - 100;
         public static final int MAX_YCOORDINATE = GUI.WINDOW_HEIGHT - 100;
         public static final int NUM_OF_SYBIL = 3;

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 public abstract class Packet {
-    public final int PACKET_ID;
+    public int PACKET_ID;
     public WifiMacHeader wifiMacHeader;
     public IPHeader ipHeader;
     public UDPHeader udpHeader;

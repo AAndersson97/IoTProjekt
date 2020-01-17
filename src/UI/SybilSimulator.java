@@ -4,7 +4,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +23,7 @@ import static network.Constants.Node.NUM_OF_SYBIL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.TimerTask;
 
 public class SybilSimulator extends Application {
@@ -65,7 +65,7 @@ public class SybilSimulator extends Application {
             }
         }
     };
-    private AnchorPane root;
+    private static AnchorPane root;
 
     public static void main(String[] args) {
         launch(args);
@@ -84,6 +84,7 @@ public class SybilSimulator extends Application {
         showHelloPackets = true;
         PacketLocator.registerLocationListener(createLocationCallback());
         PacketLocator.registerPacketDroppedListener(createDroppedPacketCallback());
+        Network.registerNodeDisconnectListener((SybilSimulator::changeCircleColor));
     }
 
     public void onCreateNode() {
@@ -92,7 +93,7 @@ public class SybilSimulator extends Application {
         TAMenu.setDisable(false);
         IPMenu.setDisable(false);
         Node createdNode = new Node();
-        Label nodeLabel = createAddresslabel(createdNode);
+        Label nodeLabel = createAddressLabel(createdNode);
         addressLabels.add(nodeLabel);
         Circle taCircle = createTACircle(createdNode);
         anchorPane.getChildren().addAll(createNodeCircle(createdNode, Color.web("#7ac5cd")), taCircle, nodeLabel);
@@ -102,17 +103,17 @@ public class SybilSimulator extends Application {
         AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
         anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
         Circle tACircle = createTACircle(createdNode);
-        Label nodeLabel = createAddresslabel(createdNode);
+        Label nodeLabel = createAddressLabel(createdNode);
         anchorPane.getChildren().addAll(tACircle, nodeLabel);
         addressLabels.add(nodeLabel);
         new Alert(Alert.AlertType.INFORMATION, "The node with the address: " + Arrays.toString(createdNode.getNodeUnderAttack().getAddress())
-                + " is under attack", ButtonType.OK).show();
-        /*for (SybilNode node : createdNode.getSybilNodes()){
-            addressLabels.add(createAddresslabel(node));
-            nodeLabel = createAddresslabel(node);
+                + " is under attack and will be flooded with packets in order to shut down the node", ButtonType.OK).show();
+        for (SybilNode node : createdNode.getSybilNodes()){
+            addressLabels.add(createAddressLabel(node));
+            nodeLabel = createAddressLabel(node);
             anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), nodeLabel);
             addressLabels.add(nodeLabel);
-        }*/
+        }
     }
 
     /**
@@ -120,7 +121,7 @@ public class SybilSimulator extends Application {
      * @param node Noden vars IP-address ska sparas i ett Label-objekt
      * @return
      */
-    private Label createAddresslabel(Node node) {
+    private Label createAddressLabel(Node node) {
         String address = Arrays.toString(node.getAddress()).replace(", ", ".");
         Label nodeLabel = new Label(address.substring(1, address.length()-1));
         nodeLabel.relocate(node.getLocation().getX()-23,node.getLocation().getY()+12);
@@ -183,6 +184,45 @@ public class SybilSimulator extends Application {
     public void showIPAddresses() {
         IPVisible = false;
         toggleIPAddresses();
+    }
+
+    private static void changeCircleColor(Node node) {
+        Platform.runLater(() -> {
+            for (javafx.scene.Node n : root.getChildren()) {
+                if (n instanceof Label) {
+                    String address = Arrays.toString(node.getAddress()).replace(", ", ".");
+                    Label label = ((Label) n);
+                    if (label.getText().equals(address.substring(1, address.length() - 1))) {
+                        label.setText("Disconnected");
+                        new Alert(Alert.AlertType.INFORMATION, "The attacked node " + address + " was shut down successfully", ButtonType.OK).show();
+                        short[] attackNode = Network.removeAttackNode();
+                        removeAttackNodeCircles(attackNode);
+                    }
+                }
+            }
+        });
+    }
+
+    private static void removeAttackNodeCircles(short[] attackNode) {
+        Platform.runLater(() -> {
+            Iterator<javafx.scene.Node> iterator = root.getChildren().iterator();
+            String address = Arrays.toString(attackNode).replace(", ", ".");
+            while (iterator.hasNext()) {
+                javafx.scene.Node node = iterator.next();
+                if (node instanceof Circle) {
+                    Circle circle = (Circle) node;
+                    if (circle.getFill().equals(Color.web("#db3a42")) || circle.getFill().equals(Color.web("#cfc7c0"))) {
+                        iterator.remove();
+                        javafx.scene.Node next = iterator.next();
+                        iterator.remove();
+                    }
+                } else if (node instanceof Label) {
+                    Label label = (Label) node;
+                    if (label.getText().equals(address.substring(1, address.length() - 1)))
+                        iterator.remove();
+                }
+            }
+        });
     }
 
     private static Circle createTACircle(Node node) {
