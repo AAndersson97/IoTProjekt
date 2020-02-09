@@ -4,7 +4,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,7 +14,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import network.*;
@@ -23,6 +21,7 @@ import static network.Constants.GUI.*;
 import static network.Constants.Node.MAX_NODES;
 import static network.Constants.Node.NUM_OF_SYBIL;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class SybilSimulator extends Application {
 
@@ -44,18 +43,23 @@ public class SybilSimulator extends Application {
     Button createNode;
     @FXML
     Button sybilAttack;
+    @FXML
+    Button deleteNode;
 
-    private static ArrayList<Circle> taCircles;
-    private static ArrayList<Circle> nodeCircles;
-    private static Circle taVisible; // true om överföringsareor är synliga
+    private static ArrayList<javafx.scene.shape.Circle> taCircles;
+    private static ArrayList<javafx.scene.shape.Circle> nodeCircles;
+    private static javafx.scene.shape.Circle taVisible; // true om överföringsareor är synliga
     private static boolean IPVisible;
     private static boolean taMsgShown;
     public static int packetTransportDelay;
     public static boolean showHelloPackets;
-    public static SimpleBooleanProperty ongoingAttack;
-    private static UpdateObserver updateObserver;
+    public static boolean ongoingAttack;
     private static ArrayList<Label> addressLabels = new ArrayList<>();
+    private static SybilSimulator fxmlInstance;
+    private static AnchorPane root;
+    private static AttackNode attackNode;
 
+    // En metod som ska köras när användaren vill visa överföringsräckvidd för varje nod
     public static EventHandler<MouseEvent> showTA = (event) -> {
         for (int i = 0; i < nodeCircles.size(); i++) {
             if (nodeCircles.get(i).isHover()) {
@@ -66,7 +70,6 @@ public class SybilSimulator extends Application {
             }
         }
     };
-    private static AnchorPane root;
 
     public static void main(String[] args) {
         launch(args);
@@ -74,7 +77,9 @@ public class SybilSimulator extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        root = FXMLLoader.load(getClass().getResource("MainGUI.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MainGUI.fxml"));
+        root = fxmlLoader.load();
+        fxmlInstance = fxmlLoader.getController();
         stage.setTitle(WINDOW_TITLE);
         stage.setScene(new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT));
         stage.setResizable(false);
@@ -85,19 +90,11 @@ public class SybilSimulator extends Application {
         showHelloPackets = true;
         PacketLocator.registerLocationListener(createLocationCallback());
         PacketLocator.registerPacketDroppedListener(createDroppedPacketCallback());
-        Network.registerNodeDisconnectListener((SybilSimulator::changeCircleColor));
-        updateObserver = new UpdateObserver(2000);
-        updateObserver.addListener(() -> {
-            Platform.runLater(() -> {
-                new Alert(Alert.AlertType.ERROR, "The behavior of the application is unexpected, please restart the application", ButtonType.OK).showAndWait();
-                System.exit(-1);
-            });
-        });
     }
 
     public void onCreateNode() {
-        if (!updateObserver.isActive() && Network.getNumOfNodes() > 1)
-            updateObserver.start();
+        sybilAttack.setDisable(false);
+        deleteNode.setDisable(false);
         if (helloPacketMenu.isDisable())
             helloPacketMenu.setDisable(false);
         if (Network.getNumOfNodes() >= MAX_NODES - 5)
@@ -107,30 +104,108 @@ public class SybilSimulator extends Application {
         Node createdNode = new Node();
         Label nodeLabel = createAddressLabel(createdNode);
         addressLabels.add(nodeLabel);
-        Circle taCircle = createTACircle(createdNode);
+        javafx.scene.shape.Circle taCircle = createTACircle(createdNode);
         anchorPane.getChildren().addAll(createNodeCircle(createdNode, Color.web("#7ac5cd")), taCircle, nodeLabel);
     }
 
-    public void onStartSybilAttack() {
-        if (ongoingAttack == null) {
-            ongoingAttack = new SimpleBooleanProperty(true);
-            sybilAttack.disableProperty().bind(ongoingAttack);
+    public void onDeleteNode() {
+        if (Network.getNumOfNodes() > 0)
+            sybilAttack.setDisable(false);
+        try {
+            showIPAddresses();
+            new DeleteNodeGUI().showUI((node) ->
+                    fxmlInstance.anchorPane.getChildren().removeIf(removePaneNode(node)));
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "An error occured while trying to show the delete node GUI", ButtonType.OK).show();
         }
-        ongoingAttack.set(true);
-        AttackNode createdNode = new AttackNode(NUM_OF_SYBIL);
-        anchorPane.getChildren().add(createNodeCircle(createdNode, Color.web("#db3a42")));
-        Circle tACircle = createTACircle(createdNode);
-        Label nodeLabel = createAddressLabel(createdNode);
+        deleteNode.setDisable(Network.getNumOfNodes() == 0);
+    }
+
+    private Predicate<javafx.scene.Node> removePaneNode(Node node) {
+        return (paneNode) -> (paneNode.getId() != null && paneNode.getId().equalsIgnoreCase(node.getAddress()[3] + ""));
+    }
+
+    public void onStartSybilAttack() {
+        if (ongoingAttack) {
+            stopSybilAttack();
+            return;
+        } else {
+            sybilAttack.setText("Stop Sybil Attack");
+        }
+        try {
+            new SybilAttackTypeGUI().showUI(this::startSybilAttack);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "An error occured while trying to show the select attack type GUI", ButtonType.OK).show();
+        }
+        sybilAttack.setDisable(Network.getNumOfNodes() == 0);
+    }
+
+    private void startSybilAttack(AttackType attackType) {
+        attackNode = new AttackNode(NUM_OF_SYBIL, attackType);
+        anchorPane.getChildren().add(createNodeCircle(attackNode, Color.web("#db3a42")));
+        javafx.scene.shape.Circle tACircle = createTACircle(attackNode);
+        Label nodeLabel = createAddressLabel(attackNode);
         anchorPane.getChildren().addAll(tACircle, nodeLabel);
         addressLabels.add(nodeLabel);
-        new Alert(Alert.AlertType.INFORMATION, "The node with the address: " + Arrays.toString(createdNode.getNodeUnderAttack().getAddress())
-                + " is under attack and will be flooded with packets in order to shut down the node", ButtonType.OK).show();
-        for (SybilNode node : createdNode.getSybilNodes()){
+        for (SybilNode node : attackNode.getSybilNodes()){
             addressLabels.add(createAddressLabel(node));
             nodeLabel = createAddressLabel(node);
             anchorPane.getChildren().addAll(createNodeCircle(node, Color.web("#cfc7c0")), nodeLabel);
             addressLabels.add(nodeLabel);
         }
+        if (attackType == AttackType.VOTING) {
+            try {
+                ArrayList<Node> blackList = new ArrayList<>();
+                blackList.add(attackNode);
+                blackList.addAll(Arrays.asList(attackNode.getSybilNodes()));
+                new SelectNodeGUI(blackList).showUI(this::showVoteMessage);
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "An error occured while trying to show the select node GUI", ButtonType.OK).show();
+                stopSybilAttack();
+            }
+        }
+        else {
+            new Alert(Alert.AlertType.INFORMATION, "The sybil nodes will now disrupt the packet routing.", ButtonType.OK).show();
+            ongoingAttack = true;
+        }
+    }
+
+    private void stopSybilAttack() {
+        attackNode.shutdown();
+        sybilAttack.setText("Start Sybil Attack");
+        ongoingAttack = false;
+        int attackNodeid = attackNode.getAddress()[3];
+        int[] sybilIds = attackNode.getSybilNodeIds();
+        anchorPane.getChildren().removeIf(node ->  node.getId() != null && (node.getId().equalsIgnoreCase(attackNodeid + "") || findId(node.getId(), sybilIds)));
+        attackNode = null;
+    }
+
+    private boolean findId(String id, int[] ids) {
+        for (int num : ids)
+            if (id.equalsIgnoreCase(num + ""))
+                return true;
+
+        return false;
+    }
+
+    private void showVoteMessage(Node node) {
+        MisbehaviourVoting voting = new MisbehaviourVoting();
+        MisbehaviourVoting.VotingResult votingResult = voting.startVoting(node);
+        String message = "Number of votes in favor of excluding the node " + node.getAddressString() +
+                " from the network as a consequence of misbehaviour: " + votingResult.numOfAgree + "\nNumber of votes against: " + votingResult.numOfDisagree;
+        if (votingResult.numOfAgree > votingResult.numOfDisagree) {
+            message += "\nThe node will be excluded from the network, the majority of the nodes are in favor of the exclusion.";
+            Simulator.scheduleTask(node::disconnect);
+            anchorPane.getChildren().removeIf(paneNode -> paneNode.getId() != null && paneNode.getId().equalsIgnoreCase(node.getAddress()[3] + ""));
+        } else if (votingResult.numOfAgree == votingResult.numOfDisagree) {
+            message += "\nThe node will not be excluded from the network, no majority was either against or in favor of the exclusion.";
+        }
+        else
+            message += "\nThe node will not be excluded from the network, the majority of the nodes are against the exclusion.";
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
+        alert.setHeaderText("Voting about misbehaviour");
+        alert.show();
+        stopSybilAttack();
     }
 
     /**
@@ -141,20 +216,21 @@ public class SybilSimulator extends Application {
     private Label createAddressLabel(Node node) {
         String address = Arrays.toString(node.getAddress()).replace(", ", ".");
         Label nodeLabel = new Label(address.substring(1, address.length()-1));
+        nodeLabel.setId(node.getAddress()[3] + "");
         nodeLabel.relocate(node.getLocation().getX()-23,node.getLocation().getY()+12);
         nodeLabel.setVisible(IPVisible);
         return nodeLabel;
     }
 
-    public Circle createNodeCircle(Node node, Color fill) {
-        Circle circle = new Circle();
+    public javafx.scene.shape.Circle createNodeCircle(Node node, Color fill) {
+        javafx.scene.shape.Circle circle = new Circle();
         circle.setFill(fill);
         circle.setRadius(CIRCLE_RADIUS);
         circle.setStroke(Color.BLACK);
         circle.relocate(node.getLocation().getX() - CIRCLE_RADIUS, node.getLocation().getY() - CIRCLE_RADIUS);
+        circle.setId(node.getAddress()[3] + "");
         if (!fill.equals(Color.web("#cfc7c0")))
             nodeCircles.add(circle);
-        updateObserver.update();
         return circle;
     }
 
@@ -203,34 +279,17 @@ public class SybilSimulator extends Application {
         toggleIPAddresses();
     }
 
-    private static void changeCircleColor(Node node) {
-        Platform.runLater(() -> {
-            for (javafx.scene.Node n : root.getChildren()) {
-                if (n instanceof Label) {
-                    String address = Arrays.toString(node.getAddress()).replace(", ", ".");
-                    Label label = ((Label) n);
-                    if (label.getText().equals(address.substring(1, address.length() - 1))) {
-                        label.setText("Disconnected");
-                        new Alert(Alert.AlertType.INFORMATION, "The attacked node " + address + " was shut down successfully", ButtonType.OK).show();
-                        short[] attackNode = Network.removeAttackNode();
-                        removeAttackNodeCircles(attackNode);
-                    }
-                }
-            }
-        });
-    }
-
     private static void removeAttackNodeCircles(short[] attackNode) {
         Platform.runLater(() -> {
             Iterator<javafx.scene.Node> iterator = root.getChildren().iterator();
             String address = Arrays.toString(attackNode).replace(", ", ".");
             while (iterator.hasNext()) {
                 javafx.scene.Node node = iterator.next();
-                if (node instanceof Circle) {
-                    Circle circle = (Circle) node;
+                if (node instanceof javafx.scene.shape.Circle) {
+                    javafx.scene.shape.Circle circle = (javafx.scene.shape.Circle) node;
                     if (circle.getFill().equals(Color.web("#db3a42")) || circle.getFill().equals(Color.web("#cfc7c0"))) {
                         iterator.remove();
-                        javafx.scene.Node next = iterator.next();
+                        iterator.next();
                         iterator.remove();
                     }
                 } else if (node instanceof Label) {
@@ -239,12 +298,12 @@ public class SybilSimulator extends Application {
                         iterator.remove();
                 }
             }
-            ongoingAttack.set(false);
+            ongoingAttack = false;
         });
     }
 
-    private static Circle createTACircle(Node node) {
-        Circle circle = new Circle();
+    private static javafx.scene.shape.Circle createTACircle(Node node) {
+        javafx.scene.shape.Circle circle = new Circle(node.getAddress()[3]);
         int circleRadius = node.getTransmissionRadius();
         circle.setFill(Color.web("#ffffff", 0.5));
         circle.setRadius(circleRadius);
@@ -260,14 +319,14 @@ public class SybilSimulator extends Application {
     public void stop() throws Exception {
         Network.shutdownNetwork();
         Simulator.shutdown();
-        updateObserver.removeListener();
+        LogWriter.getInstance().writeToLog();
         System.exit(0);
         super.stop();
     }
 
     public PacketLocator.LocationListener createLocationCallback() {
         return (start, end, packet) -> Platform.runLater(() -> {
-            Circle newCircle = new Circle(2, Color.BLUE);
+            javafx.scene.shape.Circle newCircle = new javafx.scene.shape.Circle(2, Color.BLUE);
             root.getChildren().add(newCircle);
             Line newLine = new Line();
             newLine.setStartX(start.getX());
@@ -282,26 +341,16 @@ public class SybilSimulator extends Application {
             if (packet instanceof TFTPPacket) {
                 newCircle.setRadius(4);
                 newCircle.setFill(Color.DARKSEAGREEN);
-                Label label = new Label("Packet on the way");
-                label.setFont(new Font("Arial", 16));
                 Line textLine = new Line();
-                root.getChildren().add(label);
                 textLine.setStartX(start.getX() - 15);
                 textLine.setStartY(start.getY() - 15);
                 textLine.setEndX(end.getX() - 15);
                 textLine.setEndY(end.getY() - 15);
                 PathTransition textTransition = new PathTransition();
-                textTransition.setNode(label);
                 textTransition.setDuration(Duration.millis(packetTransportDelay));
                 textTransition.setPath(textLine);
                 textTransition.setCycleCount(1);
                 textTransition.play();
-                Simulator.scheduleFutureTask(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(() -> root.getChildren().remove(label));
-                    }
-                }, packetTransportDelay);
             }
             transition.play();
             Simulator.scheduleFutureTask(new TimerTask() {
@@ -310,13 +359,12 @@ public class SybilSimulator extends Application {
                     Platform.runLater(() -> root.getChildren().remove(newCircle));
                 }
             }, packetTransportDelay);
-            updateObserver.update();
         });
     }
 
     public PacketLocator.PacketDroppedListener createDroppedPacketCallback() {
         return ((node) -> Platform.runLater(() -> {
-            Circle newCircle = new Circle(2, Color.RED);
+            javafx.scene.shape.Circle newCircle = new javafx.scene.shape.Circle(2, Color.RED);
             root.getChildren().add(newCircle);
             Line newLine = new Line();
             newLine.setStartX(node.getLocation().getX());
@@ -340,7 +388,6 @@ public class SybilSimulator extends Application {
                     Platform.runLater(() -> root.getChildren().remove(newCircle));
                 }
             }, packetTransportDelay);
-            updateObserver.update();
         }));
     }
     public void sliderDragged(){

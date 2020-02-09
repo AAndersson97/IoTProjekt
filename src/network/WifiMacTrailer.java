@@ -1,5 +1,7 @@
 package network;
 
+import network.utilities.Checksum;
+
 import java.io.Serializable;
 
 public class WifiMacTrailer implements Serializable {
@@ -14,6 +16,6 @@ public class WifiMacTrailer implements Serializable {
     }
 
     public void setCheckSum(byte[] data) {
-        checkSum = utilities.Checksum.generateChecksum(data);
+        checkSum = Checksum.generateChecksum(data);
     }
 }

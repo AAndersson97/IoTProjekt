@@ -1,8 +1,13 @@
 package network;
 
+import network.tuples.*;
+import network.utilities.AddressGenerator;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static network.Constants.GUI.SHOW_PACKET_DROPPED;
+import static network.Constants.LOG_ACTIVE;
 import static network.Constants.Network.BROADCAST;
 import static network.Constants.Node.BUFFER_CAPACITY;
 import static network.Constants.Protocol.*;
@@ -24,7 +29,7 @@ public class Node implements Comparator<Node>, Runnable {
     protected final ArrayList<MPRSelectorTuple> mprSelectorSet; // innehåller info om grannar som vald denna nod till att bli en MPR-nod
     private final ArrayList<TopologyTuple> topologySet; // nyckeln är destinationsadressen
     private final Transmission transmission;
-    private final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
+    protected final ConcurrentLinkedQueue<Packet> buffer; // tillfällig lagring av paket som inte än har bearbetas
     protected final List<RoutingTuple> routingTable; // Nyckel: destination, värde: RoutingTuple
 
     public Node() {
@@ -44,18 +49,17 @@ public class Node implements Comparator<Node>, Runnable {
         mprSet = new short[0][];
         receivedPacketId = new boolean[Short.MAX_VALUE];
         if (this.getClass() == Node.class) {
-            location = LocationManager.getInstance().getLocation(this);
-            // Innan tråden kan startas i SybilNode- och i AttackNode-objekten måste objektet skapas först
+            location = LocationManager.getInstance().getLocation();
             thread.start();
         }
-        if (this.getClass() != SybilNode.class) {
-            Network.registerNode(this);
-        }
+        Network.registerNode(this);
+
     }
 
     @Override
     public void run() {
         timer.schedule(sendOLSRMsgTask(), 0, HELLO_INTERVAL);
+        timer.schedule(sendTFTPPacketTask(), HELLO_INTERVAL+1000, 1000);
         while (active) {
             while (buffer.isEmpty() && active) {
                 try {
@@ -83,6 +87,19 @@ public class Node implements Comparator<Node>, Runnable {
                 sendHelloPacket();
                 if (!mprSelectorSet.isEmpty())
                     sendTCPacket();
+            }
+        };
+    }
+
+    private TimerTask sendTFTPPacketTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                if (Network.getNumOfNodes() <= 1)
+                    return;
+                short[] destination = Network.getRandomNode(Node.this).address;
+                TFTPPacket packet = PacketGenerator.generateTFTPPacket(address, destination, "");
+                Network.sendPacket(Node.this, destination, packet);
             }
         };
     }
@@ -135,7 +152,7 @@ public class Node implements Comparator<Node>, Runnable {
                         status = PacketLocator.PacketStatus.DROPPED;
                 }
             }
-            if (status == PacketLocator.PacketStatus.DROPPED)
+            if (SHOW_PACKET_DROPPED && status == PacketLocator.PacketStatus.DROPPED)
                 PacketLocator.reportPacketDropped(this, PacketLocator.PacketType.TFTP, packet.PACKET_ID);
             else
                 PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(packet.wifiMacHeader.sender, packet.wifiMacHeader.receiver, packet, status, PacketLocator.PacketType.TFTP));
@@ -143,7 +160,8 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private void processTFTPPacket(TFTPPacket packet) {
-        System.out.println("Message received!");
+        if (LOG_ACTIVE)
+            System.out.println("Message received from: " + Arrays.toString(packet.ipHeader.sourceAddress));
     }
 
     private void sendTCPacket() {
@@ -273,7 +291,7 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     private boolean forwardPacket(Packet packet) {
-        if (Constants.LOG_ACTIVE)
+        if (LOG_ACTIVE)
             System.out.println("Forward packet: " + packet.toString());
         try {
             Thread.sleep(calculateJitter());
@@ -605,20 +623,22 @@ public class Node implements Comparator<Node>, Runnable {
     }
 
     protected void dropPacket(Packet packet) {
-        if (Constants.LOG_ACTIVE)
+        if (LOG_ACTIVE)
             System.out.println("Packet dropped: " + packet.toString());
     }
 
-    public void turnOff() {
-        active = false;
-        timer.cancel();
-        synchronized (buffer) {
-            buffer.notifyAll();
-        }
+    public void remove() {
+        Network.removeNode(this);
+        LocationManager.getInstance().returnLocation(location);
+        shutdown();
     }
 
     public void disconnect() {
-        Network.unregisterNode(this);
+        Network.removeNode(this);
+        shutdown();
+    }
+
+    private void shutdown() {
         active = false;
         timer.cancel();
         synchronized (buffer) {
@@ -655,6 +675,14 @@ public class Node implements Comparator<Node>, Runnable {
 
     public Location getLocation() {
         return location;
+    }
+
+    public MisbehaviourVoting.Vote requestVote() {
+        return MisbehaviourVoting.Vote.DISAGREE;
+    }
+
+    public String getAddressString() {
+        return address[0] + "." + address[1] + "." + address[2] + "." + address[3];
     }
 
     public TimerTask createLinkTupleRemoveTask(LinkTuple tuple) {

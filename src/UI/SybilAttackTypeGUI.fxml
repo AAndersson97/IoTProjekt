@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="191.0" prefWidth="309.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilAttackTypeGUI">
+   <children>
+      <Label layoutX="110.0" layoutY="14.0" text="Attack type">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <RadioButton fx:id="routingAttackRB" layoutX="15.0" layoutY="79.0" mnemonicParsing="false" selected="true" text="Routing Attack">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </RadioButton>
+      <RadioButton fx:id="votingAttackRB" layoutX="175.0" layoutY="79.0" mnemonicParsing="false" text="Voting Attack">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <padding>
+            <Insets right="10.0" />
+         </padding>
+      </RadioButton>
+      <Button fx:id="okBtn" layoutX="132.0" layoutY="141.0" mnemonicParsing="false" onAction="#onOKBtnPressed" stylesheets="@Style.css" text="OK" />
+   </children>
+</AnchorPane>

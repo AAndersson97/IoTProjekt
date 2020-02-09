@@ -1,4 +1,4 @@
-package utilities;
+package network.utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

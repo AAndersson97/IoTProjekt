@@ -1,6 +1,5 @@
 package network;
 
-import java.net.InetAddress;
 import java.util.*;
 
 import static network.Constants.Network.BROADCAST;
@@ -8,14 +7,20 @@ import static network.Constants.Protocol.*;
 import static network.Constants.Protocol.OLSR_HEADER_SIZE;
 
 public class AttackNode extends Node {
-
     private SybilNode[] sybilNodes;
     private Node underAttack;
 
-    public AttackNode(int numOfSybil) {
+    public AttackNode(int numOfSybil, AttackType attackType) {
         sybilNodes = new SybilNode[0];
         sybilNodes = new SybilNode[Constants.Node.NUM_OF_SYBIL];
         createSybilNodes(numOfSybil);
+        initializeAttack();
+        if (attackType == AttackType.ROUTING)
+            timer.schedule(sendOLSRMsgTask(), 0, 2000);
+        LogWriter.getInstance().writeToFile(getAddressString(), "attacknode.txt");
+    }
+
+    private void initializeAttack() {
         ArrayList<Node> blacklist = new ArrayList<>();
         blacklist.add(this);
         blacklist.addAll(Arrays.asList(sybilNodes));
@@ -25,15 +30,13 @@ public class AttackNode extends Node {
         setLocation(data.locations.get(0));
         for (int i = 0; i < sybilNodes.length; i++)
             sybilNodes[i].setLocation(data.locations.get(i+1));
-        turnOn();
     }
 
-    @Override
-    public void run() {
-        timer.schedule(sendSpamMsgTask(this), 2000, 100);
-        timer.schedule(sendOLSRMsgTask(), 0, 2000);
-    }
-
+    /**
+     * Vid en routingattack skickar attacknoden ut hello-paket oftare än vanliga noder, vilket ökar sannolikheten att de
+     * vanliga noderna ska uppdatera sina routingtabeller utifrån information från attacknodens hellopaket och på sådant sätt dirigera paket via attacknoden.
+     * @return
+     */
     private TimerTask sendOLSRMsgTask() {
         return new TimerTask() {
             @Override
@@ -46,7 +49,6 @@ public class AttackNode extends Node {
     @Override
     protected void sendHelloPacket() {
         HashMap<LinkCode, ArrayList<short[]>> neighbors = new HashMap<>(); // grannar som har en länk till denna nod, info som används för att senare hitta grannar utan länk till denna nod
-        long timeNow = System.currentTimeMillis();
         LinkCode linkCode = new LinkCode(LinkCode.LinkTypes.SYM_LINK, LinkCode.NeighborTypes.SYM_NEIGH);
         neighbors.put(linkCode, new ArrayList<>());
         for (SybilNode sybilNode : sybilNodes)
@@ -61,23 +63,6 @@ public class AttackNode extends Node {
         Network.sendPacket(this, BROADCAST, olsrPacket);
     }
 
-    private TimerTask sendSpamMsgTask(AttackNode attackNode) {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                if (!active) {
-                    timer.cancel();
-                    return;
-                }
-                TFTPPacket packet = generatePacket(getAddress());
-                Network.sendPacket(attackNode, underAttack.getAddress(), packet);
-                Network.sendPacket(attackNode, underAttack.getAddress(), generatePacket(sybilNodes[0].getAddress()));
-                Network.sendPacket(attackNode, underAttack.getAddress(), generatePacket(sybilNodes[1].getAddress()));
-                Network.sendPacket(attackNode, underAttack.getAddress(), generatePacket(sybilNodes[2].getAddress()));
-            }
-        };
-    }
-
     private TFTPPacket generatePacket(short[] sender) {
         IPHeader ipHeader = new IPHeader(0, underAttack.getAddress(), getAddress(), UDP_PROTOCOL_NUM);
         UDPHeader udpHeader = new UDPHeader(TFTP_PORT, TFTP_PORT, (short) ipHeader.getLength());
@@ -90,16 +75,36 @@ public class AttackNode extends Node {
         return packet;
     }
 
+    public void shutdown() {
+        active = false;
+        timer.cancel();
+        Network.removeNode(this);
+        for (SybilNode sybilNode : sybilNodes)
+            Network.removeNode(sybilNode);
+        synchronized (buffer) {
+            buffer.notifyAll();
+        }
+    }
+
     public Node getNodeUnderAttack() {
         return underAttack;
+    }
+
+    public SybilNode[] getSybilNodes() {
+        return sybilNodes;
+    }
+
+    public int[] getSybilNodeIds() {
+        int[] ids = new int[sybilNodes.length];
+        for (int i = 0; i < ids.length; i++)
+            ids[i] = sybilNodes[i].getAddress()[3];
+        return ids;
     }
 
     @Override
     public void receivePacket(Packet packet) {
         if (packet instanceof TFTPPacket) {
-            PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(packet.ipHeader.sourceAddress, getAddress(), packet, PacketLocator.PacketStatus.RECEIVED, PacketLocator.PacketType.TFTP));
-            packet.PACKET_ID+=25;
-            Network.sendPacket(this, underAttack.getAddress(), packet);
+            PacketLocator.reportPacketTransport(new PacketLocator.PacketTravel(packet.wifiMacHeader.sender, address, packet, PacketLocator.PacketStatus.RECEIVED, PacketLocator.PacketType.TFTP));
         }
         dropPacket(packet);
     }
@@ -109,12 +114,13 @@ public class AttackNode extends Node {
             sybilNodes[num] = new SybilNode(this);
     }
 
-    public SybilNode[] getSybilNodes() {
-        return sybilNodes;
+    @Override
+    public MisbehaviourVoting.Vote requestVote() {
+        return MisbehaviourVoting.Vote.AGREE;
     }
 
     @Override
-    public void turnOff() {
+    public void disconnect() {
         active = false;
         timer.purge();
         sybilNodes = null;

@@ -1,5 +1,8 @@
 package network;
 
+import network.tuples.NeighborTuple;
+import network.tuples.TwoHopTuple;
+
 import java.util.*;
 
 public class MPRCalculator {

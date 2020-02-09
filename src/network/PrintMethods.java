@@ -1,5 +1,8 @@
 package network;
 
+import network.tuples.RoutingTuple;
+import network.tuples.TopologyTuple;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

@@ -42,7 +42,7 @@ public class LocationManager {
         numOfCols = col;
     }
 
-    public Location getLocation(Node node) {
+    public Location getLocation() {
         if (Network.getNumOfNodes() == 0) {
             int col = numOfCols / 2;
             int row = numOfRows / 2;
@@ -56,7 +56,7 @@ public class LocationManager {
        return location;
     }
 
-    public Location findLocationWithinRange() {
+    private Location findLocationWithinRange() {
         int index = (int)(Math.random() * (Network.getNumOfNodes()-1));
         Node neighbor = Network.getNodeList().get(index);
         ArrayList<Location> locationsWithinRange = new ArrayList<>();
@@ -68,6 +68,9 @@ public class LocationManager {
         return locationsWithinRange.get((int) (Math.random() * (locationsWithinRange.size()-1)));
     }
 
+    public void returnLocation(Location location) {
+        locations.put(location.getGridCell(), location);
+    }
 
     /**
      * Hitta kandidatnoder att attackera. En kandidatnod har minst fyra lediga fysiska platser runt sig.

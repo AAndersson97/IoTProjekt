@@ -7,7 +7,7 @@ public class PacketLocator {
 
     private static LocationListener locationListener;
     private static PacketDroppedListener packetDroppedListener;
-    private static final HashMap<Integer, ArrayList<PacketTravel>> packetStops; // paket som ej än anlänt till slutdestination ska finnas i listan för att göra det möjligt att matcha fördröjningar i gränssnitt korrekt
+    private static final HashMap<Integer, ArrayList<PacketTravel>> packetStops; // paket som ej än anlänt till slutdestination ska finnas i listan för att göra det möjligt att matcha fördröjningar i gränssnittet korrekt
     private static Timer timer;
 
     static {
@@ -15,7 +15,7 @@ public class PacketLocator {
         packetStops = new HashMap<>();
     }
     public synchronized static void reportPacketDropped(Node node, PacketType type, int packetId) {
-        if (SybilSimulator.ongoingAttack != null && SybilSimulator.ongoingAttack.getValue())
+        if (SybilSimulator.ongoingAttack)
                 return;
         int additionalDelay = 1;
         if (node == null || type == null)
@@ -35,6 +35,8 @@ public class PacketLocator {
     public static void reportPacketTransport(PacketTravel travel) {
         if (Arrays.equals(travel.destination, travel.start))
             return;
+        if (travel.packetType == PacketType.TFTP)
+            LogWriter.getInstance().writeTrafficData(LogWriter.getPacketLogString(travel.start, travel.destination));
         if (travel.packetType == PacketType.HELLO && !SybilSimulator.showHelloPackets)
             return;
         synchronized (packetStops) {
@@ -110,7 +112,7 @@ public class PacketLocator {
     }
 
     enum PacketType {
-        HELLO, TC, TFTP
+        HELLO, TC, TFTP;
     }
 
     static class PacketTravel {

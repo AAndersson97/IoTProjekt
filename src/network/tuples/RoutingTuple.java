@@ -1,4 +1,4 @@
-package network;
+package network.tuples;
 
 import java.util.Arrays;
 

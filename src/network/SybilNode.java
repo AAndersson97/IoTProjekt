@@ -1,5 +1,7 @@
 package network;
 
+import network.utilities.AddressGenerator;
+
 public class SybilNode extends Node {
 
     private AttackNode master;
@@ -7,6 +9,11 @@ public class SybilNode extends Node {
     public SybilNode(AttackNode node) {
         address = AddressGenerator.generateAddress();
         master = node;
+    }
+
+    @Override
+    public MisbehaviourVoting.Vote requestVote() {
+        return MisbehaviourVoting.Vote.AGREE;
     }
 
     @Override

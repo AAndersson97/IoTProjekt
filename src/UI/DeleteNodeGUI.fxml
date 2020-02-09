@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0"
+            prefWidth="200.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/10.0.2-internal"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.DeleteNodeGUI">
+    <Label fx:id="deleteNodeLabel" layoutX="50.0" layoutY="14.0" text="Delete Node">
+        <font>
+            <Font size="18.0"/>
+        </font>
+    </Label>
+    <ChoiceBox fx:id="choiceBox1" layoutX="26.0" layoutY="58.0" onMouseClicked="#fillChoicebox" prefWidth="150.0"/>
+    <Button fx:id="deleteBtn" layoutX="71.0" layoutY="156.0" mnemonicParsing="false" onAction="#onDeleteNode"
+            text="Delete">
+        <font>
+            <Font size="14.0"/>
+        </font>
+    </Button>
+</AnchorPane>

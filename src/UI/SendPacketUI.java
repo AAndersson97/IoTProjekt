@@ -33,7 +33,6 @@ public class SendPacketUI {
     @FXML
     TextField msgBox;
 
-    private short[][] listOfAddresses;
     private ObservableList<String> addressStrings;
 
     public void start(Stage stage) throws Exception {
@@ -48,10 +47,6 @@ public class SendPacketUI {
         stage.setX(PACKET_GUI_X);
         stage.setY(PACKET_GUI_Y);
         stage.show();
-    }
-
-    public void showUI() throws Exception {
-        start(new Stage());
     }
 
     public void showUI(EventHandler<WindowEvent> winCloseCallBack) throws Exception {
@@ -106,7 +101,7 @@ public class SendPacketUI {
     private void createAddressCollection() {
         Collection<Node> nodeList = Network.getNodeList();
         addressStrings = FXCollections.observableArrayList();
-        listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
+        short[][] listOfAddresses = new short[ADDRESS_LENGTH][nodeList.size()];
         int count = 0;
         for (Node node : nodeList) {
             String addressString = Arrays.toString(node.getAddress()).replace(", ", ".");
@@ -120,7 +115,6 @@ public class SendPacketUI {
         for (int i = 0; i < strings.length; i++) {
             numbers[i] = Short.parseShort(strings[i]);
         }
-
         return numbers;
     }
 }

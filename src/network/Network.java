@@ -1,11 +1,12 @@
 package network;
 
+import network.utilities.AddressGenerator;
+
 import java.util.*;
 
 public class Network {
     private static int numOfNodes;
     private static WifiChannel wifiChannel;
-    private static NodeDisconnetListener listener;
 
     static {
         wifiChannel = new WifiChannel();
@@ -15,10 +16,6 @@ public class Network {
 
     public static int getNumOfNodes() {
         return numOfNodes;
-    }
-
-    public static void registerNodeDisconnectListener(NodeDisconnetListener l) {
-        listener = l;
     }
 
     /**
@@ -38,7 +35,7 @@ public class Network {
 
     public static void shutdownNetwork() {
         for (Node node : getNodeList()) {
-            node.turnOff();
+            node.disconnect();
         }
     }
 
@@ -55,11 +52,9 @@ public class Network {
          return null;
     }
 
-    public static void unregisterNode(Node node) {
+    public static void removeNode(Node node) {
         wifiChannel.removeObserver(node);
         numOfNodes--;
-        if (listener != null)
-            listener.nodeDisconnected(node);
         AddressGenerator.returnAddress(node.getAddress());
     }
 
@@ -70,7 +65,7 @@ public class Network {
                 node = (AttackNode) n;
         }
         if (node != null) {
-            node.turnOff();
+            node.disconnect();
             wifiChannel.removeObserver(node);
             return node.getAddress();
         }
@@ -79,6 +74,12 @@ public class Network {
 
     public static ArrayList<Node> getNodeList() {
         return wifiChannel.getObservers();
+    }
+
+    public static Node getRandomNode(Node sender) {
+        ArrayList<Node> observers = getNodeList();
+        observers.remove(sender);
+        return observers.get(new Random().nextInt(observers.size()));
     }
 
     @FunctionalInterface

@@ -1,6 +1,6 @@
 package network;
 
-import utilities.Checksum;
+import network.utilities.Checksum;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;

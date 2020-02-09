@@ -1,4 +1,4 @@
-package network;
+package network.tuples;
 
 import static network.Constants.Protocol.MPR_SELECTOR_HOLD_TIME;
 

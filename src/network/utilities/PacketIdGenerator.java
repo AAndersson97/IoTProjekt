@@ -1,4 +1,4 @@
-package utilities;
+package network.utilities;
 
 /**
  * Syftet med klassen är att generera ett unikt ID-nummer till varje paket i programmet i syfte att enkelt ta reda på

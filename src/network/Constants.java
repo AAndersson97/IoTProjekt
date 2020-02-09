@@ -4,6 +4,7 @@ public final class Constants {
     public static final boolean LOG_ACTIVE = false;
     private Constants() {}
     public static final class GUI {
+        public static final boolean SHOW_PACKET_DROPPED = false;
         public static final int WINDOW_WIDTH = 660;
         public static final int WINDOW_HEIGHT = 500;
         public static final int CIRCLE_RADIUS = 10;

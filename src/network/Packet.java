@@ -1,6 +1,6 @@
 package network;
 
-import utilities.PacketIdGenerator;
+import network.utilities.PacketIdGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

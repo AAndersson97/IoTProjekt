@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -12,55 +17,62 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="anchorPane" prefHeight="400.0" prefWidth="660.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.SybilSimulator">
-   <children>
-      <HBox layoutY="364.0" prefHeight="36.0" prefWidth="660.0" AnchorPane.bottomAnchor="0.0">
-         <children>
-         
-                   <Button fx:id="createNode" onAction="#onCreateNode" stylesheets="@Style.css" text="Create Node">
-               <HBox.margin>
-                  <Insets bottom="10.0" left="20.0" />
-               </HBox.margin>
-               <font>
-                  <Font name="Cambria" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="sendPacketBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSendPacket" prefHeight="27.0" prefWidth="115.0" stylesheets="@Style.css" text="Send packet">
-               <font>
-                  <Font name="Cambria" size="14.0" />
-               </font>
-               <HBox.margin>
-                  <Insets left="130.0" />
-               </HBox.margin>
-            </Button>
-            <Button fx:id="sybilAttack" alignment="CENTER" contentDisplay="RIGHT" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" stylesheets="@Style.css" text="Start Sybil Attack" textFill="#c20202">
-               <font>
-                  <Font name="Cambria" size="14.0" />
-               </font>
-               <HBox.margin>
-                  <Insets left="130.0" right="10.0" />
-               </HBox.margin>
-            </Button>
-         </children>
-      </HBox>
-      <MenuBar fx:id="menuDisplay" layoutY="2.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="View">
-            <items>
-              <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
-              <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
-                <MenuItem fx:id="helloPacketMenu" disable="true" mnemonicParsing="false" onAction="#toggleHelloPackets" text="Hide Hello packets" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <Slider fx:id="slider" layoutX="58.0" layoutY="1.0" max="5000.0" min="1500.0" onMouseReleased="#sliderDragged" prefHeight="26.0" prefWidth="199.0" value="3000.0">
-         <padding>
-            <Insets left="10.0" />
-         </padding></Slider>
-      <Label layoutX="257.0" layoutY="2.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="104.0" text="Animation Delay">
-         <padding>
-            <Insets bottom="2.0" left="10.0" />
-         </padding></Label>
-   </children>
+    <children>
+        <HBox layoutY="364.0" prefHeight="36.0" prefWidth="660.0" AnchorPane.bottomAnchor="0.0">
+            <children>
+                <Button fx:id="createNode" onAction="#onCreateNode" text="Create Node">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="20.0" />
+                    </HBox.margin>
+                    <font>
+                        <Font name="Cambria" size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="deleteNode" onAction="#onDeleteNode" text="Delete Node" disable="true">
+                    <font>
+                        <Font name="Cambria" size="14.0" />
+                    </font>
+                    <HBox.margin>
+                        <Insets left="20.0" />
+                    </HBox.margin>
+                </Button>
+                <Button fx:id="sendPacketBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="15.0" onAction="#onSendPacket" prefHeight="27.0" prefWidth="115.0" text="Send packet">
+                    <font>
+                        <Font name="Cambria" size="14.0" />
+                    </font>
+                    <HBox.margin>
+                        <Insets left="120.0" />
+                    </HBox.margin>
+                </Button>
+                <Button fx:id="sybilAttack" alignment="CENTER" contentDisplay="RIGHT" layoutX="121.0" layoutY="15.0" onAction="#onStartSybilAttack" prefHeight="27.0" prefWidth="142.0" disable="true" text="Start Sybil Attack" textFill="#c20202">
+                    <font>
+                        <Font name="Cambria" size="14.0" />
+                    </font>
+                    <HBox.margin>
+                        <Insets left="20.0" right="10.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+        <MenuBar fx:id="menuDisplay" layoutY="2.0">
+            <menus>
+                <Menu mnemonicParsing="false" text="View">
+                    <items>
+                        <MenuItem fx:id="TAMenu" disable="true" mnemonicParsing="false" onAction="#toggleTAs" text="Show Transmission Area" />
+                        <MenuItem fx:id="IPMenu" disable="true" mnemonicParsing="false" onAction="#toggleIPAddresses" text="Show IP addresses" />
+                        <MenuItem fx:id="helloPacketMenu" disable="true" mnemonicParsing="false" onAction="#toggleHelloPackets" text="Hide Hello packets" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <Slider fx:id="slider" layoutX="58.0" layoutY="1.0" max="5000.0" min="1500.0" onMouseReleased="#sliderDragged" prefHeight="26.0" prefWidth="199.0" value="3000.0">
+            <padding>
+                <Insets left="10.0" />
+            </padding></Slider>
+        <Label layoutX="257.0" layoutY="2.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="104.0" text="Animation Delay">
+            <padding>
+                <Insets bottom="2.0" left="10.0" />
+            </padding></Label>
+    </children>
 
 </AnchorPane>
